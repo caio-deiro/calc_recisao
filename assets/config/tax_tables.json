@@ -1,0 +1,73 @@
+{
+  "inss_2024": {
+    "description": "Tabela INSS 2024 - Alíquotas progressivas",
+    "faixas": [
+      {
+        "limite": 1412.0,
+        "aliquota": 0.075,
+        "descricao": "Até R$ 1.412,00"
+      },
+      {
+        "limite": 2666.68,
+        "aliquota": 0.09,
+        "descricao": "De R$ 1.412,01 até R$ 2.666,68"
+      },
+      {
+        "limite": 4000.03,
+        "aliquota": 0.12,
+        "descricao": "De R$ 2.666,69 até R$ 4.000,03"
+      },
+      {
+        "limite": 7786.02,
+        "aliquota": 0.14,
+        "descricao": "De R$ 4.000,04 até R$ 7.786,02"
+      }
+    ]
+  },
+  "irrf_2024": {
+    "description": "Tabela IRRF 2024 - Sem dependentes",
+    "faixas": [
+      {
+        "limite": 2259.20,
+        "aliquota": 0.0,
+        "deducao": 0.0,
+        "descricao": "Até R$ 2.259,20"
+      },
+      {
+        "limite": 2826.65,
+        "aliquota": 0.075,
+        "deducao": 169.44,
+        "descricao": "De R$ 2.259,21 até R$ 2.826,65"
+      },
+      {
+        "limite": 3751.05,
+        "aliquota": 0.15,
+        "deducao": 381.44,
+        "descricao": "De R$ 2.826,66 até R$ 3.751,05"
+      },
+      {
+        "limite": 4664.68,
+        "aliquota": 0.225,
+        "deducao": 662.77,
+        "descricao": "De R$ 3.751,06 até R$ 4.664,68"
+      },
+      {
+        "limite": 999999.99,
+        "aliquota": 0.275,
+        "deducao": 896.0,
+        "descricao": "Acima de R$ 4.664,68"
+      }
+    ]
+  },
+  "fgts": {
+    "aliquota": 0.08,
+    "multa_sem_justa_causa": 0.4,
+    "descricao": "FGTS: 8% sobre remuneração + multa de 40% quando aplicável"
+  },
+  "aviso_previo": {
+    "dias_base": 30,
+    "dias_por_ano": 3,
+    "maximo_dias": 90,
+    "descricao": "Aviso prévio: 30 dias + 3 dias por ano de serviço (máx. 90 dias)"
+  }
+}
