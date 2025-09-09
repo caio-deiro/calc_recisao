@@ -93,6 +93,57 @@ class CalculateTerminationUseCase {
       );
     }
 
+    // 7.1. Regras específicas para Rescisão com Justa Causa
+    if (type == TerminationType.withJustCause) {
+      // Na rescisão por justa causa, o empregado não tem direito a:
+      // - Aviso prévio
+      // - Multa FGTS
+      // - Saque do FGTS
+      // - 13º salário proporcional
+      // - Férias proporcionais
+
+      // Remover itens que não se aplicam
+      additions.removeWhere(
+        (item) =>
+            item.description == 'Aviso Prévio Indenizado' ||
+            item.description == '13º Salário Proporcional' ||
+            item.description == 'Férias Proporcionais + 1/3' ||
+            item.description == 'Multa FGTS (40%)',
+      );
+    }
+
+    // 7.2. Regras específicas para Acordo Mútuo (art. 484-A)
+    if (type == TerminationType.mutualAgreement) {
+      // No acordo mútuo, o empregado tem direito a:
+      // - 50% do aviso prévio (se não trabalhado)
+      // - 20% da multa FGTS (reduzida de 40% para 20%)
+      // - Demais verbas normalmente
+
+      // Ajustar aviso prévio para 50%
+      final noticeIndex = additions.indexWhere((item) => item.description == 'Aviso Prévio Indenizado');
+      if (noticeIndex != -1 && !input.noticeWorked) {
+        final originalNotice = additions[noticeIndex];
+        additions[noticeIndex] = BreakdownItem(
+          description: 'Aviso Prévio Indenizado (50%)',
+          value: originalNotice.value * 0.5,
+          type: BreakdownType.addition,
+          details: '50% do aviso prévio (acordo mútuo)',
+        );
+      }
+
+      // Ajustar multa FGTS para 20%
+      final fgtsPenaltyIndex = additions.indexWhere((item) => item.description == 'Multa FGTS (40%)');
+      if (fgtsPenaltyIndex != -1) {
+        final originalPenalty = additions[fgtsPenaltyIndex];
+        additions[fgtsPenaltyIndex] = BreakdownItem(
+          description: 'Multa FGTS (20%)',
+          value: originalPenalty.value * 0.5, // 20% = 50% de 40%
+          type: BreakdownType.addition,
+          details: '20% sobre FGTS do vínculo (acordo mútuo)',
+        );
+      }
+    }
+
     // 8. Descontos
     if (input.calculateTaxes) {
       final inssDiscount = _calculateInssDiscount(input);

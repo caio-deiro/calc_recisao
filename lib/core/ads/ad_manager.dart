@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'ad_ids.dart';
+import '../utils/pro_utils.dart';
 
 class AdManager {
   static const String _lastInterstitialKey = 'last_interstitial_time';
@@ -11,7 +12,10 @@ class AdManager {
     await MobileAds.instance.initialize();
   }
 
-  static BannerAd createBannerAd() {
+  static Future<BannerAd?> createBannerAd() async {
+    final shouldShowAds = await ProUtils.shouldShowAds();
+    if (!shouldShowAds) return null;
+
     return BannerAd(
       adUnitId: AdIds.bannerId,
       size: AdSize.banner,
@@ -28,6 +32,9 @@ class AdManager {
 
   static Future<InterstitialAd?> createInterstitialAd() async {
     try {
+      final shouldShowAds = await ProUtils.shouldShowAds();
+      if (!shouldShowAds) return null;
+
       final prefs = await SharedPreferences.getInstance();
       final lastTime = prefs.getInt(_lastInterstitialKey) ?? 0;
       final now = DateTime.now().millisecondsSinceEpoch;

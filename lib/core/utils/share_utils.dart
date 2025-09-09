@@ -1,8 +1,10 @@
-import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:flutter/services.dart';
 import '../../domain/entities/termination_input.dart';
 import '../../domain/entities/termination_result.dart';
 import '../../domain/entities/termination_type.dart';
 import 'formatters.dart';
+import 'pdf_utils.dart';
 
 class ShareUtils {
   static String generateShareText({
@@ -71,16 +73,20 @@ class ShareUtils {
   }
 
   static Future<void> shareText(String text, {String? subject}) async {
-    final uri = Uri.parse(
-      'mailto:?subject=${subject ?? 'Resultado da Rescisão CLT'}&body=${Uri.encodeComponent(text)}',
-    );
-
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
+    try {
+      await Share.share(text, subject: subject ?? 'Resultado da Rescisão CLT');
+    } catch (e) {
       // Fallback: copiar para área de transferência
-      // TODO: Implementar clipboard
-      throw Exception('Não foi possível compartilhar o resultado');
+      await _copyToClipboard(text);
+      throw Exception('Compartilhamento não disponível. Texto copiado para área de transferência.');
+    }
+  }
+
+  static Future<void> _copyToClipboard(String text) async {
+    try {
+      await Clipboard.setData(ClipboardData(text: text));
+    } catch (e) {
+      throw Exception('Não foi possível copiar para área de transferência');
     }
   }
 
@@ -95,5 +101,34 @@ class ShareUtils {
         : generateShareText(input: input, result: result, terminationType: terminationType);
 
     await ShareUtils.shareText(shareText);
+  }
+
+  static Future<void> copyResultToClipboard({
+    required TerminationInput input,
+    required TerminationResult result,
+    required TerminationType terminationType,
+    bool simple = false,
+  }) async {
+    final shareText = simple
+        ? generateSimpleShareText(result: result, terminationType: terminationType)
+        : generateShareText(input: input, result: result, terminationType: terminationType);
+
+    await _copyToClipboard(shareText);
+  }
+
+  static Future<void> exportToPdf({
+    required TerminationInput input,
+    required TerminationResult result,
+    required TerminationType terminationType,
+  }) async {
+    await PdfUtils.generateAndSharePdf(input: input, result: result, terminationType: terminationType);
+  }
+
+  static Future<void> savePdfToFile({
+    required TerminationInput input,
+    required TerminationResult result,
+    required TerminationType terminationType,
+  }) async {
+    await PdfUtils.savePdfToFile(input: input, result: result, terminationType: terminationType);
   }
 }

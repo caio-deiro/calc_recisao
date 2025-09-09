@@ -49,8 +49,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
-  void _loadBannerAd() {
-    _bannerAd = AdManager.createBannerAd();
+  Future<void> _loadBannerAd() async {
+    _bannerAd = await AdManager.createBannerAd();
     _bannerAd?.load();
   }
 

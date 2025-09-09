@@ -12,6 +12,8 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../widgets/disclaimer_widget.dart';
 import '../../widgets/breakdown_item_card.dart';
 
+enum ShareAction { share, shareSimple, copy, copySimple, exportPdf, savePdf }
+
 class ResultScreen extends StatefulWidget {
   const ResultScreen({super.key, required this.input, required this.terminationType});
 
@@ -80,8 +82,8 @@ class _ResultScreenState extends State<ResultScreen> {
     super.dispose();
   }
 
-  void _loadBannerAd() {
-    _bannerAd = AdManager.createBannerAd();
+  Future<void> _loadBannerAd() async {
+    _bannerAd = await AdManager.createBannerAd();
     _bannerAd?.load();
   }
 
@@ -269,20 +271,140 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   void _shareResult() async {
-    if (_result != null) {
-      try {
-        await ShareUtils.shareResult(input: widget.input, result: _result!, terminationType: widget.terminationType);
+    if (_result == null) return;
 
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Resultado compartilhado com sucesso!')));
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao compartilhar: $e')));
-        }
+    // Mostrar menu de opções de compartilhamento
+    final action = await _showShareOptions();
+    if (action == null) return;
+
+    try {
+      switch (action) {
+        case ShareAction.share:
+          await ShareUtils.shareResult(input: widget.input, result: _result!, terminationType: widget.terminationType);
+          if (mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Resultado compartilhado com sucesso!')));
+          }
+          break;
+        case ShareAction.shareSimple:
+          await ShareUtils.shareResult(
+            input: widget.input,
+            result: _result!,
+            terminationType: widget.terminationType,
+            simple: true,
+          );
+          if (mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Resultado compartilhado com sucesso!')));
+          }
+          break;
+        case ShareAction.copy:
+          await ShareUtils.copyResultToClipboard(
+            input: widget.input,
+            result: _result!,
+            terminationType: widget.terminationType,
+          );
+          if (mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Resultado copiado para área de transferência!')));
+          }
+          break;
+        case ShareAction.copySimple:
+          await ShareUtils.copyResultToClipboard(
+            input: widget.input,
+            result: _result!,
+            terminationType: widget.terminationType,
+            simple: true,
+          );
+          if (mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Resultado copiado para área de transferência!')));
+          }
+          break;
+        case ShareAction.exportPdf:
+          await ShareUtils.exportToPdf(input: widget.input, result: _result!, terminationType: widget.terminationType);
+          if (mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('PDF gerado e compartilhado com sucesso!')));
+          }
+          break;
+        case ShareAction.savePdf:
+          await ShareUtils.savePdfToFile(
+            input: widget.input,
+            result: _result!,
+            terminationType: widget.terminationType,
+          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('PDF salvo com sucesso!')));
+          }
+          break;
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
       }
     }
+  }
+
+  Future<ShareAction?> _showShareOptions() async {
+    return await showModalBottomSheet<ShareAction>(
+      context: context,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(16),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Compartilhar Resultado', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.share),
+                title: const Text('Compartilhar Completo'),
+                subtitle: const Text('Compartilha todos os detalhes'),
+                onTap: () => Navigator.pop(context, ShareAction.share),
+              ),
+              ListTile(
+                leading: const Icon(Icons.share_outlined),
+                title: const Text('Compartilhar Resumido'),
+                subtitle: const Text('Compartilha apenas o resumo'),
+                onTap: () => Navigator.pop(context, ShareAction.shareSimple),
+              ),
+              ListTile(
+                leading: const Icon(Icons.copy),
+                title: const Text('Copiar Completo'),
+                subtitle: const Text('Copia todos os detalhes'),
+                onTap: () => Navigator.pop(context, ShareAction.copy),
+              ),
+              ListTile(
+                leading: const Icon(Icons.copy_outlined),
+                title: const Text('Copiar Resumido'),
+                subtitle: const Text('Copia apenas o resumo'),
+                onTap: () => Navigator.pop(context, ShareAction.copySimple),
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.picture_as_pdf),
+                title: const Text('Exportar PDF'),
+                subtitle: const Text('Gera e compartilha PDF'),
+                onTap: () => Navigator.pop(context, ShareAction.exportPdf),
+              ),
+              ListTile(
+                leading: const Icon(Icons.save_alt),
+                title: const Text('Salvar PDF'),
+                subtitle: const Text('Salva PDF no dispositivo'),
+                onTap: () => Navigator.pop(context, ShareAction.savePdf),
+              ),
+              const SizedBox(height: 8),
+              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

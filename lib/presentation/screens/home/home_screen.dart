@@ -7,6 +7,7 @@ import '../../widgets/disclaimer_widget.dart';
 import '../form/form_screen.dart';
 import '../about/about_screen.dart';
 import '../history/history_screen.dart';
+import '../pro/pro_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -30,8 +31,8 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  void _loadBannerAd() {
-    _bannerAd = AdManager.createBannerAd();
+  Future<void> _loadBannerAd() async {
+    _bannerAd = await AdManager.createBannerAd();
     _bannerAd?.load();
   }
 
@@ -44,6 +45,10 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.history),
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const HistoryScreen())),
+          ),
+          IconButton(
+            icon: const Icon(Icons.star),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ProScreen())),
           ),
           IconButton(
             icon: const Icon(Icons.info_outline),
@@ -64,14 +69,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  ...TerminationType.values
-                      .where((type) => type != TerminationType.withJustCause && type != TerminationType.mutualAgreement)
-                      .map(
-                        (type) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: TerminationTypeCard(type: type, onTap: () => _navigateToForm(context, type)),
-                        ),
-                      ),
+                  ...TerminationType.values.map(
+                    (type) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: TerminationTypeCard(type: type, onTap: () => _navigateToForm(context, type)),
+                    ),
+                  ),
                   const SizedBox(height: 24),
                   const DisclaimerWidget(),
                 ],

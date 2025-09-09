@@ -5,9 +5,13 @@ import '../../domain/entities/calculation_history.dart';
 class HistoryRepository {
   static const String _historyKey = 'calculation_history';
   static const int _maxHistorySize = 50;
+  
+  final SharedPreferences? _prefs;
+  
+  HistoryRepository({SharedPreferences? prefs}) : _prefs = prefs;
 
   Future<List<CalculationHistory>> getHistory() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
     final historyJson = prefs.getStringList(_historyKey) ?? [];
 
     return historyJson.map((json) => CalculationHistory.fromJson(jsonDecode(json))).toList()
@@ -15,7 +19,7 @@ class HistoryRepository {
   }
 
   Future<void> saveCalculation(CalculationHistory calculation) async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
     final history = await getHistory();
 
     // Adicionar novo cálculo no início
@@ -33,7 +37,7 @@ class HistoryRepository {
   }
 
   Future<void> deleteCalculation(String id) async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
     final history = await getHistory();
 
     history.removeWhere((calc) => calc.id == id);
@@ -44,12 +48,12 @@ class HistoryRepository {
   }
 
   Future<void> clearHistory() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
     await prefs.remove(_historyKey);
   }
 
   Future<void> addNote(String id, String note) async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
     final history = await getHistory();
 
     final index = history.indexWhere((calc) => calc.id == id);
