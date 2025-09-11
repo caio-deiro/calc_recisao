@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import '../../../domain/entities/calculation_history.dart';
 import '../../../data/repositories/history_repository.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/pro_utils.dart';
 import '../../../core/ads/ad_manager.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../widgets/disclaimer_widget.dart';
 import '../result/result_screen.dart';
+import '../pro/pro_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -104,6 +106,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget _buildHistoryList() {
     return Column(
       children: [
+        _buildHistoryLimitBanner(),
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.all(16),
@@ -117,6 +120,41 @@ class _HistoryScreenState extends State<HistoryScreen> {
         const DisclaimerWidget(),
         if (_bannerAd != null) _buildBannerAd(),
       ],
+    );
+  }
+
+  Widget _buildHistoryLimitBanner() {
+    return FutureBuilder<bool>(
+      future: ProUtils.hasUnlimitedHistory(),
+      builder: (context, snapshot) {
+        if (snapshot.data == true) return const SizedBox.shrink();
+
+        return Container(
+          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.orange.shade50,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.orange.shade200),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.info_outline, color: Colors.orange.shade600, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Versão gratuita: máximo de 10 cálculos. Faça upgrade para histórico ilimitado.',
+                  style: TextStyle(color: Colors.orange.shade700, fontSize: 12),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ProScreen())),
+                child: const Text('Upgrade', style: TextStyle(fontSize: 12)),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

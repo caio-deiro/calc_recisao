@@ -2,6 +2,7 @@ import '../entities/termination_input.dart';
 import '../entities/termination_result.dart';
 import '../entities/breakdown_item.dart';
 import '../entities/termination_type.dart';
+import '../../core/services/tax_tables_service.dart';
 
 class CalculateTerminationUseCase {
   const CalculateTerminationUseCase();
@@ -203,9 +204,15 @@ class CalculateTerminationUseCase {
   }
 
   double _calculateNoticeAmount(TerminationInput input) {
+    final taxService = TaxTablesService.instance;
     final yearsOfService = input.terminationDate.difference(input.admissionDate).inDays / 365;
-    final noticeDays = 30 + (yearsOfService.floor() * 3);
-    final cappedNoticeDays = noticeDays > 90 ? 90.0 : noticeDays;
+
+    final baseDays = taxService.getAvisoPrevioBaseDays();
+    final daysPerYear = taxService.getAvisoPrevioDaysPerYear();
+    final maxDays = taxService.getAvisoPrevioMaxDays();
+
+    final noticeDays = baseDays + (yearsOfService.floor() * daysPerYear);
+    final cappedNoticeDays = noticeDays > maxDays ? maxDays.toDouble() : noticeDays.toDouble();
 
     return ((input.baseSalary + input.averageAdditions) / 30) * cappedNoticeDays;
   }
@@ -226,53 +233,39 @@ class CalculateTerminationUseCase {
   }
 
   double _calculateFgts(TerminationInput input, TerminationType type) {
-    final monthlyFgts = (input.baseSalary + input.averageAdditions) * 0.08;
+    final taxService = TaxTablesService.instance;
+    final fgtsAliquota = taxService.getFgtsAliquota();
+    final monthlyFgts = (input.baseSalary + input.averageAdditions) * fgtsAliquota;
     final monthsWorked = _calculateMonthsWorked(input);
     return monthlyFgts * monthsWorked;
   }
 
   double _calculateFgtsPenalty(TerminationInput input) {
+    final taxService = TaxTablesService.instance;
+    final penaltyAliquota = taxService.getFgtsPenaltyAliquota();
+
     if (input.hasExistingFgts && input.existingFgtsAmount > 0) {
-      return input.existingFgtsAmount * 0.4;
+      return input.existingFgtsAmount * penaltyAliquota;
     }
 
     // Aproximação baseada no tempo de serviço
     final monthsWorked = _calculateMonthsWorked(input);
     final averageMonthlySalary = input.baseSalary + input.averageAdditions;
-    final estimatedFgts = (averageMonthlySalary * 0.08) * monthsWorked;
-    return estimatedFgts * 0.4;
+    final fgtsAliquota = taxService.getFgtsAliquota();
+    final estimatedFgts = (averageMonthlySalary * fgtsAliquota) * monthsWorked;
+    return estimatedFgts * penaltyAliquota;
   }
 
   double _calculateInssDiscount(TerminationInput input) {
     final baseValue = input.baseSalary + input.averageAdditions;
-
-    // Tabela INSS simplificada (2024)
-    if (baseValue <= 1412.0) {
-      return baseValue * 0.075;
-    } else if (baseValue <= 2666.68) {
-      return baseValue * 0.09;
-    } else if (baseValue <= 4000.03) {
-      return baseValue * 0.12;
-    } else {
-      return baseValue * 0.14;
-    }
+    final taxService = TaxTablesService.instance;
+    return taxService.calculateInss(baseValue);
   }
 
   double _calculateIrrfDiscount(TerminationInput input, double inssDiscount) {
     final baseValue = input.baseSalary + input.averageAdditions - inssDiscount;
-
-    // Tabela IRRF simplificada (2024) - sem dependentes
-    if (baseValue <= 2259.20) {
-      return 0;
-    } else if (baseValue <= 2826.65) {
-      return (baseValue * 0.075) - 169.44;
-    } else if (baseValue <= 3751.05) {
-      return (baseValue * 0.15) - 381.44;
-    } else if (baseValue <= 4664.68) {
-      return (baseValue * 0.225) - 662.77;
-    } else {
-      return (baseValue * 0.275) - 896.00;
-    }
+    final taxService = TaxTablesService.instance;
+    return taxService.calculateIrrf(baseValue, input.terminationDate);
   }
 
   double _calculateMonthsWorked(TerminationInput input) {

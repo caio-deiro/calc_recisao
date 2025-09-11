@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/calculation_history.dart';
+import '../../core/utils/pro_utils.dart';
 
 class HistoryRepository {
   static const String _historyKey = 'calculation_history';
-  static const int _maxHistorySize = 50;
-  
+
   final SharedPreferences? _prefs;
-  
+
   HistoryRepository({SharedPreferences? prefs}) : _prefs = prefs;
 
   Future<List<CalculationHistory>> getHistory() async {
@@ -25,9 +25,10 @@ class HistoryRepository {
     // Adicionar novo cálculo no início
     history.insert(0, calculation);
 
-    // Manter apenas os últimos 50 cálculos
-    if (history.length > _maxHistorySize) {
-      history.removeRange(_maxHistorySize, history.length);
+    // Manter apenas os cálculos permitidos baseado no status PRO
+    final maxSize = await ProUtils.getMaxHistorySize();
+    if (history.length > maxSize) {
+      history.removeRange(maxSize, history.length);
     }
 
     // Salvar no SharedPreferences

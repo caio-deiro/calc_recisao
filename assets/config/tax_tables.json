@@ -1,31 +1,31 @@
 {
-  "inss_2024": {
-    "description": "Tabela INSS 2024 - Alíquotas progressivas",
+  "inss_2025": {
+    "description": "Tabela INSS 2025 - Alíquotas progressivas",
     "faixas": [
       {
-        "limite": 1412.0,
+        "limite": 1518.00,
         "aliquota": 0.075,
-        "descricao": "Até R$ 1.412,00"
+        "descricao": "Até R$ 1.518,00"
       },
       {
-        "limite": 2666.68,
+        "limite": 2793.88,
         "aliquota": 0.09,
-        "descricao": "De R$ 1.412,01 até R$ 2.666,68"
+        "descricao": "De R$ 1.518,01 até R$ 2.793,88"
       },
       {
-        "limite": 4000.03,
+        "limite": 4190.83,
         "aliquota": 0.12,
-        "descricao": "De R$ 2.666,69 até R$ 4.000,03"
+        "descricao": "De R$ 2.793,89 até R$ 4.190,83"
       },
       {
-        "limite": 7786.02,
+        "limite": 8157.41,
         "aliquota": 0.14,
-        "descricao": "De R$ 4.000,04 até R$ 7.786,02"
+        "descricao": "De R$ 4.190,84 até R$ 8.157,41"
       }
     ]
   },
-  "irrf_2024": {
-    "description": "Tabela IRRF 2024 - Sem dependentes",
+  "irrf_2025_jan_abr": {
+    "description": "Tabela IRRF 2025 (Jan–Abr) - Sem dependentes",
     "faixas": [
       {
         "limite": 2259.20,
@@ -55,6 +55,41 @@
         "limite": 999999.99,
         "aliquota": 0.275,
         "deducao": 896.0,
+        "descricao": "Acima de R$ 4.664,68"
+      }
+    ]
+  },
+  "irrf_2025_mai_dez": {
+    "description": "Tabela IRRF 2025 (Mai–Dez) - Sem dependentes",
+    "faixas": [
+      {
+        "limite": 2428.80,
+        "aliquota": 0.0,
+        "deducao": 0.0,
+        "descricao": "Até R$ 2.428,80"
+      },
+      {
+        "limite": 2826.65,
+        "aliquota": 0.075,
+        "deducao": 142.80,
+        "descricao": "De R$ 2.428,81 até R$ 2.826,65"
+      },
+      {
+        "limite": 3751.05,
+        "aliquota": 0.15,
+        "deducao": 354.80,
+        "descricao": "De R$ 2.826,66 até R$ 3.751,05"
+      },
+      {
+        "limite": 4664.68,
+        "aliquota": 0.225,
+        "deducao": 636.13,
+        "descricao": "De R$ 3.751,06 até R$ 4.664,68"
+      },
+      {
+        "limite": 999999.99,
+        "aliquota": 0.275,
+        "deducao": 869.36,
         "descricao": "Acima de R$ 4.664,68"
       }
     ]

@@ -7,10 +7,12 @@ import '../../../domain/usecases/calculate_termination.dart';
 import '../../../data/repositories/history_repository.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/share_utils.dart';
+import '../../../core/utils/pro_utils.dart';
 import '../../../core/ads/ad_manager.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../widgets/disclaimer_widget.dart';
 import '../../widgets/breakdown_item_card.dart';
+import '../pro/pro_screen.dart';
 
 enum ShareAction { share, shareSimple, copy, copySimple, exportPdf, savePdf }
 
@@ -352,58 +354,109 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Future<ShareAction?> _showShareOptions() async {
+    final canExportPdf = await ProUtils.canExportPdf();
+
+    if (!mounted) return null;
+
     return await showModalBottomSheet<ShareAction>(
       context: context,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Compartilhar Resultado', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              ListTile(
-                leading: const Icon(Icons.share),
-                title: const Text('Compartilhar Completo'),
-                subtitle: const Text('Compartilha todos os detalhes'),
-                onTap: () => Navigator.pop(context, ShareAction.share),
-              ),
-              ListTile(
-                leading: const Icon(Icons.share_outlined),
-                title: const Text('Compartilhar Resumido'),
-                subtitle: const Text('Compartilha apenas o resumo'),
-                onTap: () => Navigator.pop(context, ShareAction.shareSimple),
-              ),
-              ListTile(
-                leading: const Icon(Icons.copy),
-                title: const Text('Copiar Completo'),
-                subtitle: const Text('Copia todos os detalhes'),
-                onTap: () => Navigator.pop(context, ShareAction.copy),
-              ),
-              ListTile(
-                leading: const Icon(Icons.copy_outlined),
-                title: const Text('Copiar Resumido'),
-                subtitle: const Text('Copia apenas o resumo'),
-                onTap: () => Navigator.pop(context, ShareAction.copySimple),
-              ),
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.picture_as_pdf),
-                title: const Text('Exportar PDF'),
-                subtitle: const Text('Gera e compartilha PDF'),
-                onTap: () => Navigator.pop(context, ShareAction.exportPdf),
-              ),
-              ListTile(
-                leading: const Icon(Icons.save_alt),
-                title: const Text('Salvar PDF'),
-                subtitle: const Text('Salva PDF no dispositivo'),
-                onTap: () => Navigator.pop(context, ShareAction.savePdf),
-              ),
-              const SizedBox(height: 8),
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
-            ],
+      builder: (context) {
+        if (!mounted) return const SizedBox.shrink();
+        return Container(
+          padding: const EdgeInsets.all(16),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Compartilhar Resultado', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16),
+                ListTile(
+                  leading: const Icon(Icons.share),
+                  title: const Text('Compartilhar Completo'),
+                  subtitle: const Text('Compartilha todos os detalhes'),
+                  onTap: () => Navigator.pop(context, ShareAction.share),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.share_outlined),
+                  title: const Text('Compartilhar Resumido'),
+                  subtitle: const Text('Compartilha apenas o resumo'),
+                  onTap: () => Navigator.pop(context, ShareAction.shareSimple),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.copy),
+                  title: const Text('Copiar Completo'),
+                  subtitle: const Text('Copia todos os detalhes'),
+                  onTap: () => Navigator.pop(context, ShareAction.copy),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.copy_outlined),
+                  title: const Text('Copiar Resumido'),
+                  subtitle: const Text('Copia apenas o resumo'),
+                  onTap: () => Navigator.pop(context, ShareAction.copySimple),
+                ),
+                if (canExportPdf) ...[
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.picture_as_pdf),
+                    title: const Text('Exportar PDF'),
+                    subtitle: const Text('Gera e compartilha PDF'),
+                    onTap: () => Navigator.pop(context, ShareAction.exportPdf),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.save_alt),
+                    title: const Text('Salvar PDF'),
+                    subtitle: const Text('Salva PDF no dispositivo'),
+                    onTap: () => Navigator.pop(context, ShareAction.savePdf),
+                  ),
+                ] else ...[
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.picture_as_pdf, color: Colors.grey),
+                    title: const Text('Exportar PDF'),
+                    subtitle: const Text('Recurso PRO - Faça upgrade'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _showProUpgradeDialog();
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.save_alt, color: Colors.grey),
+                    title: const Text('Salvar PDF'),
+                    subtitle: const Text('Recurso PRO - Faça upgrade'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _showProUpgradeDialog();
+                    },
+                  ),
+                ],
+                const SizedBox(height: 8),
+                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+              ],
+            ),
           ),
+        );
+      },
+    );
+  }
+
+  void _showProUpgradeDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Recurso PRO'),
+        content: const Text(
+          'A exportação PDF é um recurso exclusivo da versão PRO. Faça upgrade para acessar esta funcionalidade.',
         ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ProScreen()));
+            },
+            child: const Text('Fazer Upgrade'),
+          ),
+        ],
       ),
     );
   }

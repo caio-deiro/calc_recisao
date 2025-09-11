@@ -17,7 +17,7 @@ class ProUtils {
   static Future<void> setProUser(bool isPro, {String? purchaseId, String? purchaseToken}) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_proKey, isPro);
-    
+
     if (isPro) {
       await prefs.setString(_proPurchaseDateKey, DateTime.now().toIso8601String());
       if (purchaseId != null) {
@@ -36,11 +36,11 @@ class ProUtils {
   static Future<DateTime?> getProPurchaseDate() async {
     final prefs = await SharedPreferences.getInstance();
     final dateString = prefs.getString(_proPurchaseDateKey);
-    
+
     if (dateString != null) {
       return DateTime.tryParse(dateString);
     }
-    
+
     return null;
   }
 
@@ -59,6 +59,21 @@ class ProUtils {
     return !isPro;
   }
 
+  static Future<bool> canExportPdf() async {
+    final isPro = await isProUser();
+    return isPro;
+  }
+
+  static Future<bool> hasUnlimitedHistory() async {
+    final isPro = await isProUser();
+    return isPro;
+  }
+
+  static Future<int> getMaxHistorySize() async {
+    final isPro = await isProUser();
+    return isPro ? 1000 : 10; // PRO: 1000, Gratuito: 10
+  }
+
   static Future<bool> upgradeToPro() async {
     try {
       // Tentar compra real primeiro
@@ -66,7 +81,7 @@ class ProUtils {
       if (success) {
         return true;
       }
-      
+
       // Se falhar, simular para testes (apenas em debug)
       return await _purchaseService.simulatePurchase();
     } catch (e) {
@@ -82,7 +97,7 @@ class ProUtils {
       if (success) {
         return true;
       }
-      
+
       // Se falhar, simular para testes (apenas em debug)
       return await _purchaseService.simulateRestore();
     } catch (e) {

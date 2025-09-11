@@ -169,7 +169,7 @@ class _ProScreenState extends State<ProScreen> {
                 ),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Fazer Upgrade - R\$ 9,90/mês'),
+                    : const Text('Fazer Upgrade - R\$ 4,90/mês'),
               ),
             ),
             const SizedBox(height: 8),

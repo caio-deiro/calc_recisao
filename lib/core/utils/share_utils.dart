@@ -74,7 +74,7 @@ class ShareUtils {
 
   static Future<void> shareText(String text, {String? subject}) async {
     try {
-      await Share.share(text, subject: subject ?? 'Resultado da Rescisão CLT');
+      await SharePlus.instance.share(ShareParams(text: text, subject: subject ?? 'Resultado da Rescisão CLT'));
     } catch (e) {
       // Fallback: copiar para área de transferência
       await _copyToClipboard(text);
