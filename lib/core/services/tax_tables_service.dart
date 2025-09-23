@@ -109,9 +109,9 @@ class TaxTablesService {
       }
     }
 
-    // Se não encontrou faixa, usar a última (maior)
+    // Se não encontrou faixa, aplicar alíquota apenas sobre o teto
     final lastRange = table.ranges.last;
-    return baseValue * lastRange.aliquota;
+    return lastRange.limite * lastRange.aliquota;
   }
 
   double calculateIrrf(double baseValue, DateTime terminationDate) {

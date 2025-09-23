@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Círculo de fundo branco -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,54m-40,0a40,40 0,1 1,80 0a40,40 0,1 1,-80 0" />
+    
+    <!-- Calculadora -->
+    <group android:scaleX="0.6"
+           android:scaleY="0.6"
+           android:pivotX="54"
+           android:pivotY="54">
+        
+        <!-- Corpo da calculadora -->
+        <path
+            android:fillColor="#1976D2"
+            android:strokeColor="#1976D2"
+            android:strokeWidth="2"
+            android:pathData="M30,25 L78,25 L78,83 L30,83 Z" />
+        
+        <!-- Linhas horizontais -->
+        <path
+            android:fillColor="#1976D2"
+            android:strokeColor="#1976D2"
+            android:strokeWidth="1.5"
+            android:pathData="M32,40 L76,40" />
+        
+        <path
+            android:fillColor="#1976D2"
+            android:strokeColor="#1976D2"
+            android:strokeWidth="1.5"
+            android:pathData="M32,50 L76,50" />
+        
+        <path
+            android:fillColor="#1976D2"
+            android:strokeColor="#1976D2"
+            android:strokeWidth="1.5"
+            android:pathData="M32,60 L76,60" />
+        
+        <path
+            android:fillColor="#1976D2"
+            android:strokeColor="#1976D2"
+            android:strokeWidth="1.5"
+            android:pathData="M32,70 L76,70" />
+        
+        <!-- Linhas verticais -->
+        <path
+            android:fillColor="#1976D2"
+            android:strokeColor="#1976D2"
+            android:strokeWidth="1.5"
+            android:pathData="M40,27 L40,81" />
+        
+        <path
+            android:fillColor="#1976D2"
+            android:strokeColor="#1976D2"
+            android:strokeWidth="1.5"
+            android:pathData="M50,27 L50,81" />
+        
+        <path
+            android:fillColor="#1976D2"
+            android:strokeColor="#1976D2"
+            android:strokeWidth="1.5"
+            android:pathData="M60,27 L60,81" />
+        
+        <path
+            android:fillColor="#1976D2"
+            android:strokeColor="#1976D2"
+            android:strokeWidth="1.5"
+            android:pathData="M70,27 L70,81" />
+    </group>
+</vector>
+

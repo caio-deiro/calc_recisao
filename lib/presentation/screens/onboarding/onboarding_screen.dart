@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/utils/responsive_helper.dart';
+import '../../../core/services/onboarding_service.dart';
 import '../home/home_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -180,8 +180,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _finishOnboarding() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('onboarding_completed', true);
+    final onboardingService = await OnboardingService.instance;
+    await onboardingService.completeOnboarding();
 
     if (mounted) {
       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const HomeScreen()));

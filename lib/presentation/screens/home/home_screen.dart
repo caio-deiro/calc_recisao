@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../domain/entities/termination_type.dart';
 import '../../../core/ads/ad_manager.dart';
+import '../../../core/analytics/aso_analytics.dart';
 import '../../../core/utils/pro_utils.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../widgets/termination_type_card.dart';
@@ -9,6 +10,7 @@ import '../form/form_screen.dart';
 import '../about/about_screen.dart';
 import '../history/history_screen.dart';
 import '../pro/pro_screen.dart';
+import '../support/support_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,6 +28,11 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _loadBannerAd();
     _checkProStatus();
+    _trackScreenView();
+  }
+
+  Future<void> _trackScreenView() async {
+    await AsoAnalytics.trackUserEngagement(action: 'screen_view', screen: 'home', timeSpent: 0);
   }
 
   Future<void> _checkProStatus() async {
@@ -59,6 +66,10 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.star),
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ProScreen())),
+          ),
+          IconButton(
+            icon: const Icon(Icons.help_outline),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SupportScreen())),
           ),
           IconButton(
             icon: const Icon(Icons.info_outline),

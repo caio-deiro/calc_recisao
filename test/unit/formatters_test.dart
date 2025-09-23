@@ -47,12 +47,22 @@ void main() {
     group('formatCurrency', () {
       test('should format currency correctly', () {
         final result = Formatters.formatCurrency(1234.56);
-        expect(result, 'R\$ 1234,56');
+        expect(result, 'R\$ 1.234,56');
       });
 
       test('should handle zero', () {
         final result = Formatters.formatCurrency(0.0);
         expect(result, 'R\$ 0,00');
+      });
+
+      test('should format large numbers with thousands separator', () {
+        final result = Formatters.formatCurrency(1234567.89);
+        expect(result, 'R\$ 1.234.567,89');
+      });
+
+      test('should format millions', () {
+        final result = Formatters.formatCurrency(1000000.00);
+        expect(result, 'R\$ 1.000.000,00');
       });
     });
 

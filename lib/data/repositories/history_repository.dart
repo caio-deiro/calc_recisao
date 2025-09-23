@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/calculation_history.dart';
 import '../../core/utils/pro_utils.dart';
+import '../../core/services/offline_service.dart';
 
 class HistoryRepository {
   static const String _historyKey = 'calculation_history';
@@ -35,6 +36,9 @@ class HistoryRepository {
     final historyJson = history.map((calc) => jsonEncode(calc.toJson())).toList();
 
     await prefs.setStringList(_historyKey, historyJson);
+
+    // Cache offline para usuários PRO
+    await OfflineService.cacheCalculation(calculation);
   }
 
   Future<void> deleteCalculation(String id) async {

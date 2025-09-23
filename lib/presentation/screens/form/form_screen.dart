@@ -4,7 +4,7 @@ import '../../../domain/entities/termination_input.dart';
 import '../../../core/utils/formatters.dart';
 import '../../widgets/disclaimer_widget.dart';
 import '../../widgets/currency_text_field.dart';
-import '../../widgets/date_picker_field.dart';
+import '../../widgets/date_input_field.dart';
 import '../result/result_screen.dart';
 
 class FormScreen extends StatefulWidget {
@@ -92,13 +92,13 @@ class _FormScreenState extends State<FormScreen> {
       children: [
         const Text('Informações Básicas', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
-        DatePickerField(
+        DateInputField(
           controller: _admissionDateController,
           label: 'Data de Admissão',
           validator: (value) => value?.isEmpty == true ? 'Campo obrigatório' : null,
         ),
         const SizedBox(height: 16),
-        DatePickerField(
+        DateInputField(
           controller: _terminationDateController,
           label: 'Data de Desligamento',
           validator: (value) => value?.isEmpty == true ? 'Campo obrigatório' : null,

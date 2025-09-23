@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dimensões otimizadas para ícones em diferentes densidades -->
+    <dimen name="icon_size_small">24dp</dimen>
+    <dimen name="icon_size_medium">32dp</dimen>
+    <dimen name="icon_size_large">48dp</dimen>
+    <dimen name="icon_size_xlarge">64dp</dimen>
+    <dimen name="icon_size_xxlarge">96dp</dimen>
+    
+    <!-- Dimensões específicas para launcher icons -->
+    <dimen name="launcher_icon_size">48dp</dimen>
+    <dimen name="launcher_icon_size_adaptive">108dp</dimen>
+</resources>
+

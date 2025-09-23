@@ -1,6 +1,20 @@
 class Formatters {
   static String formatCurrency(double value) {
-    return 'R\$ ${value.toStringAsFixed(2).replaceAll('.', ',')}';
+    // Formatar com separadores de milhares e vírgula decimal
+    final parts = value.toStringAsFixed(2).split('.');
+    final integerPart = parts[0];
+    final decimalPart = parts[1];
+
+    // Adicionar separadores de milhares
+    String formattedInteger = '';
+    for (int i = 0; i < integerPart.length; i++) {
+      if (i > 0 && (integerPart.length - i) % 3 == 0) {
+        formattedInteger += '.';
+      }
+      formattedInteger += integerPart[i];
+    }
+
+    return 'R\$ $formattedInteger,$decimalPart';
   }
 
   static String formatDate(DateTime date) {

@@ -2,13 +2,21 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:calc_recisao/domain/entities/termination_input.dart';
 import 'package:calc_recisao/domain/entities/termination_type.dart';
 import 'package:calc_recisao/domain/usecases/calculate_termination.dart';
+import 'package:calc_recisao/core/services/tax_tables_service.dart';
 
 void main() {
   group('CalculateTerminationUseCase', () {
     late CalculateTerminationUseCase useCase;
+    late TaxTablesService taxService;
 
-    setUp(() {
+    setUpAll(() async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+    });
+
+    setUp(() async {
       useCase = const CalculateTerminationUseCase();
+      taxService = TaxTablesService.instance;
+      await taxService.loadTaxTables();
     });
 
     group('Sem Justa Causa', () {

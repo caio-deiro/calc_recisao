@@ -1,8 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="Calc CLT"
+        android:label="Calculadora Rescisão CLT"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:supportsRtl="true"
+        android:theme="@style/LaunchTheme">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -11,7 +16,8 @@
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait">
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
                  while the Flutter UI initializes. After that, this theme continues
@@ -34,6 +40,17 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-2507636022850832~3319283858"/>
+        
+        <!-- ASO Metadata -->
+        <meta-data
+            android:name="app_category"
+            android:value="productivity"/>
+        <meta-data
+            android:name="app_keywords"
+            android:value="rescisão,CLT,FGTS,INSS,IRRF,trabalhista,cálculo,calculadora"/>
+        <meta-data
+            android:name="app_description"
+            android:value="Calculadora completa de rescisão CLT com FGTS, INSS, IRRF e tabelas atualizadas 2025"/>
     </application>
     
     <!-- AdMob AD_ID permission for Android 13+ -->
