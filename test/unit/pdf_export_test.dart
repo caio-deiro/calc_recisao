@@ -68,7 +68,7 @@ void main() {
         SharedPreferences.setMockInitialValues({'is_pro_user': true});
 
         try {
-          final pdf = await PdfUtils.generateAndSharePdf(
+          await PdfUtils.generateAndSharePdf(
             input: testInput,
             result: testResult,
             terminationType: TerminationType.withoutJustCause,

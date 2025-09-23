@@ -41,9 +41,6 @@ class AsoAbTesting {
 
   // Teste A/B para layout da tela inicial
   static Future<String> getHomeScreenLayout() async {
-    final prefs = await SharedPreferences.getInstance();
-    final group = prefs.getString(_abTestGroupKey) ?? _variantA;
-
     // 50% para cada variante
     final random = Random();
     final isVariantB = random.nextBool();

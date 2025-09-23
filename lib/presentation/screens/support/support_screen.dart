@@ -72,7 +72,7 @@ class _SupportScreenState extends State<SupportScreen> {
                 ),
                 Text(
                   'Resposta em até ${SupportService.getSupportResponseTime()}',
-                  style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14),
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 14),
                 ),
               ],
             ),

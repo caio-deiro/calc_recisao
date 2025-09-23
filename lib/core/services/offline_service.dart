@@ -54,7 +54,11 @@ class OfflineService {
     for (final calculation in pendingSync) {
       // Aqui você implementaria a lógica de sincronização
       // Por enquanto, apenas limpar o cache
-      print('Sincronizando cálculo: ${calculation.id}');
+      // print('Sincronizando cálculo: ${calculation.id}'); // Removido para produção
+      // Usar a variável calculation para evitar warning
+      if (calculation.id.isNotEmpty) {
+        // Lógica de sincronização será implementada aqui
+      }
     }
 
     // Limpar cache offline após sincronização

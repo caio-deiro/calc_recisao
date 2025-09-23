@@ -6,14 +6,6 @@ class AsoAnalytics {
   static const String _sessionCountKey = 'session_count';
   static const String _proConversionKey = 'pro_conversion';
 
-  // Eventos ASO importantes
-  static const String _appOpenEvent = 'app_open';
-  static const String _calculationEvent = 'calculation_performed';
-  static const String _proUpgradeEvent = 'pro_upgrade';
-  static const String _pdfExportEvent = 'pdf_export';
-  static const String _shareEvent = 'share_result';
-  static const String _supportEvent = 'support_contact';
-
   static Future<void> initialize() async {
     await _trackInstallSource();
     await _trackFirstOpen();
@@ -28,9 +20,6 @@ class AsoAnalytics {
       // Detectar fonte de instalação
       final source = await _detectInstallSource();
       await prefs.setString(_installSourceKey, source);
-
-      // Log local para debug
-      print('ASO: App install from $source');
     }
   }
 
@@ -46,9 +35,6 @@ class AsoAnalytics {
 
     if (isFirstOpen) {
       await prefs.setBool(_firstOpenKey, false);
-
-      // Log local para debug
-      print('ASO: First app open');
     }
   }
 
@@ -57,8 +43,7 @@ class AsoAnalytics {
     final sessionCount = prefs.getInt(_sessionCountKey) ?? 0;
     await prefs.setInt(_sessionCountKey, sessionCount + 1);
 
-    // Log local para debug
-    print('ASO: App open - session $sessionCount');
+    // Log local para debug (removido para produção)
   }
 
   // Eventos específicos para ASO
@@ -67,8 +52,7 @@ class AsoAnalytics {
     required double salary,
     required bool isProUser,
   }) async {
-    // Log local para debug
-    print('ASO: Calculation performed - $terminationType, salary: $salary, pro: $isProUser');
+    // Log local para debug (removido para produção)
   }
 
   static Future<void> trackProUpgrade({required String source, required double price}) async {
@@ -76,13 +60,11 @@ class AsoAnalytics {
     final conversionCount = prefs.getInt(_proConversionKey) ?? 0;
     await prefs.setInt(_proConversionKey, conversionCount + 1);
 
-    // Log local para debug
-    print('ASO: Pro upgrade from $source, price: $price, conversions: ${conversionCount + 1}');
+    // Log local para debug (removido para produção)
   }
 
   static Future<void> trackPdfExport({required bool isProUser, required String terminationType}) async {
-    // Log local para debug
-    print('ASO: PDF export - pro: $isProUser, type: $terminationType');
+    // Log local para debug (removido para produção)
   }
 
   static Future<void> trackShare({
@@ -90,13 +72,11 @@ class AsoAnalytics {
     required String terminationType,
     required bool isProUser,
   }) async {
-    // Log local para debug
-    print('ASO: Share - method: $method, type: $terminationType, pro: $isProUser');
+    // Log local para debug (removido para produção)
   }
 
   static Future<void> trackSupport({required String channel, required bool isProUser}) async {
-    // Log local para debug
-    print('ASO: Support contact - channel: $channel, pro: $isProUser');
+    // Log local para debug (removido para produção)
   }
 
   // Métricas ASO específicas
@@ -105,8 +85,7 @@ class AsoAnalytics {
     required String screen,
     required int timeSpent,
   }) async {
-    // Log local para debug
-    print('ASO: User engagement - $action on $screen, time: ${timeSpent}s');
+    // Log local para debug (removido para produção)
   }
 
   static Future<void> trackFeatureUsage({
@@ -114,13 +93,11 @@ class AsoAnalytics {
     required bool isProUser,
     required bool success,
   }) async {
-    // Log local para debug
-    print('ASO: Feature usage - $feature, pro: $isProUser, success: $success');
+    // Log local para debug (removido para produção)
   }
 
   static Future<void> trackRetention({required int daysSinceInstall, required bool isProUser}) async {
-    // Log local para debug
-    print('ASO: User retention - $daysSinceInstall days, pro: $isProUser');
+    // Log local para debug (removido para produção)
   }
 
   // Métricas de conversão

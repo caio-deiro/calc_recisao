@@ -7,7 +7,6 @@ import 'package:calc_recisao/domain/entities/calculation_history.dart';
 import 'package:calc_recisao/domain/entities/termination_input.dart';
 import 'package:calc_recisao/domain/entities/termination_result.dart';
 import 'package:calc_recisao/domain/entities/termination_type.dart';
-import 'package:calc_recisao/domain/entities/breakdown_item.dart';
 
 void main() {
   group('Pro Features Tests', () {
