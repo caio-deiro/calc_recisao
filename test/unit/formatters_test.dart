@@ -79,6 +79,67 @@ void main() {
         final result = Formatters.formatPercentage(0.15);
         expect(result, '15.0%');
       });
+
+      test('should format zero percentage', () {
+        final result = Formatters.formatPercentage(0.0);
+        expect(result, '0.0%');
+      });
+
+      test('should format 100% correctly', () {
+        final result = Formatters.formatPercentage(1.0);
+        expect(result, '100.0%');
+      });
+    });
+
+    group('formatMonths', () {
+      test('should format single month correctly', () {
+        final result = Formatters.formatMonths(1);
+        expect(result, '1 mês');
+      });
+
+      test('should format multiple months correctly', () {
+        final result = Formatters.formatMonths(5);
+        expect(result, '5 meses');
+      });
+
+      test('should format zero months', () {
+        final result = Formatters.formatMonths(0);
+        expect(result, '0 meses');
+      });
+    });
+
+    group('formatYears', () {
+      test('should format single year correctly', () {
+        final result = Formatters.formatYears(1);
+        expect(result, '1 ano');
+      });
+
+      test('should format multiple years correctly', () {
+        final result = Formatters.formatYears(5);
+        expect(result, '5 anos');
+      });
+
+      test('should format zero years', () {
+        final result = Formatters.formatYears(0);
+        expect(result, '0 anos');
+      });
+    });
+
+    group('formatCurrency edge cases', () {
+      test('should handle negative values', () {
+        final result = Formatters.formatCurrency(-1234.56);
+        expect(result, 'R\$ -1.234,56');
+      });
+
+      test('should handle very small values', () {
+        final result = Formatters.formatCurrency(0.01);
+        expect(result, 'R\$ 0,01');
+      });
+
+      test('should handle very large values', () {
+        final result = Formatters.formatCurrency(999999999.99);
+        expect(result, 'R\$ 999.999.999,99');
+      });
     });
   });
 }

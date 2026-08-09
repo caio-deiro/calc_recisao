@@ -25,7 +25,8 @@ plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
 
     // AGP e Kotlin (ajuste se o seu projeto exigir versões específicas)
-    id("com.android.application") version "8.4.0" apply false
+    // AGP 8.5.1+ é necessário para suporte completo a 16 KB no Google Play
+    id("com.android.application") version "8.7.0" apply false
     id("org.jetbrains.kotlin.android") version "2.2.10" apply false
 }
 

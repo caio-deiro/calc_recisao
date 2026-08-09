@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import '../onboarding/onboarding_screen.dart';
 import '../home/home_screen.dart';
 import '../../../core/services/onboarding_service.dart';
+import '../../../core/constants/app_constants.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,8 +20,10 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkOnboardingStatus() async {
-    // Pequeno delay para mostrar o splash
-    await Future.delayed(const Duration(milliseconds: 500));
+    // Pequeno delay para mostrar o splash (apenas em produção)
+    if (!kDebugMode) {
+      await Future.delayed(AppConstants.calculationDelay);
+    }
 
     final onboardingService = await OnboardingService.instance;
     final hasCompletedOnboarding = await onboardingService.hasCompletedOnboarding();

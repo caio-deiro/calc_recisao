@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
+  static const Color primaryDeep = Color(0xFF1565C0);
+
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,

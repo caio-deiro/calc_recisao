@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../domain/entities/calculation_history.dart';
-import '../../../data/repositories/history_repository.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart' show AdWidget, BannerAd;
+
+import '../../../core/ads/ad_manager.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/pro_utils.dart';
-import '../../../core/ads/ad_manager.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../../../data/repositories/history_repository.dart';
+import '../../../domain/entities/calculation_history.dart';
 import '../../widgets/disclaimer_widget.dart';
 import '../result/result_screen.dart';
 import '../pro/pro_screen.dart';

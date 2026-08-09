@@ -4,9 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
 import '../utils/pro_utils.dart';
+import '../constants/app_constants.dart';
 
 class PurchaseService {
-  static const String _proProductId = 'calc_recisao_pro_monthly';
+  static const String _proProductId = AppConstants.proProductId;
 
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
@@ -105,8 +106,28 @@ class PurchaseService {
   }
 
   Future<bool> _verifyPurchase(PurchaseDetails purchaseDetails) async {
-    // Em produção, você deve verificar a compra com seu servidor
-    // Por enquanto, vamos aceitar todas as compras
+    // TODO: Implementar verificação de compra no servidor
+    // Por enquanto, validamos apenas localmente
+    // Em produção, deve-se verificar com o servidor para garantir segurança
+    
+    // Validações básicas locais
+    if (purchaseDetails.productID != AppConstants.proProductId) {
+      debugPrint('Product ID inválido: ${purchaseDetails.productID}');
+      return false;
+    }
+    
+    // Verificar status da compra
+    if (purchaseDetails.status != PurchaseStatus.purchased && 
+        purchaseDetails.status != PurchaseStatus.restored) {
+      debugPrint('Status de compra inválido: ${purchaseDetails.status}');
+      return false;
+    }
+    
+    // Em produção, adicionar verificação com servidor:
+    // 1. Enviar purchaseDetails.verificationData para seu servidor
+    // 2. Servidor verifica com Google Play/App Store
+    // 3. Retornar resultado da verificação
+    
     return true;
   }
 

@@ -39,7 +39,8 @@ void main() {
         }
 
         // Verificações específicas para sem justa causa
-        expect(result.additions.any((item) => item.description == 'FGTS'), isTrue);
+        // FGTS não é pago na rescisão, apenas a multa
+        expect(result.additions.any((item) => item.description == 'FGTS'), isFalse);
         expect(result.additions.any((item) => item.description == 'Multa FGTS (40%)'), isTrue);
         expect(result.additions.any((item) => item.description == 'Aviso Prévio Indenizado'), isTrue);
       });
@@ -66,7 +67,8 @@ void main() {
         }
 
         // Verificações específicas para sem justa causa
-        expect(result.additions.any((item) => item.description == 'FGTS'), isTrue);
+        // FGTS não é pago na rescisão, apenas a multa
+        expect(result.additions.any((item) => item.description == 'FGTS'), isFalse);
         expect(result.additions.any((item) => item.description == 'Multa FGTS (40%)'), isTrue);
       });
     });
@@ -96,7 +98,8 @@ void main() {
         // Verificações específicas para pedido de demissão
         expect(result.additions.any((item) => item.description == 'FGTS'), isFalse);
         expect(result.additions.any((item) => item.description == 'Multa FGTS (40%)'), isFalse);
-        expect(result.additions.any((item) => item.description == 'Aviso Prévio Indenizado'), isTrue);
+        expect(result.additions.any((item) => item.description == 'Aviso Prévio Indenizado'), isFalse);
+        expect(result.deductions.any((item) => item.description == 'Desconto Aviso Prévio'), isTrue);
       });
     });
 
@@ -185,7 +188,8 @@ void main() {
         }
 
         // Verificações específicas para acordo mútuo
-        expect(result.additions.any((item) => item.description == 'FGTS'), isTrue);
+        // FGTS não é pago na rescisão, apenas a multa
+        expect(result.additions.any((item) => item.description == 'FGTS'), isFalse);
         expect(result.additions.any((item) => item.description == 'Multa FGTS (20%)'), isTrue);
         expect(result.additions.any((item) => item.description == 'Aviso Prévio Indenizado (50%)'), isTrue);
       });
@@ -204,7 +208,16 @@ void main() {
         );
 
         final withoutJustCause = useCase.execute(input, TerminationType.withoutJustCause);
-        final resignation = useCase.execute(input, TerminationType.resignation);
+        final resignationInput = TerminationInput(
+          admissionDate: input.admissionDate,
+          terminationDate: input.terminationDate,
+          baseSalary: input.baseSalary,
+          averageAdditions: input.averageAdditions,
+          hasAccruedVacation: input.hasAccruedVacation,
+          noticeWorked: true,
+          calculateTaxes: input.calculateTaxes,
+        );
+        final resignation = useCase.execute(resignationInput, TerminationType.resignation);
         final fixedTerm = useCase.execute(input, TerminationType.fixedTerm);
         final withJustCause = useCase.execute(input, TerminationType.withJustCause);
         final mutualAgreement = useCase.execute(input, TerminationType.mutualAgreement);
@@ -243,9 +256,9 @@ void main() {
           if (addition.details != null) {}
         }
 
-        // Verificações específicas para férias vencidas
+        // Verificações específicas para férias vencidas e proporcionais
         expect(result.additions.any((item) => item.description == 'Férias Vencidas + 1/3'), isTrue);
-        expect(result.additions.any((item) => item.description == 'Férias Proporcionais + 1/3'), isFalse);
+        expect(result.additions.any((item) => item.description == 'Férias Proporcionais + 1/3'), isTrue);
       });
 
       test('deve calcular com aviso prévio trabalhado', () {

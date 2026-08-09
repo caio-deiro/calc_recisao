@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/purchase_service.dart';
+import '../constants/app_constants.dart';
 
 class ProUtils {
   static const String _proKey = 'is_pro_user';
@@ -71,7 +72,7 @@ class ProUtils {
 
   static Future<int> getMaxHistorySize() async {
     final isPro = await isProUser();
-    return isPro ? 1000 : 10; // PRO: 1000, Gratuito: 10
+    return isPro ? AppConstants.maxProHistorySize : AppConstants.maxFreeHistorySize;
   }
 
   static Future<bool> upgradeToPro() async {

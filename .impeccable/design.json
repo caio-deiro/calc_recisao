@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-30T18:30:00.000Z",
+  "title": "Design System: Calculadora de Rescisão CLT",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Azul Confiança",
+        "canonical": "oklch(52% 0.14 250)",
+        "tonalRamp": ["#0D47A1", "#1565C0", "#1976D2", "#1E88E5", "#2196F3", "#42A5F5", "#64B5F6", "#E3F2FD"]
+      },
+      "on-surface-variant": {
+        "role": "neutral",
+        "displayName": "Texto Secundário",
+        "canonical": "oklch(38% 0.02 280)",
+        "tonalRamp": ["#1C1B1F", "#313033", "#49454F", "#605D62", "#787579", "#AEAAAE", "#CAC4D0", "#F4EFF4"]
+      },
+      "success": {
+        "role": "tertiary",
+        "displayName": "Verde Verba",
+        "canonical": "oklch(48% 0.12 145)",
+        "tonalRamp": ["#1B5E20", "#2E7D32", "#388E3C", "#43A047", "#4CAF50", "#66BB6A", "#A5D6A7", "#E8F5E9"]
+      },
+      "danger": {
+        "role": "tertiary",
+        "displayName": "Vermelho Desconto",
+        "canonical": "oklch(48% 0.18 25)",
+        "tonalRamp": ["#B71C1C", "#C62828", "#D32F2F", "#E53935", "#EF5350", "#E57373", "#EF9A9A", "#FFEBEE"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Splash e onboarding — título principal do app." },
+      "headline": { "displayName": "Headline", "purpose": "Títulos de seção em home e formulário." },
+      "title": { "displayName": "Title", "purpose": "Rótulos de cards clicáveis." },
+      "body": { "displayName": "Body", "purpose": "Descrições, disclaimers, detalhes de verbas." },
+      "label": { "displayName": "Label", "purpose": "Metadados e texto auxiliar pequeno." }
+    },
+    "shadows": [
+      { "name": "card-resting", "value": "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08)", "purpose": "Elevação padrão de Card (elevation 2)." },
+      { "name": "pro-promo", "value": "0 4px 8px rgba(25,118,210,0.25)", "purpose": "Card PRO — candidato a remoção." }
+    ],
+    "motion": [
+      { "name": "ease-material", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Transições padrão Material (ripple, navegação)." }
+    ],
+    "breakpoints": [
+      { "name": "phone", "value": "360px" },
+      { "name": "tablet", "value": "600px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Termination Type Card",
+      "kind": "card",
+      "refersTo": "card-surface",
+      "description": "Card clicável para escolher tipo de rescisão na home.",
+      "html": "<button class=\"ds-termination-card\" type=\"button\"><div class=\"ds-termination-card__body\"><strong class=\"ds-termination-card__title\">Rescisão sem justa causa</strong><span class=\"ds-termination-card__desc\">Demissão pelo empregador sem motivo</span></div><span class=\"ds-termination-card__chevron\" aria-hidden=\"true\">›</span></button>",
+      "css": ".ds-termination-card { display: flex; align-items: center; width: 100%; text-align: left; background: #FAFAFA; border: none; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); cursor: pointer; transition: box-shadow 0.2s cubic-bezier(0.4,0,0.2,1); } .ds-termination-card:hover { box-shadow: 0 2px 6px rgba(0,0,0,0.16); } .ds-termination-card:focus-visible { outline: 2px solid #1976D2; outline-offset: 2px; } .ds-termination-card__body { flex: 1; } .ds-termination-card__title { display: block; font-size: 18px; font-weight: 700; color: #1C1B1F; margin-bottom: 4px; } .ds-termination-card__desc { font-size: 14px; color: #49454F; } .ds-termination-card__chevron { color: #49454F; font-size: 16px; margin-left: 8px; }"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ação principal — calcular rescisão no formulário.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Calcular rescisão</button>",
+      "css": ".ds-btn-primary { background: #1976D2; color: #FFFFFF; border: none; border-radius: 8px; padding: 12px 24px; font-size: 16px; font-weight: 500; cursor: pointer; transition: background 0.2s cubic-bezier(0.4,0,0.2,1); } .ds-btn-primary:hover { background: #1565C0; } .ds-btn-primary:focus-visible { outline: 2px solid #1976D2; outline-offset: 2px; } .ds-btn-primary:active { background: #0D47A1; }"
+    },
+    {
+      "name": "Outline Input",
+      "kind": "input",
+      "refersTo": "input-outline",
+      "description": "Campo de formulário com borda outline — salário, datas.",
+      "html": "<label class=\"ds-input-wrap\"><span class=\"ds-input-label\">Salário base</span><input class=\"ds-input\" type=\"text\" placeholder=\"R$ 0,00\" /></label>",
+      "css": ".ds-input-wrap { display: block; } .ds-input-label { display: block; font-size: 14px; font-weight: 500; color: #1C1B1F; margin-bottom: 8px; } .ds-input { width: 100%; box-sizing: border-box; border: 1px solid #79747E; border-radius: 8px; padding: 12px 16px; font-size: 16px; color: #1C1B1F; background: #FAFAFA; transition: border-color 0.2s; } .ds-input:focus { outline: none; border-color: #1976D2; border-width: 2px; padding: 11px 15px; } .ds-input::placeholder { color: #49454F; }"
+    },
+    {
+      "name": "Breakdown Value Chip",
+      "kind": "chip",
+      "refersTo": "card-surface",
+      "description": "Valor monetário em item de breakdown — verde para adição.",
+      "html": "<span class=\"ds-value-chip ds-value-chip--add\">+ R$ 1.250,00</span>",
+      "css": ".ds-value-chip { display: inline-block; padding: 6px 12px; border-radius: 16px; font-size: 16px; font-weight: 700; border: 1px solid; } .ds-value-chip--add { color: #2E7D32; background: rgba(46,125,50,0.1); border-color: #2E7D32; } .ds-value-chip--deduct { color: #C62828; background: rgba(198,40,40,0.1); border-color: #C62828; }"
+    },
+    {
+      "name": "Disclaimer Alert",
+      "kind": "custom",
+      "description": "Aviso legal obrigatório — estimativas, consultar profissional.",
+      "html": "<div class=\"ds-disclaimer\" role=\"note\"><div class=\"ds-disclaimer__header\"><svg class=\"ds-disclaimer__icon\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" aria-hidden=\"true\"><path d=\"M12 2L1 21h22L12 2zm0 3.5L19.5 19h-15L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z\" fill=\"#B3261E\"/></svg><strong>Aviso Importante</strong></div><p>Esta calculadora fornece estimativas. Consulte um profissional antes de tomar decisões.</p></div>",
+      "css": ".ds-disclaimer { background: rgba(249,222,220,0.1); border: 1px solid rgba(249,222,220,0.3); border-radius: 12px; padding: 16px; } .ds-disclaimer__header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; } .ds-disclaimer__header strong { font-size: 16px; color: #B3261E; } .ds-disclaimer p { margin: 0; font-size: 14px; color: #49454F; line-height: 1.5; }"
+    },
+    {
+      "name": "App Navigation Bar",
+      "kind": "nav",
+      "description": "AppBar centrada com título e ações à direita.",
+      "html": "<header class=\"ds-appbar\"><h1 class=\"ds-appbar__title\">Calculadora de Rescisão CLT</h1><nav class=\"ds-appbar__actions\" aria-label=\"Ações\"><button type=\"button\" aria-label=\"Histórico\">⌛</button><button type=\"button\" aria-label=\"PRO\">★</button></nav></header>",
+      "css": ".ds-appbar { display: flex; align-items: center; justify-content: center; position: relative; background: #1976D2; color: #FFFFFF; padding: 16px; min-height: 56px; } .ds-appbar__title { font-size: 18px; font-weight: 500; margin: 0; } .ds-appbar__actions { position: absolute; right: 8px; display: flex; gap: 4px; } .ds-appbar__actions button { background: transparent; border: none; color: #FFFFFF; font-size: 20px; padding: 8px; cursor: pointer; border-radius: 50%; } .ds-appbar__actions button:hover { background: rgba(255,255,255,0.12); } .ds-appbar__actions button:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "A Mesa de Cálculo",
+    "overview": "O visual deve parecer uma mesa de trabalho organizada — números à vista, rótulos claros, nada escondido atrás de ornamentos. Material 3 com azul confiável como âncora, densidade moderada e hierarquia que guia do tipo de rescisão ao valor final em poucos toques.",
+    "keyCharacteristics": [
+      "Azul Material como cor de confiança e ação primária",
+      "Cards com cantos suaves (12px) e padding generoso (16px)",
+      "Tipografia Roboto padrão, pesos bold para títulos de seção",
+      "Verde/vermelho semântico apenas em valores de breakdown",
+      "Disclaimers em container de aviso, nunca escondidos"
+    ],
+    "rules": [
+      { "name": "The One Accent Rule", "body": "O azul primário aparece em ações e navegação. Verde e vermelho são exclusivos para valores monetários positivos/negativos e erros.", "section": "colors" },
+      { "name": "The Plain Language Rule", "body": "Títulos em português direto; evitar siglas sem expansão na primeira ocorrência.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Superfícies em repouso são planas ou com elevação mínima. Sombras coloridas e gradientes são exceções, não vocabulário base.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do usar Theme.of(context).colorScheme para cores",
+      "Do manter padding de 16px como unidade base em cards e telas com scroll",
+      "Do exibir DisclaimerWidget em home, formulário e resultado",
+      "Do usar Semantics em cards e ações principais",
+      "Do formatar valores com Formatters.formatCurrency consistentemente"
+    ],
+    "donts": [
+      "Don't usar gradientes decorativos em cards de conteúdo",
+      "Don't replicar o visual de apps genéricos de finanças",
+      "Don't densificar como site governamental",
+      "Don't colocar anúncios ou upsell no caminho crítico entre calcular e ver o resultado",
+      "Don't usar border-left colorido como acento em list items ou alertas"
+    ]
+  }
+}

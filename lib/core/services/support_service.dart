@@ -1,9 +1,8 @@
 import 'package:url_launcher/url_launcher.dart';
 import '../utils/pro_utils.dart';
+import '../constants/app_constants.dart';
 
 class SupportService {
-  static const String _supportEmail = 'suporte@calcrescisao.com';
-  static const String _proSupportEmail = 'pro@calcrescisao.com';
   static const String _supportSubject = 'Suporte - Calculadora de Rescisão CLT';
   static const String _proSupportSubject = 'Suporte PRO - Calculadora de Rescisão CLT';
 
@@ -18,7 +17,7 @@ class SupportService {
   }
 
   static Future<void> _openProSupport() async {
-    final email = _proSupportEmail;
+    final email = AppConstants.proSupportEmail;
     final subject = _proSupportSubject;
     final body = '''
 Olá! Sou um usuário PRO da Calculadora de Rescisão CLT.
@@ -30,7 +29,7 @@ Informações do dispositivo:
 - Dispositivo: [modelo]
 - Sistema operacional: [Android/iOS]
 
-Aguardo retorno em até 24h conforme prometido no plano PRO.
+Aguardo retorno em até ${AppConstants.proSupportResponseHours}h conforme prometido no plano PRO.
 
 Obrigado!
 ''';
@@ -47,7 +46,7 @@ Obrigado!
   }
 
   static Future<void> _openBasicSupport() async {
-    final email = _supportEmail;
+    final email = AppConstants.supportEmail;
     final subject = _supportSubject;
     final body = '''
 Olá! Tenho uma dúvida sobre a Calculadora de Rescisão CLT.
@@ -80,7 +79,7 @@ Obrigado!
   static Future<void> openFeatureRequest() async {
     final isPro = await ProUtils.isProUser();
 
-    final email = isPro ? _proSupportEmail : _supportEmail;
+    final email = isPro ? AppConstants.proSupportEmail : AppConstants.supportEmail;
     final subject = isPro ? 'Sugestão de Funcionalidade PRO' : 'Sugestão de Funcionalidade';
     final body =
         '''

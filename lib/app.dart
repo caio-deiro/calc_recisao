@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/theme/app_theme.dart';
+import 'l10n/app_localizations.dart';
+import 'l10n/app_localizations_delegate.dart';
 import 'presentation/screens/splash/splash_screen.dart';
 
 class App extends StatelessWidget {
@@ -16,6 +18,7 @@ class App extends StatelessWidget {
       home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
       localizationsDelegates: const [
+        AppLocalizationsDelegate(),
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,

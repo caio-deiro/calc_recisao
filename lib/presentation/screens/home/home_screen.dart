@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import '../../../domain/entities/termination_type.dart';
 import '../../../core/ads/ad_manager.dart';
 import '../../../core/analytics/aso_analytics.dart';
+import '../../../core/constants/app_constants.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/pro_utils.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../widgets/termination_type_card.dart';
 import '../../widgets/disclaimer_widget.dart';
@@ -36,10 +39,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _checkProStatus() async {
-    final isPro = await ProUtils.isProUser();
-    setState(() {
-      _isPro = isPro;
-    });
+    final bool isPro = await ProUtils.isProUser();
+    if (!mounted) return;
+    setState(() => _isPro = isPro);
   }
 
   @override
@@ -49,31 +51,51 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadBannerAd() async {
-    _bannerAd = await AdManager.createBannerAd();
-    _bannerAd?.load();
+    final BannerAd? bannerAd = await AdManager.createBannerAd(
+      onLoaded: () {
+        if (mounted) setState(() {});
+      },
+    );
+    if (!mounted) return;
+    setState(() => _bannerAd = bannerAd);
+    bannerAd?.load();
   }
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations? l10n = AppLocalizations.of(context);
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calculadora de Rescisão CLT'),
+        title: Text(l10n?.homeTitle ?? 'Calculadora de Rescisão CLT'),
         actions: [
           IconButton(
+            tooltip: 'Ver histórico de cálculos',
             icon: const Icon(Icons.history),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const HistoryScreen())),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const HistoryScreen()),
+            ),
           ),
           IconButton(
+            tooltip: l10n?.proTitle ?? 'Versão PRO',
             icon: const Icon(Icons.star),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ProScreen())),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const ProScreen()),
+            ),
           ),
           IconButton(
+            tooltip: l10n?.supportTitle ?? 'Suporte',
             icon: const Icon(Icons.help_outline),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SupportScreen())),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const SupportScreen()),
+            ),
           ),
           IconButton(
+            tooltip: l10n?.aboutTitle ?? 'Sobre',
             icon: const Icon(Icons.info_outline),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AboutScreen())),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const AboutScreen()),
+            ),
           ),
         ],
       ),
@@ -85,88 +107,129 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Escolha o tipo de rescisão:',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  if (!_isPro) ...[_buildProUpgradeCard(), const SizedBox(height: 16)],
-                  ...TerminationType.values.map(
-                    (type) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: TerminationTypeCard(type: type, onTap: () => _navigateToForm(context, type)),
+                  Text(
+                    l10n?.chooseTerminationType ?? 'Escolha o tipo de rescisão:',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  ...TerminationType.values.map(
+                    (TerminationType type) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: TerminationTypeCard(
+                        type: type,
+                        onTap: () => _navigateToForm(context, type),
+                      ),
+                    ),
+                  ),
+                  if (!_isPro) ...[
+                    const SizedBox(height: 4),
+                    _buildProUpgradeCard(colorScheme),
+                  ],
                   const SizedBox(height: 24),
                   const DisclaimerWidget(),
                 ],
               ),
             ),
           ),
-          if (_bannerAd != null) _buildBannerAd(),
+          if (_bannerAd != null) _buildBannerAd(colorScheme),
         ],
       ),
     );
   }
 
-  Widget _buildBannerAd() {
-    if (_bannerAd == null) return const SizedBox.shrink();
-
-    return SizedBox(
-      width: _bannerAd!.size.width.toDouble(),
-      height: _bannerAd!.size.height.toDouble(),
-      child: AdWidget(ad: _bannerAd!),
+  Widget _buildBannerAd(ColorScheme colorScheme) {
+    final BannerAd bannerAd = _bannerAd!;
+    return ColoredBox(
+      color: colorScheme.surfaceContainerLow,
+      child: SizedBox(
+        width: double.infinity,
+        height: bannerAd.size.height.toDouble(),
+        child: Center(
+          child: SizedBox(
+            width: bannerAd.size.width.toDouble(),
+            height: bannerAd.size.height.toDouble(),
+            child: AdWidget(ad: bannerAd),
+          ),
+        ),
+      ),
     );
   }
 
-  Widget _buildProUpgradeCard() {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.blue.shade600, Colors.blue.shade800],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.blue.shade200, blurRadius: 8, offset: const Offset(0, 4))],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
+  Widget _buildProUpgradeCard(ColorScheme colorScheme) {
+    final String formattedPrice = AppConstants.proMonthlyPrice.toStringAsFixed(2).replaceAll('.', ',');
+    return Semantics(
+      label: 'Upgrade para PRO. R\$ $formattedPrice por mês. Sem anúncios, exportação PDF e histórico ilimitado.',
+      button: true,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [colorScheme.primary, AppTheme.primaryDeep],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           borderRadius: BorderRadius.circular(12),
-          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ProScreen())),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.primary.withValues(alpha: 0.25),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const ProScreen()),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: colorScheme.onPrimary.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Icon(Icons.star, color: colorScheme.onPrimary, size: 24),
+                    ),
                   ),
-                  child: const Icon(Icons.star, color: Colors.white, size: 24),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Upgrade para PRO',
-                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'R\$ 4,90/mês • Sem anúncios • PDF • Histórico ilimitado',
-                        style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 12),
-                      ),
-                    ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Upgrade para PRO',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: colorScheme.onPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'R\$ $formattedPrice/mês · Sem anúncios · PDF · Histórico ilimitado',
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: colorScheme.onPrimary.withValues(alpha: 0.9),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                Icon(Icons.arrow_forward_ios, color: Colors.white.withValues(alpha: 0.8), size: 16),
-              ],
+                  Icon(
+                    Icons.chevron_right,
+                    color: colorScheme.onPrimary.withValues(alpha: 0.8),
+                    size: 24,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -175,6 +238,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _navigateToForm(BuildContext context, TerminationType type) {
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => FormScreen(terminationType: type)));
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => FormScreen(terminationType: type)),
+    );
   }
 }

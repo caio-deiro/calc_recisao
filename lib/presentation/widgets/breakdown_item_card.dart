@@ -9,43 +9,53 @@ class BreakdownItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(item.description, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  if (item.details != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      item.details!,
-                      style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                    ),
+    final valueLabel = item.isAddition
+        ? 'Adição de ${Formatters.formatCurrency(item.value)}'
+        : 'Desconto de ${Formatters.formatCurrency(item.value)}';
+    
+    return Semantics(
+      label: '${item.description}. ${item.details ?? ''}. $valueLabel',
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(item.description, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    if (item.details != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        item.details!,
+                        style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      ),
+                    ],
                   ],
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: item.isAddition ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: item.isAddition ? Colors.green : Colors.red, width: 1),
-              ),
-              child: Text(
-                '${item.isAddition ? '+' : '-'} ${Formatters.formatCurrency(item.value)}',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: item.isAddition ? Colors.green : Colors.red,
                 ),
               ),
-            ),
-          ],
+              Semantics(
+                label: valueLabel,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: item.isAddition ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: item.isAddition ? Colors.green : Colors.red, width: 1),
+                  ),
+                  child: Text(
+                    '${item.isAddition ? '+' : '-'} ${Formatters.formatCurrency(item.value)}',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: item.isAddition ? Colors.green : Colors.red,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

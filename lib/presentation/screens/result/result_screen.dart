@@ -8,6 +8,9 @@ import '../../../data/repositories/history_repository.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/share_utils.dart';
 import '../../../core/utils/pro_utils.dart';
+import '../../../core/utils/logger.dart';
+import '../../../core/exceptions/app_exceptions.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/ads/ad_manager.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../widgets/disclaimer_widget.dart';
@@ -45,36 +48,53 @@ class _ResultScreenState extends State<ResultScreen> {
       _isLoading = true;
     });
 
-    // Simular cálculo (em produção, seria assíncrono)
-    Future.delayed(const Duration(milliseconds: 500), () async {
-      final useCase = const CalculateTerminationUseCase();
-      final result = useCase.execute(widget.input, widget.terminationType);
-
-      // Salvar no histórico
+    // Calcular de forma assíncrona
+    Future.delayed(AppConstants.calculationDelay, () async {
       try {
-        final historyRepository = HistoryRepository();
-        final calculationHistory = CalculationHistory(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          input: widget.input,
-          result: result,
-          terminationType: widget.terminationType,
-          timestamp: DateTime.now(),
-        );
-        await historyRepository.saveCalculation(calculationHistory);
-      } catch (e) {
-        // Log error but don't interrupt the user flow
-        debugPrint('Erro ao salvar no histórico: $e');
+        final useCase = const CalculateTerminationUseCase();
+        final result = useCase.execute(widget.input, widget.terminationType);
+
+        // Salvar no histórico
+        try {
+          final historyRepository = HistoryRepository();
+          final calculationHistory = CalculationHistory(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            input: widget.input,
+            result: result,
+            terminationType: widget.terminationType,
+            timestamp: DateTime.now(),
+          );
+          await historyRepository.saveCalculation(calculationHistory);
+        } catch (e, stackTrace) {
+          // Log error but don't interrupt the user flow
+          AppLogger.warning('Erro ao salvar no histórico', e, stackTrace);
+        }
+
+        setState(() {
+          _result = result;
+          _isLoading = false;
+        });
+
+        // Mostrar anúncio intersticial após o cálculo
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          AdManager.showInterstitialAd();
+        });
+      } catch (e, stackTrace) {
+        AppLogger.error('Erro ao calcular rescisão', e, stackTrace);
+        setState(() {
+          _isLoading = false;
+        });
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(e is AppException ? e.message : 'Erro ao calcular rescisão. Tente novamente.'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        }
       }
-
-      setState(() {
-        _result = result;
-        _isLoading = false;
-      });
-
-      // Mostrar anúncio intersticial após o cálculo
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        AdManager.showInterstitialAd();
-      });
     });
   }
 

@@ -137,8 +137,8 @@ void main() {
         final result = useCase.execute(input, TerminationType.withoutJustCause);
         final thirteenthSalary = result.additions.where((item) => item.description.contains('13º Salário')).first;
 
-        // 5 meses trabalhados: (3000 + 500) * 5/12 = 1458.33
-        expect(thirteenthSalary.value, closeTo(1458.33, 0.01));
+        // 6 meses trabalhados (jan-jun, junho conta porque >= 15 dias): (3000 + 500) * 6/12 = 1750.0
+        expect(thirteenthSalary.value, closeTo(1750.0, 0.01));
       });
     });
   });

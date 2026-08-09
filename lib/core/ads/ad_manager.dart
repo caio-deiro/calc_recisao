@@ -3,16 +3,16 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'ad_ids.dart';
 import '../utils/pro_utils.dart';
+import '../constants/app_constants.dart';
 
 class AdManager {
   static const String _lastInterstitialKey = 'last_interstitial_time';
-  static const int _interstitialCooldownMinutes = 3;
 
   static Future<void> initialize() async {
     await MobileAds.instance.initialize();
   }
 
-  static Future<BannerAd?> createBannerAd() async {
+  static Future<BannerAd?> createBannerAd({VoidCallback? onLoaded}) async {
     final shouldShowAds = await ProUtils.shouldShowAds();
     if (!shouldShowAds) return null;
 
@@ -21,7 +21,10 @@ class AdManager {
       size: AdSize.banner,
       request: const AdRequest(),
       listener: BannerAdListener(
-        onAdLoaded: (ad) => debugPrint('Banner ad loaded'),
+        onAdLoaded: (ad) {
+          debugPrint('Banner ad loaded');
+          onLoaded?.call();
+        },
         onAdFailedToLoad: (ad, error) {
           ad.dispose();
           debugPrint('Banner ad failed to load: $error');
@@ -40,7 +43,7 @@ class AdManager {
       final now = DateTime.now().millisecondsSinceEpoch;
       final minutesSinceLastAd = (now - lastTime) / (1000 * 60);
 
-      if (minutesSinceLastAd < _interstitialCooldownMinutes) {
+      if (minutesSinceLastAd < AppConstants.interstitialAdCooldownMinutes) {
         return null;
       }
 

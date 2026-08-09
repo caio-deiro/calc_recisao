@@ -1,6 +1,7 @@
 {
   "inss_2025": {
     "description": "Tabela INSS 2025 - Alíquotas progressivas",
+    "teto": 8157.41,
     "faixas": [
       {
         "limite": 1518.00,
@@ -21,6 +22,32 @@
         "limite": 8157.41,
         "aliquota": 0.14,
         "descricao": "De R$ 4.190,84 até R$ 8.157,41"
+      }
+    ]
+  },
+  "inss_2026": {
+    "description": "Tabela INSS 2026 - Portaria MPS/MF nº 13/2026",
+    "teto": 8475.55,
+    "faixas": [
+      {
+        "limite": 1621.00,
+        "aliquota": 0.075,
+        "descricao": "Até R$ 1.621,00"
+      },
+      {
+        "limite": 2902.84,
+        "aliquota": 0.09,
+        "descricao": "De R$ 1.621,01 até R$ 2.902,84"
+      },
+      {
+        "limite": 4354.27,
+        "aliquota": 0.12,
+        "descricao": "De R$ 2.902,85 até R$ 4.354,27"
+      },
+      {
+        "limite": 8475.55,
+        "aliquota": 0.14,
+        "descricao": "De R$ 4.354,28 até R$ 8.475,55"
       }
     ]
   },
@@ -93,6 +120,94 @@
         "descricao": "Acima de R$ 4.664,68"
       }
     ]
+  },
+  "irrf_2026_mensal": {
+    "description": "Tabela IRRF 2026 mensal - Receita Federal",
+    "faixas": [
+      {
+        "limite": 2428.80,
+        "aliquota": 0.0,
+        "deducao": 0.0,
+        "descricao": "Até R$ 2.428,80"
+      },
+      {
+        "limite": 2826.65,
+        "aliquota": 0.075,
+        "deducao": 182.16,
+        "descricao": "De R$ 2.428,81 até R$ 2.826,65"
+      },
+      {
+        "limite": 3751.05,
+        "aliquota": 0.15,
+        "deducao": 394.16,
+        "descricao": "De R$ 2.826,66 até R$ 3.751,05"
+      },
+      {
+        "limite": 4664.68,
+        "aliquota": 0.225,
+        "deducao": 675.49,
+        "descricao": "De R$ 3.751,06 até R$ 4.664,68"
+      },
+      {
+        "limite": 999999.99,
+        "aliquota": 0.275,
+        "deducao": 908.73,
+        "descricao": "Acima de R$ 4.664,68"
+      }
+    ]
+  },
+  "irrf_2026_anual": {
+    "description": "Tabela IRRF 2026 anual - 13º e férias na rescisão",
+    "faixas": [
+      {
+        "limite": 29145.60,
+        "aliquota": 0.0,
+        "deducao": 0.0,
+        "descricao": "Até R$ 29.145,60"
+      },
+      {
+        "limite": 33919.80,
+        "aliquota": 0.075,
+        "deducao": 2185.92,
+        "descricao": "De R$ 29.145,61 até R$ 33.919,80"
+      },
+      {
+        "limite": 45012.60,
+        "aliquota": 0.15,
+        "deducao": 4729.91,
+        "descricao": "De R$ 33.919,81 até R$ 45.012,60"
+      },
+      {
+        "limite": 55976.16,
+        "aliquota": 0.225,
+        "deducao": 8105.85,
+        "descricao": "De R$ 45.012,61 até R$ 55.976,16"
+      },
+      {
+        "limite": 999999.99,
+        "aliquota": 0.275,
+        "deducao": 10904.66,
+        "descricao": "Acima de R$ 55.976,16"
+      }
+    ]
+  },
+  "irrf_redutor_2026": {
+    "description": "Redutor IRRF Lei 15.270/2025",
+    "deducao_dependente_mensal": 189.59,
+    "mensal": {
+      "limite_isencao": 5000.00,
+      "reducao_maxima": 312.89,
+      "limite_reducao_gradual": 7350.00,
+      "formula_constante": 978.62,
+      "formula_coeficiente": 0.133145
+    },
+    "anual": {
+      "limite_isencao": 60000.00,
+      "reducao_maxima": 2694.15,
+      "limite_reducao_gradual": 88200.00,
+      "formula_constante": 8429.73,
+      "formula_coeficiente": 0.095575
+    }
   },
   "fgts": {
     "aliquota": 0.08,

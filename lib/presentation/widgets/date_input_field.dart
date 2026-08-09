@@ -27,16 +27,28 @@ class DateInputField extends StatefulWidget {
 class _DateInputFieldState extends State<DateInputField> {
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: widget.controller,
-      decoration: InputDecoration(
-        labelText: widget.label,
-        hintText: 'dd/mm/aaaa',
-        suffixIcon: IconButton(icon: const Icon(Icons.calendar_today), onPressed: () => _selectDate(context)),
+    return Semantics(
+      label: widget.label,
+      hint: 'Digite a data no formato dia, mês e ano',
+      textField: true,
+      child: TextFormField(
+        controller: widget.controller,
+        decoration: InputDecoration(
+          labelText: widget.label,
+          hintText: 'dd/mm/aaaa',
+          suffixIcon: Semantics(
+            label: 'Abrir seletor de data',
+            button: true,
+            child: IconButton(
+              icon: const Icon(Icons.calendar_today),
+              onPressed: () => _selectDate(context),
+            ),
+          ),
+        ),
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly, _DateInputFormatter()],
+        validator: widget.validator,
       ),
-      keyboardType: TextInputType.number,
-      inputFormatters: [FilteringTextInputFormatter.digitsOnly, _DateInputFormatter()],
-      validator: widget.validator,
     );
   }
 

@@ -19,7 +19,6 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "com.caiodeiro.calcclt"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -51,6 +50,15 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
+        }
+    }
+
+    // Suporte a tamanhos de página de 16 KB
+    // Desativa o empacotamento legado para garantir alinhamento correto de bibliotecas nativas (.so)
+    // Isso é necessário para suportar dispositivos com páginas de 16 KB (requisito do Google Play a partir de nov/2025)
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
         }
     }
 }
