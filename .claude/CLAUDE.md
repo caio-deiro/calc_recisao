@@ -9,6 +9,8 @@ Este arquivo é um **índice**: aponta onde está cada informação. Não dupliq
 |---|---|
 | Stack, camadas, fluxo de dados, convenções, dívidas técnicas | `docs/ARCHITECTURE.md` |
 | Por que o app existe, regras de negócio, escopo, modelo de negócio, decisões de produto (Q1–Q28), plano de execução | `docs/PROJECT.md` |
+| Fatiamento técnico do PRD em blocos (IDs `B<n>-<nn>`) | `docs/SPECS.md` |
+| Quanto do SPECS já foi entregue pelo pipeline (**gerado**, não edite) | `docs/PROGRESS.md` (`python scripts/specs_progress.py`) |
 | Tom, personalidade e princípios de experiência | `PRODUCT.md` |
 | Tokens e componentes visuais | `DESIGN.md` |
 | Specs de compliance (target SDK, Play Billing) | `openspec/specs/` |
