@@ -24,4 +24,5 @@ Este arquivo é um **índice**: aponta onde está cada informação. Não dupliq
 
 ## Regras
 
+- **Princípios de engenharia** (KISS, YAGNI, DRY, escopo): `.claude/rules/principios.md`, carregado automaticamente em toda sessão.
 - **Hooks ativos** (`.claude/settings.json`, scripts em `.claude/hooks/`): `.dart` editado é formatado e analisado (erros/warnings voltam); `assets/config/tax_tables.json` é validado a cada edição; segredos (`key.properties`, keystore, `.env`, configs de serviço) estão bloqueados. Se um hook negar algo, não contorne: peça ao usuário.

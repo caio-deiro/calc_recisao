@@ -33,6 +33,7 @@ flutter test
 
 ### 4. Qualidade e regras do projeto (skill `flutter-conventions`)
 - Lógica de negócio fora do `State`; `mounted` após `await`; `dispose` de controllers.
+- **Simplicidade** (`.claude/rules/principios.md`): o diff introduz abstração, parâmetro, camada, dependência ou padrão que a spec não pediu? Há lógica de negócio ou constante duplicada em mais de um lugar? Há código morto deixado para trás? Trate o excesso como **sugestão**, e como **bloqueador** só se adiciona dependência/padrão novo sem aprovação ou duplica uma regra de negócio.
 - Sem dado pessoal em log, evento ou crash; sem `print` com dado do usuário.
 - Sem segredo no diff (chaves, keystore, `.env`).
 - Anúncios: nenhum antes do resultado; intersticial só ao sair do Resultado, com limites (PRD §8).
