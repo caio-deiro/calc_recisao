@@ -291,7 +291,7 @@ Não é código de app, mas gate de publicação. Itens fora do repositório de 
 | B7-01 | **Política de privacidade** reescrita: AdMob (ID de publicidade), Analytics/Crashlytics sob consentimento, ausência de dado pessoal no cálculo. Hoje afirma "não coleta dados". | `README.md` (página do GitHub Pages) |
 | B7-02 | **Data Safety** da Play alinhada a B7-01 e declaração **"contém anúncios"**. | Play Console |
 | B7-03 | **Desativar** o produto `calc_recisao_pro_monthly` (sem assinantes). | Play Console |
-| B7-04 | Listagem da loja sem qualquer menção a PRO, PDF "exclusivo" ou histórico "ilimitado". | `google-play-assets/app-listing-info.md` |
+| B7-04 | Listagem da loja sem qualquer menção a PRO, PDF "exclusivo" ou histórico "ilimitado". | Play Console |
 | B7-05 | Confirmar e unificar o e-mail de contato (política × app). | `README.md`, `AppConstants.supportEmail` |
 | B7-06 | **Manutenção anual** das tabelas (checklist do PRD §13): JSON, teste do ano, listagem. | `assets/config/tax_tables.json` |
 | B7-07 | Specs de compliance Android (`android-target-sdk`, 16 KB) preservadas; prazo da Play 31/08/2026 já atendido. | `openspec/` |

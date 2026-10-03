@@ -502,4 +502,3 @@ desativar o produto `calc_recisao_pro_monthly` no Play Console.
 | [`../PRODUCT.md`](../PRODUCT.md) | Registro, personalidade de marca, princípios de design |
 | [`../DESIGN.md`](../DESIGN.md) | Tokens e componentes de design |
 | `../openspec/specs/` | Specs de compliance (target SDK; `play-billing` será arquivada na change 1) |
-| `../google-play-assets/` | Material de listagem da loja |

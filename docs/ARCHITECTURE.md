@@ -259,10 +259,9 @@ limpo, `flutter test` verde. Mudança de regra trabalhista exige citar a base le
 - 🎯 **Billing Library:** a exigência deixa de valer quando `in_app_purchase*` for removido. Até lá,
   vem do plugin `in_app_purchase_android`; **não** fixar versão no Gradle (spec `play-billing`).
 - Produto PRO (a **desativar no Play Console**; não há assinantes): ID `calc_recisao_pro_monthly`. Configuração de console
-  (assinatura, testadores, compliance de SDK/16 KB) está resumida acima e nas specs do OpenSpec; assets de listagem em `google-play-assets/`.
+  (assinatura, testadores, compliance de SDK/16 KB) está resumida acima e nas specs do OpenSpec.
 - Fluxo **spec-driven** com OpenSpec: mudanças de compliance entram em `openspec/changes/<nome>` e,
   ao serem arquivadas, viram `openspec/specs/<capability>/spec.md`.
-- ⚠️ Artefatos soltos na raiz (`build_release_log*.txt`, `build_stack.txt`) não devem ser versionados.
 
 ### Dívidas técnicas conhecidas
 
