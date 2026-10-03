@@ -132,10 +132,3 @@ flutter_launcher_icons:
     - name: "ic_launcher"
       density: "xxxhdpi"
       size: 192
-  web:
-    generate: true
-    image_path: "assets/icons/android_icon.png"
-    background_color: "#1976D2"
-    theme_color: "#1976D2"
-
-
