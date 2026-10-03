@@ -83,6 +83,7 @@ Verificação: analyze <...> | testes <n/n> | E2E <n/n ou n/a> | openspec valida
 
 Bloqueadores (só se reprovado):
 1. <arquivo:linha> — <o que está errado> — <por quê importa> — <como verificar a correção>
+   Regra que faltou: <regra ignorada/ambígua (arquivo + trecho) | texto proposto + destino | nenhuma: erro pontual>
 
 Sugestões: <lista ou nenhuma>
 Pendências para o usuário (⚖️, produto): <lista ou nenhuma>

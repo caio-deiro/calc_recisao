@@ -58,6 +58,7 @@ Verificação: analyze <ok|n erros> | testes <n/n> | E2E <n/n ou n/a> | openspec
 
 Bloqueadores (só se reprovado):
 1. <arquivo:linha> — <o que está errado> — <por quê importa> — <como verificar que foi corrigido>
+   Regra que faltou: <regra existente ignorada (arquivo + trecho) | texto proposto para regra nova + onde entra>
 2. ...
 
 Sugestões:
@@ -67,6 +68,9 @@ Pendências para o usuário (⚖️, dúvidas de produto):
 - ...
 ```
 O feedback é **numerado, específico e verificável**: o executor deve conseguir agir sem perguntar. Não reabra o que já foi aprovado em rodada anterior, a menos que uma correção o tenha quebrado.
+
+### Regra que faltou (melhoria contínua do harness)
+Todo bloqueador diz **por que o executor errou**: a regra existia e foi ignorada, estava ambígua, ou não existia. Destino da regra: `.claude/rules/`, uma skill, ou `.claude/agents/executor.md`. Cite o trecho exato (se existe) ou escreva o texto proposto (se não existe). Erro de execução isolado, sem falha de regra (ex.: typo), diga "nenhuma: erro pontual". O reviewer **não edita** o harness; só propõe. O orquestrador aplica (ver `orchestrate`, seção 2).
 
 ## Depois do veredito
 - **Reprovado:** entregue o feedback ao orquestrador, que o repassa ao executor sem alterações.

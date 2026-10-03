@@ -36,8 +36,10 @@ planner  →  [checkpoint humano: plano]  →  executor  →  reviewer
 2. **Checkpoint:** mostre ao usuário o resumo da change e peça "ok" antes de executar. A spec define tudo o que vem depois; corrigir aqui é barato, depois é caro. Se as questões em aberto envolverem regra trabalhista (⚖️), elas voltam ao usuário, nunca se resolvem por palpite.
 3. **Executor** implementa a change (skills `flutter-conventions` e `calc-rules`), roda `flutter analyze` e os testes unitários e de widget, e marca as tasks. Entrega: relatório curto.
 4. **Reviewer** valida (skills `review-checklist` e `maestro-e2e`): critérios de aceite, testes, E2E, documentação. Veredito: **APROVADO** ou **REPROVADO** com feedback numerado.
-5. **Reprovado:** devolva o feedback do reviewer ao executor, **inalterado** (não reinterprete). Conte a rodada.
+5. **Reprovado:** devolva o feedback do reviewer ao executor, **inalterado** (não reinterprete). Conte a rodada. Retire a linha "Regra que faltou" de cada item antes de repassar (é para você, não para o executor) e guarde-as para o passo 7.
 6. **Aprovado:** o reviewer **prepara** commit e PR (staging local, mensagem e corpo do PR; skill `pr-and-commit`), mas **não tem permissão** de commitar nem publicar. Você apresenta a proposta ao usuário e, **só com o "sim" explícito dele, a cada ação**, executa `git commit`, `git push` e `gh pr create` na sessão principal.
+
+7. **Melhoria do harness** (ao aprovar ou ao parar no teto): reúna as "Regra que faltou" de todas as rodadas, junte as repetidas e mostre ao usuário só as que propõem regra nova ou reforço. Com o "sim" dele, edite o destino (`.claude/rules/`, skill ou agente) e commite à parte: `chore(harness): <regra>`. Sem documento de registro: o `git log` de `.claude/` é o histórico. Não edite o harness sem aprovação.
 
 ### Teto de 3 rodadas
 Rodada = um ciclo executor → reviewer. Se a 3ª terminar reprovada, **pare**. Entregue ao usuário: o que foi tentado, o que continua falhando e sua hipótese da causa. Não tente uma 4ª rodada por conta própria; falhas repetidas costumam ser spec ambígua ou premissa errada, e isso é decisão humana.
