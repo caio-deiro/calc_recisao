@@ -1,6 +1,6 @@
 ---
 name: pr-and-commit
-description: Prepara commit e pull request estruturados para uma change aprovada neste projeto (branch, staging seletivo, mensagem, corpo do PR com testes e riscos) e só publica com confirmação explícita do usuário. Cobre também a leitura do retorno do Cubic depois do PR. Use sempre que o usuário pedir "commite", "faça o commit", "abra o PR", "suba isso", ao fechar o laço de revisão com veredito APROVADO, ou ao tratar comentários de review num PR. Nunca faz push, PR ou merge sem confirmação humana.
+description: Prepara commit e pull request estruturados para uma change aprovada neste projeto (branch, staging seletivo, mensagem, corpo do PR com testes e riscos) e só publica com confirmação explícita do usuário. Cobre também o tratamento de comentários de review depois do PR. Use sempre que o usuário pedir "commite", "faça o commit", "abra o PR", "suba isso", ao fechar o laço de revisão com veredito APROVADO, ou ao tratar comentários de review num PR. Nunca faz push, PR ou merge sem confirmação humana.
 ---
 
 # Commit e PR
@@ -79,8 +79,8 @@ Use `gh pr create --title "..." --body-file <arquivo>` (escreva o corpo em arqui
 ## 6. Depois do PR
 Se o ambiente tiver ferramentas de PR (`ccd_pr`), use `get_status` e, se o PR não estiver vinculado, `bind_pr`. **Não faça polling de CI** nem agende verificações.
 
-### Cubic (revisão na nuvem)
-O Cubic revisa o PR de forma **assíncrona**, depois que ele existe; não faz parte do mesmo laço. Quando o usuário trouxer o retorno ou pedir para tratá-lo:
+### Comentários de review no PR
+A revisão externa do PR é **assíncrona**, depois que ele existe; não faz parte do mesmo laço. Quando o usuário trouxer o retorno ou pedir para tratá-lo:
 ```bash
 gh pr view <n> --comments
 gh api repos/{owner}/{repo}/pulls/<n>/comments
