@@ -1,0 +1,5 @@
+# Gate de publicacao (B6-05): pulado na execucao padrao de `flutter test`.
+# Rodar antes de publicar: flutter test --tags release-gate --run-skipped
+tags:
+  release-gate:
+    skip: "gate de publicacao: rode com --tags release-gate --run-skipped"

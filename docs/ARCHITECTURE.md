@@ -236,6 +236,7 @@ removidas no boot por `LegacyCleanup` (idempotente).
 | `test/unit/` | Regras de cálculo (`calculate_termination`, `edge_cases`, `termination_2026`, `comprehensive_termination_review`), validação, repositório (FIFO de 100), limpeza legada, `AdManager`, analytics, PDF, logger, onboarding |
 | `test/widget/` | Onboarding, banner por tela, aviso de histórico cheio, aviso de consentimento |
 | `test/integration/` | Fluxo de cálculo ponta a ponta |
+| `test/golden/` | Infra de casos golden (B6): `cases/*.json` (oráculo externo, um arquivo por caso), `support/` (loader, comparador, `goldenTolerance`, mapa provisório `codeOf`), `golden_test.dart` (runner único), `validation_status.dart` (regras ⚖️ pendentes), `coverage_test.dart` (gate `release-gate`). Hoje sem casos reais (pendência B6-06) |
 | `test/mocks`, `test_helpers/` | Setup de `SharedPreferences` |
 
 Comandos:
@@ -245,7 +246,14 @@ flutter pub get
 flutter analyze          # lints: flutter_lints (analysis_options.yaml)
 flutter test             # toda a suíte
 flutter test test/unit/termination_2026_test.dart   # um arquivo
+flutter test --tags release-gate --run-skipped      # gate de cobertura golden (B6-05)
 ```
+
+**Checklist de publicação:** antes de publicar a change B2 (e os exemplos de contador antes de B3/B4),
+rodar `flutter test --tags release-gate --run-skipped`. Ele fica fora do `flutter test` padrão
+(`dart_test.yaml`) e falha enquanto faltar caso golden na matriz (tipos de rescisão, C1–C5, regras ⚖️).
+Caso golden só entra com `fonte` (TRCT, calculadora oficial gov.br/MTE com URL e data, ou exemplo de contador);
+o esperado nunca vem da saída do app. Dica: `flutter test --concurrency=1` se o compilador cair por memória.
 
 **Definição de pronto para mudanças em cálculo:** teste novo cobrindo o caso, `flutter analyze`
 limpo, `flutter test` verde. Mudança de regra trabalhista exige citar a base legal no commit/PR.
