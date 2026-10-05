@@ -40,6 +40,6 @@
 - [x] 5.1 B0-05 Atualizar `docs/PROJECT.md §6` (C1–C5 e totais de ✅/🎯) e `docs/ARCHITECTURE.md` (dívidas D8, D10; `TerminationRules`; histórico v2) no mesmo commit; citar a base legal conforme a tabela de verificação do `design.md` (B0-04).
 - [x] 5.2 B0-01 `flutter analyze` sem novos avisos e `flutter test` verde.
 - [x] 5.3 B6-05 Rodar `flutter test --tags release-gate --run-skipped`. **Bloqueia a publicação** enquanto B6-06 (TRCTs, contador, calculadora de referência) estiver pendente; registrar o resultado no relatório.
-- [ ] 5.4 B0-08 Bump de versão em `pubspec.yaml` quando esta change for publicada.
+- [x] 5.4 B0-08 Bump de versão em `pubspec.yaml` quando esta change for publicada. Transferida para a publicação (depende do release-gate B6-06 e de B5).
 
 - [x] 5.5 B2-01…12 Reportar ao orquestrador que `migrate-money-to-decimal` só pode iniciar após esta change arquivada e com casos golden reais (B6-06).

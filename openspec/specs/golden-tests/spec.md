@@ -25,7 +25,7 @@ Cada caso golden MUST ser um arquivo `test/golden/cases/*.json` contendo `id`, `
 - **THEN** o loader MUST falhar com o code inválido na mensagem
 
 ### Requirement: Single golden runner
-Um único `test/golden/golden_test.dart` MUST carregar todos os casos de `test/golden/cases/` e comparar cada verba e cada total suportado, usando a constante única `goldenTolerance`, igual a 0,01 antes de B2-13 e 0,00 depois. Verba produzida pelo app e ausente do esperado MUST falhar o caso se o valor for diferente de zero. Item do resultado sem mapeamento de code MUST falhar o teste com a descrição do item. Campo de entrada ou total ainda não suportado pelo app MUST ser pulado com motivo explícito, nunca em silêncio.
+Um único `test/golden/golden_test.dart` MUST carregar todos os casos de `test/golden/cases/` e comparar cada verba e cada total suportado, identificando a verba por `item.code.name`, usando a constante única `goldenTolerance`, igual a 0,01 até a change `migrate-money-to-decimal` (B2-13) e 0,00 depois. Verba produzida pelo app e ausente do esperado MUST falhar o caso se o valor for diferente de zero. Itens de `fgtsDeposit` MUST ser comparados como verbas e os totais `paidAtTermination` e `fgtsDeposit` MUST ser suportados. Campo de entrada ainda não suportado pelo app MUST ser pulado com motivo explícito, nunca em silêncio.
 
 #### Scenario: Value within tolerance passes
 - **WHEN** o comparador recebe 100,00 e 100,01 com tolerância 0,01
@@ -34,6 +34,10 @@ Um único `test/golden/golden_test.dart` MUST carregar todos os casos de `test/g
 #### Scenario: Extra verba fails
 - **WHEN** o app produz uma verba de valor 50,00 que o esperado não lista
 - **THEN** o caso MUST falhar apontando o code da verba
+
+#### Scenario: Totals of two kinds are compared
+- **WHEN** um caso traz `paidAtTermination` e `fgtsDeposit` em `totais`
+- **THEN** o runner MUST compará-los em vez de pulá-los
 
 #### Scenario: Unsupported input is skipped visibly
 - **WHEN** um caso traz `periodosFeriasGozados` e o app ainda não suporta o campo
@@ -53,17 +57,6 @@ O valor esperado MUST vir de documento externo citado em `fonte`; MUST NOT exist
 #### Scenario: No generator of expected values
 - **WHEN** se inspeciona `test/golden` por código que escreve em `test/golden/cases/`
 - **THEN** nenhum código MUST gravar nesse diretório
-
-### Requirement: Provisional verba mapping isolated
-Antes de B2-01, o runner MUST identificar verbas por uma única função `codeOf` em `test/golden/support/provisional_code_map.dart`, baseada na `description` atual, e nenhum outro arquivo MUST depender do texto de `description`. A change MUST NOT adicionar `BreakdownCode` a `lib/`.
-
-#### Scenario: Mapping covers current verbas
-- **WHEN** o use case calcula um caso que gera todas as verbas atuais
-- **THEN** `codeOf` MUST devolver um code válido para cada item
-
-#### Scenario: Unmapped description fails loudly
-- **WHEN** `codeOf` recebe uma descrição desconhecida
-- **THEN** MUST lançar erro com a descrição
 
 ### Requirement: Validation-pending rules registry
 O projeto MUST manter `test/golden/validation_status.dart` listando as regras ⚖️ sem caso golden com fonte (art. 479, art. 480, férias em dobro, projeção do aviso no acordo mútuo). Regra listada que chegue ao usuário MUST exibir a premissa "cálculo em validação" (`Assumption` de B2-10) até existir caso golden com fonte, e o gate de cobertura MUST acusar regra listada sem caso.
