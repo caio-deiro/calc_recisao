@@ -7,12 +7,12 @@
 
 ## Resumo
 
-**0/76 requisitos entregues (0%)**
+**22/76 requisitos entregues (29%)**
 
 | Estado | Requisitos |
 |---|--:|
-| 🚀 Entregue | 0 |
-| ✔ Implementado | 22 |
+| 🚀 Entregue | 22 |
+| ✔ Implementado | 0 |
 | 🔨 Em andamento | 0 |
 | 📋 Planejado | 0 |
 | 🎯 Sem plano | 54 |
@@ -21,8 +21,8 @@
 
 | Bloco | Título | Total | 🚀 | ✔ | 🔨 | 📋 | 🎯 | Entregue |
 |---|---|--:|--:|--:|--:|--:|--:|--:|
-| B0 | Convenções e pré-requisitos transversais | 8 | 0 | 5 | 0 | 0 | 3 | 0% |
-| B1 | Remoção do PRO e monetização só com AdMob | 17 | 0 | 17 | 0 | 0 | 0 | 0% |
+| B0 | Convenções e pré-requisitos transversais | 8 | 5 | 0 | 0 | 0 | 3 | 62% |
+| B1 | Remoção do PRO e monetização só com AdMob | 17 | 17 | 0 | 0 | 0 | 0 | 100% |
 | B2 | Núcleo de cálculo: modelo, correções e Decimal | 15 | 0 | 0 | 0 | 0 | 15 | 0% |
 | B3 | Períodos de férias e férias em dobro | 8 | 0 | 0 | 0 | 0 | 8 | 0% |
 | B4 | Contratos a prazo e rescisão indireta | 9 | 0 | 0 | 0 | 0 | 9 | 0% |
@@ -36,36 +36,36 @@
 
 | ID | Estado | Requisito | Changes |
 |---|---|---|---|
-| B0-01 | ✔ Implementado | flutter analyze sem novos avisos e flutter test verde antes de qualquer commi... | `remove-pro-ads-only` |
+| B0-01 | 🚀 Entregue | flutter analyze sem novos avisos e flutter test verde antes de qualquer commi... | `2026-10-04-remove-pro-ads-only` |
 | B0-02 | 🎯 Sem plano | Teste antes da regra: mudança em cálculo só entra com teste que a cubra (gold... | — |
-| B0-03 | ✔ Implementado | Nenhum dado pessoal em log, evento de analytics ou relatório de crash: sem sa... | `remove-pro-ads-only` |
+| B0-03 | 🚀 Entregue | Nenhum dado pessoal em log, evento de analytics ou relatório de crash: sem sa... | `2026-10-04-remove-pro-ads-only` |
 | B0-04 | 🎯 Sem plano | Base legal no commit: mudança de regra trabalhista/tributária cita artigo, sú... | — |
-| B0-05 | ✔ Implementado | Mudou camada, dependência, fluxo ou regra → atualizar docs/ARCHITECTURE.md e/... | `remove-pro-ads-only` |
-| B0-06 | ✔ Implementado | D3 — Firebase não é inicializado (main.dart não chama Firebase.initializeApp)... | `remove-pro-ads-only` |
+| B0-05 | 🚀 Entregue | Mudou camada, dependência, fluxo ou regra → atualizar docs/ARCHITECTURE.md e/... | `2026-10-04-remove-pro-ads-only` |
+| B0-06 | 🚀 Entregue | D3 — Firebase não é inicializado (main.dart não chama Firebase.initializeApp)... | `2026-10-04-remove-pro-ads-only` |
 | B0-07 | 🎯 Sem plano | Strings novas de UI vão em lib/l10n/app_localizations_pt.dart quando houver c... | — |
-| B0-08 | ✔ Implementado | Cada bloco sai como versão publicável pequena; pubspec.yaml ganha bump de ver... | `remove-pro-ads-only` |
+| B0-08 | 🚀 Entregue | Cada bloco sai como versão publicável pequena; pubspec.yaml ganha bump de ver... | `2026-10-04-remove-pro-ads-only` |
 
 ### B1 — Remoção do PRO e monetização só com AdMob
 
 | ID | Estado | Requisito | Changes |
 |---|---|---|---|
-| B1-01 | ✔ Implementado | Remover lib/core/services/purchase_service.dart, lib/core/services/offline_se... | `remove-pro-ads-only` |
-| B1-02 | ✔ Implementado | Remover todo acesso a ProUtils/PurchaseService/OfflineService. Pontos conheci... | `remove-pro-ads-only` |
-| B1-03 | ✔ Implementado | Remover de pubspec.yaml: in_app_purchase e in_app_purchase_android. Confirmar... | `remove-pro-ads-only` |
-| B1-04 | ✔ Implementado | Remover de AppConstants: proProductId, proMonthlyPrice, proSupportEmail, proS... | `remove-pro-ads-only` |
-| B1-05 | ✔ Implementado | Limpeza de dados legados: na primeira execução da nova versão, remover de Sha... | `remove-pro-ads-only` |
-| B1-06 | ✔ Implementado | Arquivar a spec openspec/specs/play-billing (a exigência deixa de valer). Man... | `remove-pro-ads-only` |
-| B1-07 | ✔ Implementado | Remover/ajustar testes: test/unit/pro_features_test.dart (apagar), ad_manager... | `remove-pro-ads-only` |
-| B1-08 | ✔ Implementado | PDF (PdfUtils/ShareUtils.exportToPdf/savePdfToFile) disponível para todos, se... | `remove-pro-ads-only` |
-| B1-09 | ✔ Implementado | AppConstants.maxHistorySize = 100. HistoryRepository.saveCalculation descarta... | `remove-pro-ads-only` |
-| B1-10a | ✔ Implementado | Banner adaptativo (AdSize ancorado adaptativo) fixo no rodapé nas telas Home,... | `remove-pro-ads-only` |
-| B1-10b | ✔ Implementado | Intersticial somente ao sair do Resultado (voltar à Home, ou ao concluir comp... | `remove-pro-ads-only` |
-| B1-10c | ✔ Implementado | Frequência: no máximo 1 a cada 3 min (persistir last_interstitial_time, ✅ exi... | `remove-pro-ads-only` |
-| B1-10d | ✔ Implementado | Sem anúncio recompensado; sem anúncio em Splash e Formulário (decisão Q16a). | `remove-pro-ads-only` |
-| B1-11 | ✔ Implementado | Aviso único após o primeiro resultado: formulário de consentimento do Google ... | `remove-pro-ads-only` |
-| B1-12 | ✔ Implementado | Analytics opt-in (firebase_analytics, reativar no pubspec). Coleta desligada ... | `remove-pro-ads-only` |
-| B1-13 | ✔ Implementado | Eventos permitidos (únicos): calc_completed{tipo_rescisao}, share_used, pdf_e... | `remove-pro-ads-only` |
-| B1-14 | ✔ Implementado | Anúncios não personalizados até o consentimento (AdRequest(nonPersonalizedAds... | `remove-pro-ads-only` |
+| B1-01 | 🚀 Entregue | Remover lib/core/services/purchase_service.dart, lib/core/services/offline_se... | `2026-10-04-remove-pro-ads-only` |
+| B1-02 | 🚀 Entregue | Remover todo acesso a ProUtils/PurchaseService/OfflineService. Pontos conheci... | `2026-10-04-remove-pro-ads-only` |
+| B1-03 | 🚀 Entregue | Remover de pubspec.yaml: in_app_purchase e in_app_purchase_android. Confirmar... | `2026-10-04-remove-pro-ads-only` |
+| B1-04 | 🚀 Entregue | Remover de AppConstants: proProductId, proMonthlyPrice, proSupportEmail, proS... | `2026-10-04-remove-pro-ads-only` |
+| B1-05 | 🚀 Entregue | Limpeza de dados legados: na primeira execução da nova versão, remover de Sha... | `2026-10-04-remove-pro-ads-only` |
+| B1-06 | 🚀 Entregue | Arquivar a spec openspec/specs/play-billing (a exigência deixa de valer). Man... | `2026-10-04-remove-pro-ads-only` |
+| B1-07 | 🚀 Entregue | Remover/ajustar testes: test/unit/pro_features_test.dart (apagar), ad_manager... | `2026-10-04-remove-pro-ads-only` |
+| B1-08 | 🚀 Entregue | PDF (PdfUtils/ShareUtils.exportToPdf/savePdfToFile) disponível para todos, se... | `2026-10-04-remove-pro-ads-only` |
+| B1-09 | 🚀 Entregue | AppConstants.maxHistorySize = 100. HistoryRepository.saveCalculation descarta... | `2026-10-04-remove-pro-ads-only` |
+| B1-10a | 🚀 Entregue | Banner adaptativo (AdSize ancorado adaptativo) fixo no rodapé nas telas Home,... | `2026-10-04-remove-pro-ads-only` |
+| B1-10b | 🚀 Entregue | Intersticial somente ao sair do Resultado (voltar à Home, ou ao concluir comp... | `2026-10-04-remove-pro-ads-only` |
+| B1-10c | 🚀 Entregue | Frequência: no máximo 1 a cada 3 min (persistir last_interstitial_time, ✅ exi... | `2026-10-04-remove-pro-ads-only` |
+| B1-10d | 🚀 Entregue | Sem anúncio recompensado; sem anúncio em Splash e Formulário (decisão Q16a). | `2026-10-04-remove-pro-ads-only` |
+| B1-11 | 🚀 Entregue | Aviso único após o primeiro resultado: formulário de consentimento do Google ... | `2026-10-04-remove-pro-ads-only` |
+| B1-12 | 🚀 Entregue | Analytics opt-in (firebase_analytics, reativar no pubspec). Coleta desligada ... | `2026-10-04-remove-pro-ads-only` |
+| B1-13 | 🚀 Entregue | Eventos permitidos (únicos): calc_completed{tipo_rescisao}, share_used, pdf_e... | `2026-10-04-remove-pro-ads-only` |
+| B1-14 | 🚀 Entregue | Anúncios não personalizados até o consentimento (AdRequest(nonPersonalizedAds... | `2026-10-04-remove-pro-ads-only` |
 
 ### B2 — Núcleo de cálculo: modelo, correções e Decimal
 
