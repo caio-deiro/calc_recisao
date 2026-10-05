@@ -1,15 +1,18 @@
 # Modelos de fluxo (calc_recisao)
 
-Pontos de partida. Os `id` abaixo são a **convenção alvo** (`<tela>_<elemento>`); ainda não existem no app. Confirme os reais com `inspect_screen` (MCP) ou `maestro hierarchy` e ajuste. Os textos de tela vêm do app em português.
+Pontos de partida. Os `id` abaixo são `Semantics.identifier` que já existem no app (convenção `<tela>_<elemento>`: `home_type_<tipo>` com o nome do enum, `form_admission_date`, `form_termination_date`, `form_base_salary`, `form_calculate_button`, `form_back_button`, `result_paid_total`, `result_back_button`, `result_share_button`, `share_export_pdf`, `history_item_<i>`, `history_legacy_mark`). Confirme os reais no código ou com `inspect_screen` (MCP) / `maestro hierarchy`. Não use `point:` (coordenadas). Os textos de tela vêm do app em português.
 
 Sumário: [config.yaml](#configyaml) · [Subfluxos](#subfluxos) · [Jornada: primeira abertura](#jornada-primeira-abertura-first_run) · [Jornada: cálculo](#jornada-cálculo-returning) · [Variações](#variações-do-funil)
 
 ## config.yaml
 ```yaml
 # .maestro/config.yaml
+excludeTags:
+  - seeded
 flows:
   - tests/**
 ```
+Fluxos com a tag `seeded` (histórico semeado no `SharedPreferences` do APK debug) ficam fora da suíte padrão: rode `.maestro/utils/seed_history.sh [serial]` e depois o arquivo, sem `clearState`.
 Subfluxos (`subflows/`) e scripts (`utils/`) ficam fora de `tests/` de propósito: não são testes.
 
 ## Subfluxos
@@ -18,12 +21,17 @@ Subfluxos (`subflows/`) e scripts (`utils/`) ficam fora de `tests/` de propósit
 ```yaml
 appId: com.caiodeiro.calcclt
 ---
+- extendedWaitUntil:
+    visible: "Pular"
+    timeout: 20000
+    optional: true
 - runFlow:
     when:
       visible: "Pular"
     commands:
       - tapOn: "Pular"
 ```
+Espere o "Pular" com `extendedWaitUntil` opcional: logo após `clearState` a checagem imediata falha.
 
 `subflows/dismiss_consent.yaml`: dispensa o aviso de consentimento (após a change `remove-pro-ads-only`); opcional por natureza.
 ```yaml
@@ -43,14 +51,21 @@ appId: com.caiodeiro.calcclt
 appId: com.caiodeiro.calcclt
 ---
 - tapOn:
-    id: "form_salary_field"
-    label: "Informar salário"
+    id: "form_admission_date"
+- inputText: ${ADMISSION}
+- tapOn:
+    id: "form_termination_date"
+- inputText: "15062025"
+- tapOn:
+    id: "form_base_salary"
 - inputText: ${SALARY}
-- hideKeyboard
 - tapOn:
     id: "form_calculate_button"
     label: "Calcular"
 ```
+Não declare defaults de `env` no subfluxo: o default sobrescreve o valor passado pelo chamador. Cada teste declara os seus. Não use `hideKeyboard`: com a barra flutuante do Gboard no emulador ele aperta Voltar e fecha o formulário (o botão Calcular já fica visível com o teclado aberto).
+
+`subflows/leave_result_to_home.yaml`: sai do Resultado fechando o intersticial de teste (`adContainer`), que aparece ao sair, de forma opcional.
 
 ## Jornada: primeira abertura (`first_run`)
 `tests/first_run/onboarding_to_first_result.yaml`
@@ -123,4 +138,9 @@ Cada uma é um arquivo novo em `returning/`, mudando só o tipo e as entradas:
 | `history_open_saved_calculation.yaml` | calcula, volta e abre pelo histórico | mesmo total do resultado |
 
 ## Comandos úteis neste app
-`launchApp` (`clearState`), `tapOn`, `inputText`, `hideKeyboard`, `assertVisible` / `assertNotVisible`, `extendedWaitUntil`, `scrollUntilVisible`, `runFlow` (`file`, `when`, `env`, `commands`), `back`, `pressKey`, `setOrientation`, `setDarkMode` (tema claro/escuro). Sintaxe completa: `cheat_sheet` (MCP).
+`launchApp` (`clearState`), `tapOn`, `inputText`, `assertVisible` / `assertNotVisible`, `extendedWaitUntil`, `scrollUntilVisible`, `runFlow` (`file`, `when`, `env`, `commands`), `back`, `pressKey`, `setOrientation`, `setDarkMode` (tema claro/escuro). Sintaxe completa: `cheat_sheet` (MCP).
+
+## Ambiente do emulador
+- Rode pela CLI (`maestro --device emulator-5554 test ...`); o MCP do Maestro costuma cair.
+- Se o teclado virtual não aparecer: `adb shell settings put secure show_ime_with_hard_keyboard 1`.
+- Memória: sem `flutter test --concurrency=1` e com daemons do Gradle/Kotlin abertos, o compilador do Dart pode cair por falta de memória virtual do Windows.
