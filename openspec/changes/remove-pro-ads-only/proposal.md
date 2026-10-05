@@ -32,3 +32,4 @@ O app passa a ser 100 % gratuito (projeto de portfólio, sem meta de receita; de
 
 - Qualquer mudança de cálculo (B2+), recompensado, anúncios em Splash/Formulário, eventos além dos 4 listados.
 - Banner no Onboarding: não incluído (B1-10a lista as telas); ver Open Questions em `design.md`.
+- Escopo adicional aprovado: Gradle wrapper 8.14.3 (exigência do Flutter atual) e texto de privacidade em `about_screen` ajustado ao novo comportamento.

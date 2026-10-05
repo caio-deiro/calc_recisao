@@ -59,7 +59,6 @@ void main() {
           .fold(0.0, (sum, item) => sum + item.value);
 
       final inss = result.deductions.where((item) => item.description == 'INSS');
-      final irrf = result.deductions.where((item) => item.description == 'IRRF');
 
       expect(inss.length, 1);
       expect(inss.first.value, closeTo(taxService.calculateInss(4000.0, terminationDate), 0.01));

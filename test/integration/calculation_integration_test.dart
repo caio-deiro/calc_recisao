@@ -6,7 +6,6 @@ import 'package:calc_recisao/domain/entities/calculation_history.dart';
 import 'package:calc_recisao/domain/usecases/calculate_termination.dart';
 import 'package:calc_recisao/data/repositories/history_repository.dart';
 import 'package:calc_recisao/core/services/tax_tables_service.dart';
-import 'package:calc_recisao/core/utils/pro_utils.dart';
 import 'package:calc_recisao/core/validators/termination_input_validator.dart';
 
 /// Testes de integração que verificam o fluxo completo da aplicação
@@ -140,72 +139,6 @@ void main() {
           () => useCase.execute(invalidInput, TerminationType.withoutJustCause),
           returnsNormally, // O cálculo pode executar, mas o resultado será incorreto
         );
-      });
-    });
-
-    group('Integração: Histórico com Limites PRO', () {
-      test('deve respeitar limite de histórico para usuário gratuito', () async {
-        // Simular usuário gratuito
-        SharedPreferences.setMockInitialValues({'is_pro_user': false});
-
-        final input = TerminationInput(
-          admissionDate: DateTime(2023, 1, 1),
-          terminationDate: DateTime(2024, 6, 30),
-          baseSalary: 5000.0,
-          calculateTaxes: true,
-        );
-
-        final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final maxSize = await ProUtils.getMaxHistorySize();
-
-        // Salvar mais cálculos do que o limite
-        for (int i = 0; i < maxSize + 5; i++) {
-          await repository.saveCalculation(
-            CalculationHistory(
-              id: 'calc_$i',
-              input: input,
-              result: result,
-              terminationType: TerminationType.withoutJustCause,
-              timestamp: DateTime.now().add(Duration(seconds: i)),
-            ),
-          );
-        }
-
-        final history = await repository.getHistory();
-        expect(history.length, lessThanOrEqualTo(maxSize));
-      });
-
-      test('deve permitir histórico ilimitado para usuário PRO', () async {
-        // Simular usuário PRO
-        SharedPreferences.setMockInitialValues({'is_pro_user': true});
-
-        final input = TerminationInput(
-          admissionDate: DateTime(2023, 1, 1),
-          terminationDate: DateTime(2024, 6, 30),
-          baseSalary: 5000.0,
-          calculateTaxes: true,
-        );
-
-        final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final maxSize = await ProUtils.getMaxHistorySize();
-
-        // Salvar muitos cálculos
-        for (int i = 0; i < 50; i++) {
-          await repository.saveCalculation(
-            CalculationHistory(
-              id: 'calc_$i',
-              input: input,
-              result: result,
-              terminationType: TerminationType.withoutJustCause,
-              timestamp: DateTime.now().add(Duration(seconds: i)),
-            ),
-          );
-        }
-
-        final history = await repository.getHistory();
-        // PRO deve ter limite maior (1000)
-        expect(history.length, 50);
-        expect(maxSize, greaterThan(10));
       });
     });
 

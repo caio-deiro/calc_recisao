@@ -16,7 +16,6 @@ abstract class AppLocalizations {
   String get historyTitle;
   String get aboutTitle;
   String get supportTitle;
-  String get proTitle;
 
   // Formulário
   String get chooseTerminationType;

@@ -50,3 +50,6 @@ app.*.map.json
 .fvm/
 # Firecrawl CLI (cache local de pesquisas)
 .firecrawl/
+# Config do Firebase (distribuída fora do repo)
+android/app/google-services.json
+android/build/

@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:calc_recisao/core/utils/pdf_utils.dart';
-import 'package:calc_recisao/core/utils/pro_utils.dart';
 import 'package:calc_recisao/domain/entities/termination_input.dart';
 import 'package:calc_recisao/domain/entities/termination_result.dart';
 import 'package:calc_recisao/domain/entities/termination_type.dart';
@@ -63,9 +62,8 @@ void main() {
     });
 
     group('PDF Generation', () {
-      test('should generate PDF for pro user', () async {
-        // Simular usuário PRO
-        SharedPreferences.setMockInitialValues({'is_pro_user': true});
+      test('should generate PDF for all users', () async {
+        SharedPreferences.setMockInitialValues({});
 
         try {
           await PdfUtils.generateAndSharePdf(
@@ -83,9 +81,8 @@ void main() {
         }
       });
 
-      test('should save PDF to file for pro user', () async {
-        // Simular usuário PRO
-        SharedPreferences.setMockInitialValues({'is_pro_user': true});
+      test('should save PDF to file for all users', () async {
+        SharedPreferences.setMockInitialValues({});
 
         try {
           await PdfUtils.savePdfToFile(
@@ -104,8 +101,7 @@ void main() {
       });
 
       test('should handle PDF generation errors gracefully', () async {
-        // Simular usuário PRO
-        SharedPreferences.setMockInitialValues({'is_pro_user': true});
+        SharedPreferences.setMockInitialValues({});
 
         // Testar com dados inválidos
         final invalidInput = TerminationInput(
@@ -184,21 +180,21 @@ void main() {
       });
     });
 
-    group('PDF Pro Features', () {
-      test('should only allow PDF export for pro users', () async {
-        // Simular usuário não-PRO
-        SharedPreferences.setMockInitialValues({'is_pro_user': false});
+    group('PDF liberado para todos', () {
+      test('deve gerar PDF sem consultar nenhum status de usuário', () async {
+        SharedPreferences.setMockInitialValues({});
 
-        final canExportPdf = await ProUtils.canExportPdf();
-        expect(canExportPdf, false);
-      });
-
-      test('should allow PDF export for pro users', () async {
-        // Simular usuário PRO
-        SharedPreferences.setMockInitialValues({'is_pro_user': true});
-
-        final canExportPdf = await ProUtils.canExportPdf();
-        expect(canExportPdf, true);
+        try {
+          await PdfUtils.generateAndSharePdf(
+            input: testInput,
+            result: testResult,
+            terminationType: TerminationType.withoutJustCause,
+          );
+        } catch (e) {
+          // Em ambiente de teste pode falhar por dependências de plataforma,
+          // mas nunca por bloqueio de recurso.
+          expect(e.toString().toLowerCase(), isNot(contains('pro')));
+        }
       });
     });
 
@@ -212,8 +208,7 @@ void main() {
       });
 
       test('should handle file save errors gracefully', () async {
-        // Simular usuário PRO
-        SharedPreferences.setMockInitialValues({'is_pro_user': true});
+        SharedPreferences.setMockInitialValues({});
 
         // Simular erro de permissão ou espaço em disco
         try {

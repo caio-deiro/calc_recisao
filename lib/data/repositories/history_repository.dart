@@ -1,15 +1,14 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/calculation_history.dart';
-import '../../core/utils/pro_utils.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/utils/logger.dart';
 import '../../core/exceptions/app_exceptions.dart';
-import '../../core/services/offline_service.dart';
 
 /// Repositório responsável pelo gerenciamento do histórico de cálculos.
 ///
 /// Armazena e recupera cálculos de rescisão usando SharedPreferences.
-/// Respeita os limites de histórico baseado no status PRO do usuário.
+/// Guarda no máximo [AppConstants.maxHistorySize] itens (FIFO).
 class HistoryRepository {
   static const String _historyKey = 'calculation_history';
 
@@ -51,8 +50,7 @@ class HistoryRepository {
 
   /// Salva um novo cálculo no histórico.
   ///
-  /// Adiciona no início da lista e respeita o limite máximo baseado no status PRO.
-  /// Também faz cache offline para usuários PRO.
+  /// Adiciona no início da lista; ao exceder o limite, descarta o mais antigo.
   ///
   /// [calculation] - Cálculo a ser salvo
   /// Throws [StorageException] se houver erro ao salvar
@@ -64,24 +62,15 @@ class HistoryRepository {
       // Adicionar novo cálculo no início
       history.insert(0, calculation);
 
-      // Manter apenas os cálculos permitidos baseado no status PRO
-      final maxSize = await ProUtils.getMaxHistorySize();
-      if (history.length > maxSize) {
-        history.removeRange(maxSize, history.length);
+      // FIFO: o histórico está ordenado do mais recente ao mais antigo
+      if (history.length > AppConstants.maxHistorySize) {
+        history.removeRange(AppConstants.maxHistorySize, history.length);
       }
 
       // Salvar no SharedPreferences
       final historyJson = history.map((calc) => jsonEncode(calc.toJson())).toList();
 
       await prefs.setStringList(_historyKey, historyJson);
-
-      // Cache offline para usuários PRO
-      try {
-        await OfflineService.cacheCalculation(calculation);
-      } catch (e) {
-        AppLogger.warning('Erro ao fazer cache offline', e);
-        // Não interrompe o fluxo se o cache falhar
-      }
     } catch (e, stackTrace) {
       AppLogger.error('Erro ao salvar cálculo no histórico', e, stackTrace);
       throw StorageException('Erro ao salvar cálculo no histórico', originalError: e);

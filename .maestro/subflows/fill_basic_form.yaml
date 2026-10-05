@@ -1,0 +1,14 @@
+appId: com.caiodeiro.calcclt
+env:
+  SALARY: "400000"
+---
+- tapOn: "Data de Admissão"
+- inputText: "01012023"
+- tapOn: "Data de Desligamento"
+- inputText: "15062025"
+- tapOn: "Salário Base Mensal"
+- inputText: ${SALARY}
+- hideKeyboard
+- tapOn:
+    text: "Calcular Rescisão"
+    label: "Calcular"

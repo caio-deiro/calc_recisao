@@ -7,15 +7,15 @@ import '../../../domain/usecases/calculate_termination.dart';
 import '../../../data/repositories/history_repository.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/share_utils.dart';
-import '../../../core/utils/pro_utils.dart';
 import '../../../core/utils/logger.dart';
 import '../../../core/exceptions/app_exceptions.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/ads/ad_manager.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../../../core/analytics/analytics_service.dart';
+import '../../../core/analytics/consent_service.dart';
+import '../../widgets/ad_banner.dart';
 import '../../widgets/disclaimer_widget.dart';
 import '../../widgets/breakdown_item_card.dart';
-import '../pro/pro_screen.dart';
 
 enum ShareAction { share, shareSimple, copy, copySimple, exportPdf, savePdf }
 
@@ -32,14 +32,12 @@ class ResultScreen extends StatefulWidget {
 class _ResultScreenState extends State<ResultScreen> {
   TerminationResult? _result;
   bool _isLoading = true;
-  BannerAd? _bannerAd;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadResult();
-      _loadBannerAd();
     });
   }
 
@@ -70,21 +68,20 @@ class _ResultScreenState extends State<ResultScreen> {
           AppLogger.warning('Erro ao salvar no histórico', e, stackTrace);
         }
 
+        if (!mounted) return;
         setState(() {
           _result = result;
           _isLoading = false;
         });
 
-        // Mostrar anúncio intersticial após o cálculo
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          AdManager.showInterstitialAd();
-        });
+        await ConsentService.markFirstResult();
+        await AnalyticsService.calcCompleted(widget.terminationType);
       } catch (e, stackTrace) {
         AppLogger.error('Erro ao calcular rescisão', e, stackTrace);
         setState(() {
           _isLoading = false;
         });
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -99,39 +96,25 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   @override
-  void dispose() {
-    _bannerAd?.dispose();
-    super.dispose();
-  }
-
-  Future<void> _loadBannerAd() async {
-    _bannerAd = await AdManager.createBannerAd();
-    _bannerAd?.load();
-  }
-
-  Widget _buildBannerAd() {
-    if (_bannerAd == null) return const SizedBox.shrink();
-
-    return SizedBox(
-      width: _bannerAd!.size.width.toDouble(),
-      height: _bannerAd!.size.height.toDouble(),
-      child: AdWidget(ad: _bannerAd!),
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Resultado da Rescisão'),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.of(context).pop()),
-        actions: [if (_result != null) IconButton(icon: const Icon(Icons.share), onPressed: _shareResult)],
+    return PopScope(
+      onPopInvokedWithResult: (didPop, _) {
+        // Intersticial só ao sair do Resultado, nunca ao entrar (B1-10b).
+        if (didPop) AdManager.showInterstitialOnExit();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Resultado da Rescisão'),
+          leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.of(context).pop()),
+          actions: [if (_result != null) IconButton(icon: const Icon(Icons.share), onPressed: _shareResult)],
+        ),
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _result == null
+            ? const Center(child: Text('Erro ao calcular rescisão'))
+            : _buildResultContent(),
+        bottomNavigationBar: const AdBanner(),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _result == null
-          ? const Center(child: Text('Erro ao calcular rescisão'))
-          : _buildResultContent(),
     );
   }
 
@@ -154,7 +137,6 @@ class _ResultScreenState extends State<ResultScreen> {
           ),
         ),
         _buildBottomSection(),
-        if (_bannerAd != null) _buildBannerAd(),
       ],
     );
   }
@@ -303,6 +285,7 @@ class _ResultScreenState extends State<ResultScreen> {
       switch (action) {
         case ShareAction.share:
           await ShareUtils.shareResult(input: widget.input, result: _result!, terminationType: widget.terminationType);
+          _afterShareOrExport(pdf: false);
           if (mounted) {
             ScaffoldMessenger.of(
               context,
@@ -316,6 +299,7 @@ class _ResultScreenState extends State<ResultScreen> {
             terminationType: widget.terminationType,
             simple: true,
           );
+          _afterShareOrExport(pdf: false);
           if (mounted) {
             ScaffoldMessenger.of(
               context,
@@ -349,6 +333,7 @@ class _ResultScreenState extends State<ResultScreen> {
           break;
         case ShareAction.exportPdf:
           await ShareUtils.exportToPdf(input: widget.input, result: _result!, terminationType: widget.terminationType);
+          _afterShareOrExport(pdf: true);
           if (mounted) {
             ScaffoldMessenger.of(
               context,
@@ -361,6 +346,7 @@ class _ResultScreenState extends State<ResultScreen> {
             result: _result!,
             terminationType: widget.terminationType,
           );
+          _afterShareOrExport(pdf: true);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('PDF salvo com sucesso!')));
           }
@@ -373,11 +359,17 @@ class _ResultScreenState extends State<ResultScreen> {
     }
   }
 
+  /// Evento de analytics (só se houver consentimento) e intersticial ao concluir.
+  void _afterShareOrExport({required bool pdf}) {
+    if (pdf) {
+      AnalyticsService.pdfExported();
+    } else {
+      AnalyticsService.shareUsed();
+    }
+    AdManager.showInterstitialOnExit();
+  }
+
   Future<ShareAction?> _showShareOptions() async {
-    final canExportPdf = await ProUtils.canExportPdf();
-
-    if (!mounted) return null;
-
     return await showModalBottomSheet<ShareAction>(
       context: context,
       builder: (context) {
@@ -414,41 +406,19 @@ class _ResultScreenState extends State<ResultScreen> {
                   subtitle: const Text('Copia apenas o resumo'),
                   onTap: () => Navigator.pop(context, ShareAction.copySimple),
                 ),
-                if (canExportPdf) ...[
-                  const Divider(),
-                  ListTile(
-                    leading: const Icon(Icons.picture_as_pdf),
-                    title: const Text('Exportar PDF'),
-                    subtitle: const Text('Gera e compartilha PDF'),
-                    onTap: () => Navigator.pop(context, ShareAction.exportPdf),
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.save_alt),
-                    title: const Text('Salvar PDF'),
-                    subtitle: const Text('Salva PDF no dispositivo'),
-                    onTap: () => Navigator.pop(context, ShareAction.savePdf),
-                  ),
-                ] else ...[
-                  const Divider(),
-                  ListTile(
-                    leading: const Icon(Icons.picture_as_pdf, color: Colors.grey),
-                    title: const Text('Exportar PDF'),
-                    subtitle: const Text('Recurso PRO - Faça upgrade'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      _showProUpgradeDialog();
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.save_alt, color: Colors.grey),
-                    title: const Text('Salvar PDF'),
-                    subtitle: const Text('Recurso PRO - Faça upgrade'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      _showProUpgradeDialog();
-                    },
-                  ),
-                ],
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.picture_as_pdf),
+                  title: const Text('Exportar PDF'),
+                  subtitle: const Text('Gera e compartilha PDF'),
+                  onTap: () => Navigator.pop(context, ShareAction.exportPdf),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.save_alt),
+                  title: const Text('Salvar PDF'),
+                  subtitle: const Text('Salva PDF no dispositivo'),
+                  onTap: () => Navigator.pop(context, ShareAction.savePdf),
+                ),
                 const SizedBox(height: 8),
                 TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
               ],
@@ -456,28 +426,6 @@ class _ResultScreenState extends State<ResultScreen> {
           ),
         );
       },
-    );
-  }
-
-  void _showProUpgradeDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Recurso PRO'),
-        content: const Text(
-          'A exportação PDF é um recurso exclusivo da versão PRO. Faça upgrade para acessar esta funcionalidade.',
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ProScreen()));
-            },
-            child: const Text('Fazer Upgrade'),
-          ),
-        ],
-      ),
     );
   }
 }

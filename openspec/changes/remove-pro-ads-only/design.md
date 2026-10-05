@@ -35,3 +35,7 @@ Primeira execução da nova versão limpa as chaves legadas; histórico intacto.
 - **Config Firebase** (arquivos de configuração do projeto Firebase) ausente: quem fornece? Recomendação: usuário cria o projeto e adiciona os arquivos; o executor para e pede.
 - **Momento do aviso de consentimento:** ao primeiro retorno do Resultado ou sobre ele? Recomendação: ao primeiro retorno à Home, antes de qualquer intersticial.
 - **`consent_decision` com recusa** não sai (ver decisão 6). Recomendação: aceitar.
+
+## Addendum
+
+- Gate do intersticial: `showInterstitialOnExit` exige `consent_decided`; a primeira saída do Resultado não exibe intersticial. Gradle wrapper sobe para 8.14.3 (toolchain, aprovado pelo usuário).

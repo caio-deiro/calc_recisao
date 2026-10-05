@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart' show AdWidget, BannerAd;
 
-import '../../../core/ads/ad_manager.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../core/utils/pro_utils.dart';
 import '../../../data/repositories/history_repository.dart';
 import '../../../domain/entities/calculation_history.dart';
+import '../../widgets/ad_banner.dart';
 import '../../widgets/disclaimer_widget.dart';
 import '../result/result_screen.dart';
-import '../pro/pro_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -20,19 +18,11 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen> {
   List<CalculationHistory> _history = [];
   bool _isLoading = true;
-  BannerAd? _bannerAd;
 
   @override
   void initState() {
     super.initState();
     _loadHistory();
-    _loadBannerAd();
-  }
-
-  @override
-  void dispose() {
-    _bannerAd?.dispose();
-    super.dispose();
   }
 
   Future<void> _loadHistory() async {
@@ -52,21 +42,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
-  Future<void> _loadBannerAd() async {
-    _bannerAd = await AdManager.createBannerAd();
-    _bannerAd?.load();
-  }
-
-  Widget _buildBannerAd() {
-    if (_bannerAd == null) return const SizedBox.shrink();
-
-    return SizedBox(
-      width: _bannerAd!.size.width.toDouble(),
-      height: _bannerAd!.size.height.toDouble(),
-      child: AdWidget(ad: _bannerAd!),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,6 +56,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           : _history.isEmpty
           ? _buildEmptyState()
           : _buildHistoryList(),
+      bottomNavigationBar: const AdBanner(),
     );
   }
 
@@ -107,7 +83,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget _buildHistoryList() {
     return Column(
       children: [
-        _buildHistoryLimitBanner(),
+        if (_history.length >= AppConstants.historyWarningThreshold) _buildHistoryLimitNotice(),
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.all(16),
@@ -119,43 +95,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
         ),
         const DisclaimerWidget(),
-        if (_bannerAd != null) _buildBannerAd(),
       ],
     );
   }
 
-  Widget _buildHistoryLimitBanner() {
-    return FutureBuilder<bool>(
-      future: ProUtils.hasUnlimitedHistory(),
-      builder: (context, snapshot) {
-        if (snapshot.data == true) return const SizedBox.shrink();
-
-        return Container(
-          margin: const EdgeInsets.all(16),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.orange.shade50,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.orange.shade200),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.info_outline, color: Colors.orange.shade600, size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Versão gratuita: máximo de 10 cálculos. Faça upgrade para histórico ilimitado.',
-                  style: TextStyle(color: Colors.orange.shade700, fontSize: 12),
-                ),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ProScreen())),
-                child: const Text('Upgrade', style: TextStyle(fontSize: 12)),
-              ),
-            ],
-          ),
-        );
-      },
+  Widget _buildHistoryLimitNotice() {
+    return Semantics(
+      identifier: 'history_limit_notice',
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+        child: Text(
+          'Histórico quase cheio: guardamos os ${AppConstants.maxHistorySize} cálculos mais recentes. '
+          'Os mais antigos são apagados automaticamente.',
+          style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+        ),
+      ),
     );
   }
 

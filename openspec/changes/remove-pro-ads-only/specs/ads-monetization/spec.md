@@ -37,6 +37,17 @@ O intersticial MUST ser exibido somente ao sair do Resultado (voltar à Home ou 
 - **WHEN** o anúncio não está carregado ao sair do Resultado
 - **THEN** a navegação MUST concluir imediatamente sem espera
 
+### Requirement: No interstitial before consent decision
+Nenhum intersticial MUST ser exibido antes de `consent_decided` ser verdadeiro. Como o aviso de consentimento aparece no primeiro retorno à Home depois do primeiro resultado, o intersticial da primeira saída do Resultado MUST ser omitido.
+
+#### Scenario: First exit from Result
+- **WHEN** o usuário sai do Resultado pela primeira vez e `consent_decided` é falso
+- **THEN** nenhum intersticial MUST ser exibido
+
+#### Scenario: After consent decision
+- **WHEN** `consent_decided` é verdadeiro, o anúncio está carregado e a frequência permite
+- **THEN** o intersticial MUST ser exibido ao sair do Resultado
+
 ### Requirement: No rewarded or splash/form ads
 O app MUST NOT exibir anúncio recompensado nem qualquer anúncio em Splash e Formulário.
 

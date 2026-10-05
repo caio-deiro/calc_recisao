@@ -8,19 +8,17 @@
 > camadas, dependências, fluxo de dados ou convenções, atualize este arquivo no mesmo commit.
 > Itens marcados com ⚠️ são divergências entre intenção e código — não os trate como verdade.
 >
-> **Estado atual × alvo.** Este documento descreve o código **de hoje** (1.0.11+13). Onde o PRD
-> ([PROJECT.md](PROJECT.md)) já decidiu uma mudança, ela aparece marcada com 🎯 e **ainda não está
-> implementada**. A decisão mais estrutural: o **plano PRO será extinto** (monetização só com AdMob), o que
-> remove compras in-app, `ProUtils`, `PurchaseService`, `OfflineService` e `ProScreen` (§10, change
-> `remove-pro-ads-only`).
+> **Estado atual × alvo.** Este documento descreve o código **de hoje**. Onde o PRD
+> ([PROJECT.md](PROJECT.md)) já decidiu uma mudança ainda não implementada, ela aparece marcada com 🎯.
+> ✅ A change `remove-pro-ads-only` (B1) já **extinguiu o PRO**: o app é gratuito, com AdMob, consentimento
+> único e analytics opt-in (§5.3, §7, §10).
 
 ---
 
 ## 1. Visão geral
 
 App Flutter **offline-first**, sem backend próprio. Todo o cálculo roda no dispositivo e os dados
-(histórico, preferências) ficam em `SharedPreferences`. Monetização: AdMob. 🎯 **Hoje** ainda existe
-assinatura PRO via Google Play Billing; **o alvo é um app 100 % gratuito, só com anúncios**.
+(histórico, preferências) ficam em `SharedPreferences`. Monetização: AdMob. ✅ App **100 % gratuito, só com anúncios** (sem assinatura nem compras in-app).
 
 | Item | Valor |
 |---|---|
@@ -44,19 +42,17 @@ e atualize esta tabela.
 | Pacote | Uso | Observações |
 |---|---|---|
 | `flutter_localizations` / `intl` | Datas, moeda, locale | Localização **manual** em `lib/l10n/` (não usa `gen-l10n`/ARB) |
-| `shared_preferences` | Persistência única do app | Histórico, flag PRO, onboarding, cache offline, analytics local |
-| `google_mobile_ads` | Banner e intersticial | Hoje só para não-PRO. 🎯 Para todos; adicionar o formulário de consentimento UMP |
-| `in_app_purchase` + `in_app_purchase_android` | Assinatura PRO | 🎯 **Serão removidos** (PRO extinto). Hoje: Billing ≥ 8.0.0 vem do plugin (`openspec/specs/play-billing`, a arquivar) |
-| `pdf` + `printing` | Exportação de PDF (PRO) | `core/utils/pdf_utils.dart` |
+| `shared_preferences` | Persistência única do app | Histórico, onboarding, consentimento, controle do intersticial, contadores locais |
+| `google_mobile_ads` | Banner e intersticial | Banner adaptativo e intersticial para todos; formulário de consentimento UMP; anúncios não personalizados até o aceite |
+| `pdf` + `printing` | Exportação de PDF (todos os usuários) | `core/utils/pdf_utils.dart` |
 | `share_plus` | Compartilhar resultado | `core/utils/share_utils.dart` |
 | `url_launcher` | E-mail de suporte, links | |
 | `path_provider` | Salvar PDF em arquivo | |
-| `firebase_core` + `firebase_crashlytics` | Relato de erros não-fatais | ⚠️ ver §9 (Firebase não é inicializado). 🎯 Sob consentimento opt-in |
-| `firebase_analytics` | — | Comentado no `pubspec`. 🎯 Reativar com 4 eventos mínimos e consentimento (PROJECT.md §9) |
+| `firebase_core` + `firebase_crashlytics` | Relato de erros não-fatais | Inicializados no `main`; coleta desligada por padrão e ligada só após o aceite (§7) |
+| `firebase_analytics` | 4 eventos mínimos | Só com consentimento, via `core/analytics/analytics_service.dart` (PROJECT.md §9) |
 | `decimal` | — | ⚠️ declarado, **não usado**. 🎯 Passa a ser o tipo do dinheiro no domínio (change `fix-calculation-rules`, depois dos testes golden) |
 | `cupertino_icons` | Ícones | |
 
-`firebase_analytics` está comentado no `pubspec.yaml` por problema de build.
 
 ### Dev
 
@@ -79,13 +75,13 @@ lib/
 ├── core/                      # infraestrutura transversal (sem regra de negócio de rescisão)
 │   ├── ab_testing/            # aso_ab_testing.dart (experimentos ASO locais)
 │   ├── ads/                   # ad_manager.dart, ad_ids.dart
-│   ├── analytics/             # aso_analytics.dart (contadores locais em SharedPreferences)
+│   ├── analytics/             # analytics_service (ponto central), analytics_sink, consent_service, aso_analytics (contadores locais)
 │   ├── constants/             # app_constants.dart — única fonte de "magic numbers"
 │   ├── deep_links/            # aso_deep_links.dart
 │   ├── exceptions/            # hierarquia AppException
-│   ├── services/              # tax_tables, purchase, onboarding, offline, support
+│   ├── services/              # tax_tables, onboarding, support, legacy_cleanup
 │   ├── theme/                 # app_theme.dart (light/dark)
-│   ├── utils/                 # logger, formatters, pdf, share, pro_utils, responsive, connectivity
+│   ├── utils/                 # logger, formatters, pdf, share, responsive, connectivity
 │   └── validators/            # termination_input_validator.dart
 ├── data/
 │   └── repositories/          # history_repository.dart
@@ -94,8 +90,8 @@ lib/
 │   └── usecases/              # calculate_termination.dart
 ├── l10n/                      # AppLocalizations manual (pt)
 └── presentation/
-    ├── screens/               # splash, onboarding, home, form, result, history, pro, support, about
-    └── widgets/               # componentes reutilizáveis (cards, campos de moeda/data, disclaimer)
+    ├── screens/               # splash, onboarding, home, form, result, history, support, about
+    └── widgets/               # componentes reutilizáveis (cards, campos de moeda/data, disclaimer, banner de anúncio, aviso de consentimento)
 
 assets/config/tax_tables.json  # tabelas INSS/IRRF/aviso prévio/dependente versionadas por ano
 test/{unit,widget,integration,mocks,test_helpers}
@@ -150,7 +146,7 @@ CalculateTermination.execute()          ← domain/usecases (função pura, sín
     ▼
 ResultScreen ──► HistoryRepository.save() ──► SharedPreferences
              ├─► ShareUtils (texto) 
-             └─► PdfUtils (somente PRO)
+             └─► PdfUtils (todos)
 ```
 
 - O resultado é uma lista de `BreakdownItem` (`addition`/`deduction`) — a UI renderiza o *breakdown*
@@ -167,34 +163,37 @@ da rescisão**, não pela data atual.
 > **Atualização anual** é a manutenção mais crítica do app. Ao mudar uma tabela: editar o JSON,
 > adicionar/ajustar o teste em `test/unit/termination_<ano>_test.dart` e `tax_tables_service_test.dart`.
 
-### 5.3 PRO, anúncios e limites (estado atual — 🎯 PRO será removido)
+### 5.3 Anúncios, consentimento e limites
 
-> 🎯 No alvo, `ProUtils`, `PurchaseService` e a flag `is_pro_user` deixam de existir. PDF é livre, o
-> histórico tem teto fixo de **100 itens** e os anúncios valem para todos. O fluxo abaixo descreve o
-> código atual, para orientar a remoção.
-
-```
-PurchaseService (singleton, stream do Play Billing)
-        │ compra/restauração confirmada
-        ▼
-ProUtils.setProUser(true)  ──►  SharedPreferences['is_pro_user']
-        ▲
-        │ lido por
-AdManager.shouldShowAds · HistoryRepository (maxFree=10 / PRO≈ilimitado)
-PdfUtils/ResultScreen (canExportPdf) · OfflineService · ProScreen
-```
-
-`ProUtils` é o **único ponto de leitura** do status PRO. Nenhuma tela deve ler a chave direto.
+- **Sem PRO.** PDF liberado; histórico com teto de `AppConstants.maxHistorySize` (100) em FIFO
+  (`HistoryRepository.saveCalculation`); aviso discreto na tela de Histórico a partir de 90 itens.
+- **Banner adaptativo** (`presentation/widgets/ad_banner.dart`, em `Scaffold.bottomNavigationBar`) em Home,
+  Resultado, Histórico, Suporte e Sobre; ausente em Formulário, Splash e Onboarding.
+- **Intersticial** (`AdManager.showInterstitialOnExit`): só ao **sair** do Resultado (`PopScope`) e ao concluir
+  compartilhar/exportar; nunca ao entrar. Pré-carregado; 1 por sessão (flag em memória) e 1 a cada 3 min
+  (`last_interstitial_time`); não é exibido antes da decisão de consentimento. Sem recompensado.
+- **Consentimento único** (`presentation/widgets/consent_prompt.dart`): ao primeiro retorno à Home depois do
+  primeiro resultado (`first_result_done`), UMP + escolha de analytics; persiste `consent_decided` e
+  `analytics_enabled`. Antes do aceite os anúncios usam `AdRequest(nonPersonalizedAds: true)`.
+- **Analytics** (`core/analytics/analytics_service.dart`): único ponto de emissão; descarta tudo sem
+  consentimento; só `calc_completed{tipo_rescisao}`, `share_used`, `pdf_exported`, `consent_decision`.
+  `consent_decision` só chega a sair quando `aceitou` (sem consentimento nada sai).
+  Nomes definidos na implementação: parâmetro `decisao` (`aceitou`|`recusou`) em `consent_decision` e chave
+  `first_result_done` (marca o primeiro resultado, gatilho do aviso).
+- **Gate do intersticial:** `AdManager` não exibe intersticial antes de `consent_decided`; logo, o intersticial
+  da primeira saída do Resultado é omitido (o aviso de consentimento vem antes de qualquer anúncio de tela cheia).
 
 ### 5.4 Persistência (chaves principais de `SharedPreferences`)
 
 | Chave | Dono | Conteúdo |
 |---|---|---|
 | `calculation_history` | `HistoryRepository` | `List<String>` de JSON de `CalculationHistory` |
-| `is_pro_user`, `pro_purchase_*` | `ProUtils` | flag e metadados da compra |
 | `last_interstitial_time` | `AdManager` | controle do cooldown de 3 min |
-| `offline_cache`, `pending_sync` | `OfflineService` | cache PRO (últimos 50) |
-| `install_source`, `first_open`, `session_count`, `pro_conversion` | `AsoAnalytics` | métricas **locais** |
+| `first_result_done`, `consent_decided`, `analytics_enabled` | `ConsentService` | consentimento único (B1-11) |
+| `install_source`, `first_open`, `session_count` | `AsoAnalytics` | métricas **locais** |
+
+As chaves da antiga versão PRO (`is_pro_user`, `pro_purchase_*`, `offline_cache`, `pending_sync`, `pro_conversion`) são
+removidas no boot por `LegacyCleanup` (idempotente).
 
 ---
 
@@ -204,7 +203,7 @@ PdfUtils/ResultScreen (canExportPdf) · OfflineService · ProScreen
   ViewModel. Telas grandes (`form_screen`, `result_screen`, `home_screen`) concentram lógica de UI —
   extraia widgets ao tocá-las.
 - **Navegação:** `Navigator.push(MaterialPageRoute)` imperativo. Fluxo:
-  `Splash → (Onboarding, 1ª vez) → Home → Form → Result`; `Home → History | Pro | Support | About`.
+  `Splash → (Onboarding, 1ª vez) → Home → Form → Result`; `Home → History | Support | About`.
 - **Design system:** definido em `DESIGN.md` (raiz) e implementado em `core/theme/app_theme.dart`
   (azul `#1976D2`, Roboto, raios 8/12/16). Não crie cores/estilos soltos nos widgets.
 - **Localização:** strings em `lib/l10n/app_localizations_pt.dart`. Muita string de domínio ainda é
@@ -222,8 +221,10 @@ PdfUtils/ResultScreen (canExportPdf) · OfflineService · ProScreen
   defensiva (ignora se Firebase indisponível).
 - **Privacidade:** nunca logar/enviar salário, datas ou resultado. A política de privacidade afirma
   que **nenhum dado pessoal é coletado** — qualquer telemetria nova precisa revisar esse texto.
-  🎯 Telemetria (Analytics e Crashlytics) só **após consentimento opt-in**, pedido uma única vez depois do
+  ✅ Telemetria (Analytics e Crashlytics) só **após consentimento opt-in**, pedido uma única vez depois do
   primeiro resultado, junto com o UMP dos anúncios. Anúncios **não personalizados** até o consentimento.
+  Firebase é inicializado no `main`; coleta desligada no manifesto e no boot. ⚠️ A política de privacidade
+  (`about_screen.dart`, site) foi atualizada na rodada 2 (texto a revisar pelo usuário).
 - `AsoAnalytics` e `AsoAbTesting` são **contadores locais**; nada sai do aparelho.
 
 ---
@@ -232,8 +233,8 @@ PdfUtils/ResultScreen (canExportPdf) · OfflineService · ProScreen
 
 | Pasta | Foco |
 |---|---|
-| `test/unit/` | Regras de cálculo (`calculate_termination`, `edge_cases`, `termination_2026`, `comprehensive_termination_review`), validação, repositório, PRO, PDF, logger, onboarding |
-| `test/widget/` | Onboarding |
+| `test/unit/` | Regras de cálculo (`calculate_termination`, `edge_cases`, `termination_2026`, `comprehensive_termination_review`), validação, repositório (FIFO de 100), limpeza legada, `AdManager`, analytics, PDF, logger, onboarding |
+| `test/widget/` | Onboarding, banner por tela, aviso de histórico cheio, aviso de consentimento |
 | `test/integration/` | Fluxo de cálculo ponta a ponta |
 | `test/mocks`, `test_helpers/` | Setup de `SharedPreferences` |
 
@@ -256,10 +257,12 @@ limpo, `flutter test` verde. Mudança de regra trabalhista exige citar a base le
 - Assinatura de release configurada em `android/app/build.gradle.kts` (keystore fora do repositório).
 - **Target SDK 36** e **páginas de 16 KB** são exigências da Play Console (prazo ≈ 31/08/2026) e
   estão especificadas em `openspec/specs/android-target-sdk` e `openspec/changes/android-16kb-page-size`.
-- 🎯 **Billing Library:** a exigência deixa de valer quando `in_app_purchase*` for removido. Até lá,
-  vem do plugin `in_app_purchase_android`; **não** fixar versão no Gradle (spec `play-billing`).
-- Produto PRO (a **desativar no Play Console**; não há assinantes): ID `calc_recisao_pro_monthly`. Configuração de console
-  (assinatura, testadores, compliance de SDK/16 KB) está resumida acima e nas specs do OpenSpec.
+- ✅ **Billing Library:** exigência extinta; `in_app_purchase*` foi removido e o manifesto não declara `BILLING`
+  (a spec `play-billing` é arquivada junto com a change `remove-pro-ads-only`).
+- Produto PRO (`calc_recisao_pro_monthly`): **desativar no Play Console** (não há assinantes).
+- Firebase: config do projeto em `android/app` e plugin Gradle do Google Services; sem
+  `firebase_options.dart` (Android usa a config nativa). ⚠️ iOS sem o arquivo plist do Firebase: o Firebase fica
+  indisponível no iOS até ele ser adicionado (a inicialização falha em silêncio).
 - Fluxo **spec-driven** com OpenSpec: mudanças de compliance entram em `openspec/changes/<nome>` e,
   ao serem arquivadas, viram `openspec/specs/<capability>/spec.md`.
 
@@ -268,14 +271,14 @@ limpo, `flutter test` verde. Mudança de regra trabalhista exige citar a base le
 | # | Dívida | Impacto | Sugestão |
 |---|---|---|---|
 | D1 | **Dinheiro em `double`**; `decimal` está no `pubspec` mas não é usado | Erros de arredondamento acumulados | Migrar o use case para `Decimal` ou inteiros em centavos |
-| D2 | ~~Status PRO só local~~ | 🎯 **Resolvida pela extinção do PRO** | Remover `ProUtils`/`PurchaseService` |
-| D3 | `Firebase.initializeApp()` não é chamado em `main.dart` | Crashlytics provavelmente inoperante (o logger só ignora o erro) | Inicializar com `firebase_options` + `google-services.json`, ou remover a dependência |
+| D2 | ~~Status PRO só local~~ | ✅ **Resolvida pela extinção do PRO** | `ProUtils`/`PurchaseService` removidos |
+| D3 | ~~`Firebase.initializeApp()` não era chamado~~ | ✅ **Resolvida** (B0-06): inicializado no `main` com coleta desligada | Falta config iOS |
 | D4 | Telas muito grandes, sem separação UI/lógica | Difícil testar e evoluir | Extrair widgets/controllers |
 | D5 | Strings de domínio hardcoded; l10n manual | Bloqueia en-US real | Migrar para ARB/`gen-l10n` |
-| D6 | Singletons estáticos (`ProUtils`, `TaxTablesService`) | Testes dependem de estado global | Injeção simples por construtor nos use cases/repositórios |
-| D7 | `OfflineService` sem consumidor | 🎯 **Resolvida pela remoção** | Apagar na change `remove-pro-ads-only` |
+| D6 | Singletons estáticos (`TaxTablesService`, `AdManager`, `AnalyticsService`) | Testes dependem de estado global | Injeção simples por construtor nos use cases/repositórios |
+| D7 | ~~`OfflineService` sem consumidor~~ | ✅ **Resolvida pela remoção** | — |
 | D8 | Descrições de itens do cálculo usadas como *chave* (`removeWhere(item.description == ...)`) | Frágil a renomeações; piora com férias em dobro e art. 479/480 | Usar enum/ID no `BreakdownItem` **antes** de adicionar verbas |
-| D9 | Intersticial exibido logo ao renderizar o Resultado (`result_screen.dart`) | Cobre o número do usuário; viola o guardrail do PRD | 🎯 Exibir só ao **sair** do Resultado, ≤ 1/3 min e 1/sessão |
+| D9 | ~~Intersticial exibido ao renderizar o Resultado~~ | ✅ **Resolvida**: só ao **sair** do Resultado, ≤ 1/3 min e 1/sessão | — |
 | D10 | Cálculo e apresentação misturam "a receber" e multa do FGTS | Total enganoso | 🎯 `TerminationResult` com dois totais (pago na rescisão × depositado no FGTS) e premissas |
 | D11 | `hasAccruedVacation` booleano e meses por ano-calendário | Não modela períodos nem dobro | 🎯 Modelo de períodos derivado da admissão (change `add-vacation-periods`) |
 
@@ -291,10 +294,10 @@ limpo, `flutter test` verde. Mudança de regra trabalhista exige citar a base le
 | — (histórico) | Tabelas fiscais em JSON versionado por ano | Atualizar lei sem alterar código |
 | 2026 | Billing Library via plugin, sem override | Compliance Play (spec `play-billing`) |
 | 2026 | Target SDK 36 + 16 KB pages | Exigência da Play Console |
-| 2026-10 | 🎯 **Extinguir o PRO; monetizar só com AdMob** | Simplicidade; público de uso pontual converte mal em assinatura; elimina compliance de Billing |
-| 2026-10 | 🎯 Intersticial só ao sair do Resultado; anúncios não personalizados até consentimento | Respeitar o momento do usuário; privacidade por padrão |
+| 2026-10 | ✅ **Extinguir o PRO; monetizar só com AdMob** | Simplicidade; público de uso pontual converte mal em assinatura; elimina compliance de Billing |
+| 2026-10 | ✅ Intersticial só ao sair do Resultado; anúncios não personalizados até consentimento | Respeitar o momento do usuário; privacidade por padrão |
 | 2026-10 | 🎯 Dinheiro em `Decimal`, após testes golden | Evitar erro de ponto flutuante com refatoração protegida |
-| 2026-10 | 🎯 Histórico limitado a 100 itens em `SharedPreferences` | Não degradar o armazenamento; migrar para SQLite se crescer |
+| 2026-10 | ✅ Histórico limitado a 100 itens em `SharedPreferences` (FIFO) | Não degradar o armazenamento; migrar para SQLite se crescer |
 | 2026-10 | 🎯 Execução em 4 changes OpenSpec sequenciais | Versões pequenas isolam regressões (ver PROJECT.md §15) |
 
 > Novas decisões: acrescente uma linha (data, decisão, motivo). Se for grande, crie uma change

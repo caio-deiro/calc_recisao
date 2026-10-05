@@ -24,9 +24,6 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get supportTitle => 'Suporte';
   
-  @override
-  String get proTitle => 'Versão PRO';
-
   // Formulário
   @override
   String get chooseTerminationType => 'Escolha o tipo de rescisão:';

@@ -4,7 +4,6 @@ class AsoAnalytics {
   static const String _installSourceKey = 'install_source';
   static const String _firstOpenKey = 'first_open';
   static const String _sessionCountKey = 'session_count';
-  static const String _proConversionKey = 'pro_conversion';
 
   static Future<void> initialize() async {
     await _trackInstallSource();
@@ -55,14 +54,6 @@ class AsoAnalytics {
     // Log local para debug (removido para produção)
   }
 
-  static Future<void> trackProUpgrade({required String source, required double price}) async {
-    final prefs = await SharedPreferences.getInstance();
-    final conversionCount = prefs.getInt(_proConversionKey) ?? 0;
-    await prefs.setInt(_proConversionKey, conversionCount + 1);
-
-    // Log local para debug (removido para produção)
-  }
-
   static Future<void> trackPdfExport({required bool isProUser, required String terminationType}) async {
     // Log local para debug (removido para produção)
   }
@@ -104,12 +95,7 @@ class AsoAnalytics {
   static Future<Map<String, dynamic>> getConversionMetrics() async {
     final prefs = await SharedPreferences.getInstance();
     final sessionCount = prefs.getInt(_sessionCountKey) ?? 0;
-    final proConversions = prefs.getInt(_proConversionKey) ?? 0;
 
-    return {
-      'session_count': sessionCount,
-      'pro_conversions': proConversions,
-      'conversion_rate': sessionCount > 0 ? (proConversions / sessionCount) : 0.0,
-    };
+    return {'session_count': sessionCount};
   }
 }
