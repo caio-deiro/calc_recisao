@@ -14,15 +14,15 @@
 | 🚀 Entregue | 0 |
 | ✔ Implementado | 0 |
 | 🔨 Em andamento | 0 |
-| 📋 Planejado | 0 |
-| 🎯 Sem plano | 76 |
+| 📋 Planejado | 22 |
+| 🎯 Sem plano | 54 |
 
 ## Por bloco
 
 | Bloco | Título | Total | 🚀 | ✔ | 🔨 | 📋 | 🎯 | Entregue |
 |---|---|--:|--:|--:|--:|--:|--:|--:|
-| B0 | Convenções e pré-requisitos transversais | 8 | 0 | 0 | 0 | 0 | 8 | 0% |
-| B1 | Remoção do PRO e monetização só com AdMob | 17 | 0 | 0 | 0 | 0 | 17 | 0% |
+| B0 | Convenções e pré-requisitos transversais | 8 | 0 | 0 | 0 | 5 | 3 | 0% |
+| B1 | Remoção do PRO e monetização só com AdMob | 17 | 0 | 0 | 0 | 17 | 0 | 0% |
 | B2 | Núcleo de cálculo: modelo, correções e Decimal | 15 | 0 | 0 | 0 | 0 | 15 | 0% |
 | B3 | Períodos de férias e férias em dobro | 8 | 0 | 0 | 0 | 0 | 8 | 0% |
 | B4 | Contratos a prazo e rescisão indireta | 9 | 0 | 0 | 0 | 0 | 9 | 0% |
@@ -36,36 +36,36 @@
 
 | ID | Estado | Requisito | Changes |
 |---|---|---|---|
-| B0-01 | 🎯 Sem plano | flutter analyze sem novos avisos e flutter test verde antes de qualquer commi... | — |
+| B0-01 | 📋 Planejado | flutter analyze sem novos avisos e flutter test verde antes de qualquer commi... | `remove-pro-ads-only` |
 | B0-02 | 🎯 Sem plano | Teste antes da regra: mudança em cálculo só entra com teste que a cubra (gold... | — |
-| B0-03 | 🎯 Sem plano | Nenhum dado pessoal em log, evento de analytics ou relatório de crash: sem sa... | — |
+| B0-03 | 📋 Planejado | Nenhum dado pessoal em log, evento de analytics ou relatório de crash: sem sa... | `remove-pro-ads-only` |
 | B0-04 | 🎯 Sem plano | Base legal no commit: mudança de regra trabalhista/tributária cita artigo, sú... | — |
-| B0-05 | 🎯 Sem plano | Mudou camada, dependência, fluxo ou regra → atualizar docs/ARCHITECTURE.md e/... | — |
-| B0-06 | 🎯 Sem plano | D3 — Firebase não é inicializado (main.dart não chama Firebase.initializeApp)... | — |
+| B0-05 | 📋 Planejado | Mudou camada, dependência, fluxo ou regra → atualizar docs/ARCHITECTURE.md e/... | `remove-pro-ads-only` |
+| B0-06 | 📋 Planejado | D3 — Firebase não é inicializado (main.dart não chama Firebase.initializeApp)... | `remove-pro-ads-only` |
 | B0-07 | 🎯 Sem plano | Strings novas de UI vão em lib/l10n/app_localizations_pt.dart quando houver c... | — |
-| B0-08 | 🎯 Sem plano | Cada bloco sai como versão publicável pequena; pubspec.yaml ganha bump de ver... | — |
+| B0-08 | 📋 Planejado | Cada bloco sai como versão publicável pequena; pubspec.yaml ganha bump de ver... | `remove-pro-ads-only` |
 
 ### B1 — Remoção do PRO e monetização só com AdMob
 
 | ID | Estado | Requisito | Changes |
 |---|---|---|---|
-| B1-01 | 🎯 Sem plano | Remover lib/core/services/purchase_service.dart, lib/core/services/offline_se... | — |
-| B1-02 | 🎯 Sem plano | Remover todo acesso a ProUtils/PurchaseService/OfflineService. Pontos conheci... | — |
-| B1-03 | 🎯 Sem plano | Remover de pubspec.yaml: in_app_purchase e in_app_purchase_android. Confirmar... | — |
-| B1-04 | 🎯 Sem plano | Remover de AppConstants: proProductId, proMonthlyPrice, proSupportEmail, proS... | — |
-| B1-05 | 🎯 Sem plano | Limpeza de dados legados: na primeira execução da nova versão, remover de Sha... | — |
-| B1-06 | 🎯 Sem plano | Arquivar a spec openspec/specs/play-billing (a exigência deixa de valer). Man... | — |
-| B1-07 | 🎯 Sem plano | Remover/ajustar testes: test/unit/pro_features_test.dart (apagar), ad_manager... | — |
-| B1-08 | 🎯 Sem plano | PDF (PdfUtils/ShareUtils.exportToPdf/savePdfToFile) disponível para todos, se... | — |
-| B1-09 | 🎯 Sem plano | AppConstants.maxHistorySize = 100. HistoryRepository.saveCalculation descarta... | — |
-| B1-10a | 🎯 Sem plano | Banner adaptativo (AdSize ancorado adaptativo) fixo no rodapé nas telas Home,... | — |
-| B1-10b | 🎯 Sem plano | Intersticial somente ao sair do Resultado (voltar à Home, ou ao concluir comp... | — |
-| B1-10c | 🎯 Sem plano | Frequência: no máximo 1 a cada 3 min (persistir last_interstitial_time, ✅ exi... | — |
-| B1-10d | 🎯 Sem plano | Sem anúncio recompensado; sem anúncio em Splash e Formulário (decisão Q16a). | — |
-| B1-11 | 🎯 Sem plano | Aviso único após o primeiro resultado: formulário de consentimento do Google ... | — |
-| B1-12 | 🎯 Sem plano | Analytics opt-in (firebase_analytics, reativar no pubspec). Coleta desligada ... | — |
-| B1-13 | 🎯 Sem plano | Eventos permitidos (únicos): calc_completed{tipo_rescisao}, share_used, pdf_e... | — |
-| B1-14 | 🎯 Sem plano | Anúncios não personalizados até o consentimento (AdRequest(nonPersonalizedAds... | — |
+| B1-01 | 📋 Planejado | Remover lib/core/services/purchase_service.dart, lib/core/services/offline_se... | `remove-pro-ads-only` |
+| B1-02 | 📋 Planejado | Remover todo acesso a ProUtils/PurchaseService/OfflineService. Pontos conheci... | `remove-pro-ads-only` |
+| B1-03 | 📋 Planejado | Remover de pubspec.yaml: in_app_purchase e in_app_purchase_android. Confirmar... | `remove-pro-ads-only` |
+| B1-04 | 📋 Planejado | Remover de AppConstants: proProductId, proMonthlyPrice, proSupportEmail, proS... | `remove-pro-ads-only` |
+| B1-05 | 📋 Planejado | Limpeza de dados legados: na primeira execução da nova versão, remover de Sha... | `remove-pro-ads-only` |
+| B1-06 | 📋 Planejado | Arquivar a spec openspec/specs/play-billing (a exigência deixa de valer). Man... | `remove-pro-ads-only` |
+| B1-07 | 📋 Planejado | Remover/ajustar testes: test/unit/pro_features_test.dart (apagar), ad_manager... | `remove-pro-ads-only` |
+| B1-08 | 📋 Planejado | PDF (PdfUtils/ShareUtils.exportToPdf/savePdfToFile) disponível para todos, se... | `remove-pro-ads-only` |
+| B1-09 | 📋 Planejado | AppConstants.maxHistorySize = 100. HistoryRepository.saveCalculation descarta... | `remove-pro-ads-only` |
+| B1-10a | 📋 Planejado | Banner adaptativo (AdSize ancorado adaptativo) fixo no rodapé nas telas Home,... | `remove-pro-ads-only` |
+| B1-10b | 📋 Planejado | Intersticial somente ao sair do Resultado (voltar à Home, ou ao concluir comp... | `remove-pro-ads-only` |
+| B1-10c | 📋 Planejado | Frequência: no máximo 1 a cada 3 min (persistir last_interstitial_time, ✅ exi... | `remove-pro-ads-only` |
+| B1-10d | 📋 Planejado | Sem anúncio recompensado; sem anúncio em Splash e Formulário (decisão Q16a). | `remove-pro-ads-only` |
+| B1-11 | 📋 Planejado | Aviso único após o primeiro resultado: formulário de consentimento do Google ... | `remove-pro-ads-only` |
+| B1-12 | 📋 Planejado | Analytics opt-in (firebase_analytics, reativar no pubspec). Coleta desligada ... | `remove-pro-ads-only` |
+| B1-13 | 📋 Planejado | Eventos permitidos (únicos): calc_completed{tipo_rescisao}, share_used, pdf_e... | `remove-pro-ads-only` |
+| B1-14 | 📋 Planejado | Anúncios não personalizados até o consentimento (AdRequest(nonPersonalizedAds... | `remove-pro-ads-only` |
 
 ### B2 — Núcleo de cálculo: modelo, correções e Decimal
 
@@ -150,4 +150,5 @@
 
 ## Alertas
 
-Nenhum.
+**Buracos no plano** (bloco em andamento com requisitos sem task):
+- **B0** tem requisitos planejados, mas estes não têm task: B0-02, B0-04, B0-07
