@@ -1,6 +1,6 @@
 ---
 name: orchestrate
-description: Decide, para cada pedido, se a sessão principal resolve sozinha ou se delega ao laço planner → executor → reviewer, e conduz esse laço (no máximo 3 rodadas, com confirmação humana antes de push/PR). Use no início de qualquer tarefa de desenvolvimento neste projeto: implementar uma feature ou um bloco do docs/SPECS.md, mudar regra de cálculo, corrigir bug, rodar E2E, preparar commit/PR, ou quando o usuário disser "orquestre", "delegue", "rode o laço", "execute esta change", mesmo sem citar agentes. Não use para perguntas, explicações ou edições triviais de documentação.
+description: Decide, para cada pedido, se a sessão principal resolve sozinha ou se delega ao laço planner → executor → reviewer, e conduz esse laço (no máximo 3 rodadas, com confirmação humana antes de push/PR). Use no início de qualquer tarefa de desenvolvimento neste projeto: implementar uma feature ou um bloco do docs/SPECS.md, mudar regra de cálculo, corrigir bug, rodar E2E, preparar commit/PR, ou quando o usuário disser "orquestre", "delegue", "rode o laço", "execute esta change", mesmo sem citar agentes; e para o modo autônomo ("rode o loop", executar os blocos do SPECS sem intervenção humana). Não use para perguntas, explicações ou edições triviais de documentação.
 ---
 
 # Orquestração
@@ -31,6 +31,8 @@ planner  →  [checkpoint humano: plano]  →  executor  →  reviewer
                                               └── reprovou ──┘   (máx. 3 rodadas)
                                                   aprovou → commit/PR (humano confirma)
 ```
+
+No **modo autônomo** (§8) o checkpoint do plano e as confirmações de commit, push, PR e merge não se aplicam.
 
 1. **Planner** transforma o bloco do `docs/SPECS.md` em uma change de OpenSpec pronta (skill `openspec-planning`). Entrega: nome da change, resumo, questões em aberto.
 2. **Checkpoint:** mostre ao usuário o resumo da change e peça "ok" antes de executar. A spec define tudo o que vem depois; corrigir aqui é barato, depois é caro. Se as questões em aberto envolverem regra trabalhista (⚖️), elas voltam ao usuário, nunca se resolvem por palpite.
@@ -67,7 +69,7 @@ Cada agente tem modelo e esforço próprios, definidos no arquivo dele em `.clau
 ## 5. O que nunca se delega nem se automatiza
 
 - Decisões de produto e interpretação de regra trabalhista sem fonte (⚖️).
-- **Push, PR, merge, arquivar change em branch principal**: sempre confirmação humana.
+- **Push, PR, merge, arquivar change em branch principal**: sempre confirmação humana, **exceto no modo autônomo (§8)**, quando o usuário o pediu para aquela execução.
 - Ações destrutivas (apagar branches, `reset --hard`, `push --force`).
 - Qualquer coisa que os hooks do projeto bloquearem (segredos, etc.): não contorne; peça ao usuário.
 
@@ -91,4 +93,11 @@ Regra que sustenta tudo: **toda task cita o ID do requisito (`B2-04`)** que ela 
 
 ## 7. Fechamento
 
+
 Ao terminar (ou ao parar no teto de rodadas), responda em poucas linhas: caminho escolhido (direto/laço), rodadas usadas, veredito, o que ficou pendente. Sem repetir o conteúdo dos relatórios.
+
+## 8. Modo autônomo (loop)
+
+Executa os blocos do SPECS em sequência, sem humano, com cada alvo rodando em um `claude -p` headless (`scripts/loop_worker.sh`) até o merge. **Só com pedido explícito do usuário** ("rode o loop", "modo autônomo"); a autorização vale só para aquela execução. Sem o pedido, valem as confirmações das seções anteriores.
+
+Procedimento, state, regras do worker, condição de merge e proibições: `references/loop.md`. Prompt do worker: `references/worker-prompt.md`. Dúvida ⚖️ ou de produto nunca é resolvida por palpite: o alvo vira `blocked` e o loop segue para o próximo.

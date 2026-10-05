@@ -13,6 +13,7 @@ Este arquivo é um **índice**: aponta onde está cada informação. Não dupliq
 | Quanto do SPECS já foi entregue pelo pipeline (**gerado**, não edite) | `docs/PROGRESS.md` (`python scripts/specs_progress.py`) |
 | Tom, personalidade e princípios de experiência | `PRODUCT.md` |
 | Tokens e componentes visuais | `DESIGN.md` |
+| Rodar o SPECS inteiro sem humano (loop autônomo) | skill `orchestrate` §8 e `references/loop.md` |
 | Specs de compliance (target SDK, Play Billing) | `openspec/specs/` |
 | Mudanças em andamento | `openspec/changes/` |
 

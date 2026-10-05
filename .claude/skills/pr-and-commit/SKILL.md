@@ -9,6 +9,8 @@ Commit e PR são o ponto onde o trabalho **sai da máquina e fica registrado**. 
 
 Pré-requisito: o `reviewer` emitiu **APROVADO** para a change. Sem isso, não prepare nada.
 
+**Modo autônomo.** Quando o worker roda sob `orchestrate` §8 (loop pedido pelo usuário), o passo 4 (pedir "sim") não se aplica: o worker faz commit, push, PR e squash-merge conforme `orchestrate/references/loop.md`. Os passos 1 a 3 e 5 valem iguais. Fora do loop, tudo abaixo continua exigindo o "sim".
+
 **Quem faz o quê.** Quando esta skill roda dentro do agente `reviewer`, ele só **prepara** (branch local, `git add` seletivo, mensagem de commit e corpo do PR) e devolve a proposta: o agente não tem `git commit`, `git push` nem `gh`. Os passos 3 (commit) e 4 (push e PR) abaixo são executados pelo **orquestrador** na sessão principal, depois da confirmação do usuário.
 
 ## 1. Branch

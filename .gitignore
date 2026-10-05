@@ -53,3 +53,6 @@ app.*.map.json
 # Config do Firebase (distribuída fora do repo)
 android/app/google-services.json
 android/build/
+
+# Estado e logs do loop autônomo (orchestrate)
+.claude/loop/
