@@ -7,12 +7,12 @@
 
 ## Resumo
 
-**32/76 requisitos entregues (42%)**
+**44/76 requisitos entregues (58%)**
 
 | Estado | Requisitos |
 |---|--:|
-| 🚀 Entregue | 32 |
-| ✔ Implementado | 12 |
+| 🚀 Entregue | 44 |
+| ✔ Implementado | 0 |
 | 🔨 Em andamento | 6 |
 | 📋 Planejado | 2 |
 | 🎯 Sem plano | 24 |
@@ -21,13 +21,13 @@
 
 | Bloco | Título | Total | 🚀 | ✔ | 🔨 | 📋 | 🎯 | Entregue |
 |---|---|--:|--:|--:|--:|--:|--:|--:|
-| B0 | Convenções e pré-requisitos transversais | 8 | 2 | 3 | 3 | 0 | 0 | 25% |
+| B0 | Convenções e pré-requisitos transversais | 8 | 5 | 0 | 3 | 0 | 0 | 62% |
 | B1 | Remoção do PRO e monetização só com AdMob | 17 | 17 | 0 | 0 | 0 | 0 | 100% |
-| B2 | Núcleo de cálculo: modelo, correções e Decimal | 15 | 10 | 2 | 1 | 2 | 0 | 67% |
+| B2 | Núcleo de cálculo: modelo, correções e Decimal | 15 | 12 | 0 | 1 | 2 | 0 | 80% |
 | B3 | Períodos de férias e férias em dobro | 8 | 0 | 0 | 0 | 0 | 8 | 0% |
 | B4 | Contratos a prazo e rescisão indireta | 9 | 0 | 0 | 0 | 0 | 9 | 0% |
-| B5 | Resultado, compartilhamento e PDF | 6 | 0 | 6 | 0 | 0 | 0 | 0% |
-| B6 | Validação e infraestrutura de testes golden | 6 | 3 | 1 | 2 | 0 | 0 | 50% |
+| B5 | Resultado, compartilhamento e PDF | 6 | 6 | 0 | 0 | 0 | 0 | 100% |
+| B6 | Validação e infraestrutura de testes golden | 6 | 4 | 0 | 2 | 0 | 0 | 67% |
 | B7 | Conformidade, privacidade e operação | 7 | 0 | 0 | 0 | 0 | 7 | 0% |
 
 ## Detalhe
@@ -36,14 +36,14 @@
 
 | ID | Estado | Requisito | Changes |
 |---|---|---|---|
-| B0-01 | 🔨 Em andamento | flutter analyze sem novos avisos e flutter test verde antes de qualquer commi... | `2026-10-04-remove-pro-ads-only`, `2026-10-05-fix-calculation-rules`, `migrate-money-to-decimal`, `result-assumptions-and-two-totals` |
-| B0-02 | ✔ Implementado | Teste antes da regra: mudança em cálculo só entra com teste que a cubra (gold... | `2026-10-05-fix-calculation-rules`, `result-assumptions-and-two-totals` |
-| B0-03 | ✔ Implementado | Nenhum dado pessoal em log, evento de analytics ou relatório de crash: sem sa... | `2026-10-04-remove-pro-ads-only`, `2026-10-05-fix-calculation-rules`, `result-assumptions-and-two-totals` |
+| B0-01 | 🔨 Em andamento | flutter analyze sem novos avisos e flutter test verde antes de qualquer commi... | `2026-10-04-remove-pro-ads-only`, `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals`, `migrate-money-to-decimal` |
+| B0-02 | 🚀 Entregue | Teste antes da regra: mudança em cálculo só entra com teste que a cubra (gold... | `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals` |
+| B0-03 | 🚀 Entregue | Nenhum dado pessoal em log, evento de analytics ou relatório de crash: sem sa... | `2026-10-04-remove-pro-ads-only`, `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals` |
 | B0-04 | 🚀 Entregue | Base legal no commit: mudança de regra trabalhista/tributária cita artigo, sú... | `2026-10-05-fix-calculation-rules` |
-| B0-05 | 🔨 Em andamento | Mudou camada, dependência, fluxo ou regra → atualizar docs/ARCHITECTURE.md e/... | `2026-10-04-remove-pro-ads-only`, `2026-10-05-fix-calculation-rules`, `migrate-money-to-decimal`, `result-assumptions-and-two-totals` |
+| B0-05 | 🔨 Em andamento | Mudou camada, dependência, fluxo ou regra → atualizar docs/ARCHITECTURE.md e/... | `2026-10-04-remove-pro-ads-only`, `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals`, `migrate-money-to-decimal` |
 | B0-06 | 🚀 Entregue | D3 — Firebase não é inicializado (main.dart não chama Firebase.initializeApp)... | `2026-10-04-remove-pro-ads-only` |
-| B0-07 | ✔ Implementado | Strings novas de UI vão em lib/l10n/app_localizations_pt.dart quando houver c... | `result-assumptions-and-two-totals` |
-| B0-08 | 🔨 Em andamento | Cada bloco sai como versão publicável pequena; pubspec.yaml ganha bump de ver... | `2026-10-04-remove-pro-ads-only`, `2026-10-05-fix-calculation-rules`, `migrate-money-to-decimal`, `result-assumptions-and-two-totals` |
+| B0-07 | 🚀 Entregue | Strings novas de UI vão em lib/l10n/app_localizations_pt.dart quando houver c... | `2026-10-05-result-assumptions-and-two-totals` |
+| B0-08 | 🔨 Em andamento | Cada bloco sai como versão publicável pequena; pubspec.yaml ganha bump de ver... | `2026-10-04-remove-pro-ads-only`, `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals`, `migrate-money-to-decimal` |
 
 ### B1 — Remoção do PRO e monetização só com AdMob
 
@@ -79,9 +79,9 @@
 | B2-06 | 🚀 Entregue | C3 Férias proporcionais pelo período aquisitivo | `2026-10-05-fix-calculation-rules` |
 | B2-07 | 🚀 Entregue | C4 Férias indenizadas sem IRRF e sem INSS | `2026-10-05-fix-calculation-rules` |
 | B2-08 | 🚀 Entregue | C5 INSS do 13º separado do salário | `2026-10-05-fix-calculation-rules` |
-| B2-09 | ✔ Implementado | TerminationResult passa a expor paidAtTermination (soma dos proventos pagos −... | `2026-10-05-fix-calculation-rules`, `result-assumptions-and-two-totals` |
+| B2-09 | 🚀 Entregue | TerminationResult passa a expor paidAtTermination (soma dos proventos pagos −... | `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals` |
 | B2-10 | 🚀 Entregue | Premissas: TerminationResult.assumptions: List<Assumption> com code, texto, o... | `2026-10-05-add-golden-test-infra`, `2026-10-05-fix-calculation-rules` |
-| B2-11 | ✔ Implementado | Histórico compatível: CalculationHistory.toJson ganha schemaVersion (inteiro)... | `2026-10-05-fix-calculation-rules`, `result-assumptions-and-two-totals` |
+| B2-11 | 🚀 Entregue | Histórico compatível: CalculationHistory.toJson ganha schemaVersion (inteiro)... | `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals` |
 | B2-12 | 🚀 Entregue | O TerminationType.values.firstWhere(...) em CalculationHistory.fromJson não t... | `2026-10-05-fix-calculation-rules` |
 | B2-13 | 🔨 Em andamento | Introduzir Decimal (package:decimal, já no pubspec) em domain/. Cálculo inter... | `2026-10-05-add-golden-test-infra`, `migrate-money-to-decimal` |
 | B2-14 | 📋 Planejado | Fronteiras convertem para double (apresentação, toJson); o JSON do histórico ... | `migrate-money-to-decimal` |
@@ -118,12 +118,12 @@
 
 | ID | Estado | Requisito | Changes |
 |---|---|---|---|
-| B5-01 | ✔ Implementado | ResultScreen exibe dois totais — "Pago na rescisão" e "Depositado no FGTS" — ... | `result-assumptions-and-two-totals` |
-| B5-02 | ✔ Implementado | Seção "Premissas desta estimativa" recolhível (fechada por padrão). Marcador ... | `result-assumptions-and-two-totals` |
-| B5-03 | ✔ Implementado | ShareUtils.generateShareText/generateSimpleShareText e PdfUtils._generatePdf ... | `result-assumptions-and-two-totals` |
-| B5-04 | ✔ Implementado | O aviso legal permanece nas telas atuais (Home, Formulário, Resultado, Histór... | `result-assumptions-and-two-totals` |
-| B5-05 | ✔ Implementado | Texto do compartilhamento sem dado pessoal além do próprio cálculo; nenhuma m... | `result-assumptions-and-two-totals` |
-| B5-06 | ✔ Implementado | A tela de histórico abre um registro usando a mesma ResultScreen; registros l... | `result-assumptions-and-two-totals` |
+| B5-01 | 🚀 Entregue | ResultScreen exibe dois totais — "Pago na rescisão" e "Depositado no FGTS" — ... | `2026-10-05-result-assumptions-and-two-totals` |
+| B5-02 | 🚀 Entregue | Seção "Premissas desta estimativa" recolhível (fechada por padrão). Marcador ... | `2026-10-05-result-assumptions-and-two-totals` |
+| B5-03 | 🚀 Entregue | ShareUtils.generateShareText/generateSimpleShareText e PdfUtils._generatePdf ... | `2026-10-05-result-assumptions-and-two-totals` |
+| B5-04 | 🚀 Entregue | O aviso legal permanece nas telas atuais (Home, Formulário, Resultado, Histór... | `2026-10-05-result-assumptions-and-two-totals` |
+| B5-05 | 🚀 Entregue | Texto do compartilhamento sem dado pessoal além do próprio cálculo; nenhuma m... | `2026-10-05-result-assumptions-and-two-totals` |
+| B5-06 | 🚀 Entregue | A tela de histórico abre um registro usando a mesma ResultScreen; registros l... | `2026-10-05-result-assumptions-and-two-totals` |
 
 ### B6 — Validação e infraestrutura de testes golden
 
@@ -132,7 +132,7 @@
 | B6-01 | 🚀 Entregue | Criar test/golden/cases/*.json. Cada arquivo: fonte (TRCT anonimizado, calcul... | `2026-10-05-add-golden-test-infra` |
 | B6-02 | 🔨 Em andamento | Um único *runner* (test/golden/golden_test.dart) carrega todos os casos e com... | `2026-10-05-add-golden-test-infra`, `2026-10-05-fix-calculation-rules`, `migrate-money-to-decimal` |
 | B6-03 | 🚀 Entregue | O resultado esperado vem sempre do documento externo, nunca da saída do app. ... | `2026-10-05-add-golden-test-infra` |
-| B6-04 | ✔ Implementado | Plano B: regras cujo caso golden ainda não existe (art. 479/480, férias em do... | `2026-10-05-add-golden-test-infra`, `2026-10-05-fix-calculation-rules`, `result-assumptions-and-two-totals` |
+| B6-04 | 🚀 Entregue | Plano B: regras cujo caso golden ainda não existe (art. 479/480, férias em do... | `2026-10-05-add-golden-test-infra`, `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals` |
 | B6-05 | 🚀 Entregue | Cobertura mínima antes de publicar B2: um caso por tipo de rescisão ativo e p... | `2026-10-05-add-golden-test-infra`, `2026-10-05-fix-calculation-rules` |
 | B6-06 | 🔨 Em andamento | Pendências do responsável (bloqueiam a publicação, não o código): fornecer TR... | `2026-10-05-add-golden-test-infra`, `2026-10-05-fix-calculation-rules`, `migrate-money-to-decimal` |
 
