@@ -26,8 +26,9 @@ plugins {
 
     // AGP e Kotlin (ajuste se o seu projeto exigir versões específicas)
     // AGP 8.5.1+ é necessário para suporte completo a 16 KB no Google Play
-    id("com.android.application") version "8.7.0" apply false
-    id("org.jetbrains.kotlin.android") version "2.2.10" apply false
+    id("com.android.application") version "8.11.1" apply false
+    id("org.jetbrains.kotlin.android") version "2.2.20" apply false
+    id("com.google.gms.google-services") version "4.5.0" apply false
 }
 
 rootProject.name = "calc_recisao"

@@ -1,91 +1,115 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'ad_ids.dart';
-import '../utils/pro_utils.dart';
+import '../analytics/consent_service.dart';
 import '../constants/app_constants.dart';
+import '../utils/logger.dart';
 
 class AdManager {
+  AdManager._();
+
   static const String _lastInterstitialKey = 'last_interstitial_time';
+
+  static InterstitialAd? _interstitial;
+  static bool _isLoadingInterstitial = false;
+  static bool _shownThisSession = false;
 
   static Future<void> initialize() async {
     await MobileAds.instance.initialize();
+    await loadInterstitial();
   }
 
-  static Future<BannerAd?> createBannerAd({VoidCallback? onLoaded}) async {
-    final shouldShowAds = await ProUtils.shouldShowAds();
-    if (!shouldShowAds) return null;
+  /// Não personalizado até o aceite do consentimento (B1-14).
+  @visibleForTesting
+  static AdRequest requestFor({required bool consented}) => AdRequest(nonPersonalizedAds: consented ? null : true);
 
-    return BannerAd(
-      adUnitId: AdIds.bannerId,
-      size: AdSize.banner,
-      request: const AdRequest(),
-      listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          debugPrint('Banner ad loaded');
-          onLoaded?.call();
-        },
-        onAdFailedToLoad: (ad, error) {
-          ad.dispose();
-          debugPrint('Banner ad failed to load: $error');
-        },
-      ),
-    );
-  }
+  static Future<AdRequest> buildRequest() async => requestFor(consented: await ConsentService.hasAccepted());
 
-  static Future<InterstitialAd?> createInterstitialAd() async {
+  /// Banner adaptativo ancorado de largura [width]; null se não for possível.
+  static Future<BannerAd?> createAdaptiveBanner(int width, {VoidCallback? onLoaded}) async {
     try {
-      final shouldShowAds = await ProUtils.shouldShowAds();
-      if (!shouldShowAds) return null;
-
-      final prefs = await SharedPreferences.getInstance();
-      final lastTime = prefs.getInt(_lastInterstitialKey) ?? 0;
-      final now = DateTime.now().millisecondsSinceEpoch;
-      final minutesSinceLastAd = (now - lastTime) / (1000 * 60);
-
-      if (minutesSinceLastAd < AppConstants.interstitialAdCooldownMinutes) {
-        return null;
-      }
-
-      InterstitialAd? interstitialAd;
-      await InterstitialAd.load(
-        adUnitId: AdIds.interstitialId,
-        request: const AdRequest(),
-        adLoadCallback: InterstitialAdLoadCallback(
-          onAdLoaded: (ad) {
-            interstitialAd = ad;
-            ad.fullScreenContentCallback = FullScreenContentCallback(
-              onAdDismissedFullScreenContent: (ad) {
-                ad.dispose();
-                _updateLastInterstitialTime();
-              },
-              onAdFailedToShowFullScreenContent: (ad, error) {
-                ad.dispose();
-                debugPrint('Interstitial ad failed to show: $error');
-              },
-            );
-          },
-          onAdFailedToLoad: (LoadAdError error) {
-            debugPrint('Interstitial ad failed to load: $error');
+      final size = await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(width);
+      if (size == null) return null;
+      return BannerAd(
+        adUnitId: AdIds.bannerId,
+        size: size,
+        request: await buildRequest(),
+        listener: BannerAdListener(
+          onAdLoaded: (_) => onLoaded?.call(),
+          onAdFailedToLoad: (ad, error) {
+            ad.dispose();
+            AppLogger.warning('Banner não carregou: ${error.code}');
           },
         ),
       );
-      return interstitialAd;
     } catch (e) {
-      debugPrint('Error creating interstitial ad: $e');
+      AppLogger.warning('Erro ao criar banner', e);
       return null;
     }
   }
 
-  static Future<void> _updateLastInterstitialTime() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_lastInterstitialKey, DateTime.now().millisecondsSinceEpoch);
-  }
-
-  static Future<void> showInterstitialAd() async {
-    final ad = await createInterstitialAd();
-    if (ad != null) {
-      await ad.show();
+  /// Pré-carrega o intersticial para que a saída do Resultado nunca espere.
+  static Future<void> loadInterstitial() async {
+    if (_interstitial != null || _isLoadingInterstitial) return;
+    _isLoadingInterstitial = true;
+    try {
+      await InterstitialAd.load(
+        adUnitId: AdIds.interstitialId,
+        request: await buildRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          onAdLoaded: (ad) {
+            ad.fullScreenContentCallback = FullScreenContentCallback(
+              onAdDismissedFullScreenContent: (ad) {
+                ad.dispose();
+                loadInterstitial();
+              },
+              onAdFailedToShowFullScreenContent: (ad, error) {
+                ad.dispose();
+                loadInterstitial();
+              },
+            );
+            _interstitial = ad;
+            _isLoadingInterstitial = false;
+          },
+          onAdFailedToLoad: (error) {
+            _isLoadingInterstitial = false;
+            AppLogger.warning('Intersticial não carregou: ${error.code}');
+          },
+        ),
+      );
+    } catch (e) {
+      _isLoadingInterstitial = false;
+      AppLogger.warning('Erro ao carregar intersticial', e);
     }
   }
+
+  /// 1 por sessão, 1 a cada 3 min e nunca antes da decisão de consentimento.
+  @visibleForTesting
+  static Future<bool> isInterstitialAllowed({DateTime? now}) async {
+    if (_shownThisSession) return false;
+    if (!await ConsentService.isDecided()) return false;
+
+    final prefs = await SharedPreferences.getInstance();
+    final lastTime = prefs.getInt(_lastInterstitialKey) ?? 0;
+    final elapsed = (now ?? DateTime.now()).millisecondsSinceEpoch - lastTime;
+    return elapsed >= AppConstants.interstitialAdCooldown.inMilliseconds;
+  }
+
+  /// Exibe o intersticial ao sair do Resultado, se permitido. Nunca espera.
+  static Future<bool> showInterstitialOnExit({DateTime? now}) async {
+    final ad = _interstitial;
+    if (ad == null) return false;
+    if (!await isInterstitialAllowed(now: now)) return false;
+
+    _interstitial = null;
+    _shownThisSession = true;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_lastInterstitialKey, (now ?? DateTime.now()).millisecondsSinceEpoch);
+    await ad.show();
+    return true;
+  }
+
+  @visibleForTesting
+  static void resetSession() => _shownThisSession = false;
 }

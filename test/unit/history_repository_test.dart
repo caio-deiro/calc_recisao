@@ -20,6 +20,35 @@ void main() {
       await repository.clearHistory();
     });
 
+    group('limite de 100 itens (FIFO)', () {
+      CalculationHistory item(int i) => CalculationHistory(
+        id: 'calc_$i',
+        input: TerminationInput(admissionDate: DateTime(2023, 1, 1), terminationDate: DateTime(2024, 6, 30), baseSalary: 5000.0),
+        result: TerminationResult(
+          additions: [],
+          deductions: [],
+          totalToReceive: 1000.0,
+          totalDeductions: 200.0,
+          netAmount: 800.0,
+          calculationDate: DateTime(2024, 6, 30),
+        ),
+        terminationType: TerminationType.withoutJustCause,
+        timestamp: DateTime(2024, 1, 1).add(Duration(minutes: i)),
+      );
+
+      test('deve descartar o mais antigo ao salvar o 101º', () async {
+        for (int i = 0; i < 101; i++) {
+          await repository.saveCalculation(item(i));
+        }
+
+        final history = await repository.getHistory();
+        expect(history.length, 100);
+        expect(history.any((c) => c.id == 'calc_0'), isFalse);
+        expect(history.first.id, 'calc_100');
+        expect(history.last.id, 'calc_1');
+      });
+    });
+
     group('getHistory', () {
       test('deve retornar lista vazia quando não há histórico', () async {
         final history = await repository.getHistory();

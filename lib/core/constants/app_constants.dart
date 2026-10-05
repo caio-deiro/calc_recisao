@@ -1,16 +1,15 @@
-/// Constantes da aplicação
-/// 
-/// Centraliza todos os valores configuráveis e magic numbers
+// Constantes da aplicação
+//
+// Centraliza todos os valores configuráveis e magic numbers
 
 class AppConstants {
   AppConstants._(); // Classe privada para evitar instanciação
 
   // Histórico
-  static const int maxFreeHistorySize = 10;
-  static const int maxProHistorySize = 999999; // Praticamente ilimitado
+  static const int maxHistorySize = 100;
+  static const int historyWarningThreshold = 90;
 
   // Anúncios
-  static const int interstitialAdCooldownMinutes = 3;
   static const Duration interstitialAdCooldown = Duration(minutes: 3);
 
   // Performance
@@ -38,15 +37,8 @@ class AppConstants {
 
   // Suporte
   static const String supportEmail = 'suporte@calcrescisao.com';
-  static const String proSupportEmail = 'pro@calcrescisao.com';
-  static const int proSupportResponseHours = 24;
-
-  // Produtos
-  static const String proProductId = 'calc_recisao_pro_monthly';
-  static const double proMonthlyPrice = 4.90;
 
   // URLs
   static const String privacyPolicyUrl = 'https://calcrescisao.com/privacy';
   static const String termsOfServiceUrl = 'https://calcrescisao.com/terms';
 }
-

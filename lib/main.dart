@@ -1,8 +1,10 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'app.dart';
 import 'core/ads/ad_manager.dart';
+import 'core/analytics/analytics_service.dart';
 import 'core/analytics/aso_analytics.dart';
-import 'core/utils/pro_utils.dart';
+import 'core/services/legacy_cleanup.dart';
 import 'core/services/tax_tables_service.dart';
 
 void main() async {
@@ -11,8 +13,9 @@ void main() async {
   try {
     // Inicializar serviços de forma paralela quando possível
     await Future.wait([
+      LegacyCleanup.run(),
+      _initFirebase(),
       AdManager.initialize(),
-      ProUtils.initializePurchaseService(),
       TaxTablesService.instance.loadTaxTables(),
       AsoAnalytics.initialize(),
     ], eagerError: false); // Não falhar se um serviço falhar
@@ -29,4 +32,15 @@ void main() async {
   }
 
   runApp(const App());
+}
+
+/// Firebase com coleta desligada por padrão (manifesto + boot); só liga após o
+/// aceite do consentimento (B0-06, B1-12).
+Future<void> _initFirebase() async {
+  try {
+    await Firebase.initializeApp();
+    await AnalyticsService.initialize();
+  } catch (e) {
+    debugPrint('Firebase indisponível: $e');
+  }
 }

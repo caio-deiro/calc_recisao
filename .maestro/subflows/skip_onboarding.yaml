@@ -1,0 +1,7 @@
+appId: com.caiodeiro.calcclt
+---
+- runFlow:
+    when:
+      visible: "Pular"
+    commands:
+      - tapOn: "Pular"

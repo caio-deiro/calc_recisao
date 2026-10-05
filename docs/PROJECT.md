@@ -34,7 +34,7 @@ resultado.
 sem contador e sem cadastro — e veja de onde vem cada centavo."*
 
 ### O que mudou nesta revisão
-- 🎯 **O plano PRO foi extinto.** Tudo é gratuito; a monetização é só AdMob (§8).
+- ✅ **O plano PRO foi extinto** (change `remove-pro-ads-only`). Tudo é gratuito; a monetização é só AdMob (§8).
 - 🎯 O resultado separa **"Pago na rescisão"** de **"Depositado no FGTS"** (§6.5).
 - 🎯 Regras de cálculo serão corrigidas e ampliadas: períodos de férias, **férias em dobro**, **art.
   479/480**, rescisão indireta (§6).
@@ -114,12 +114,12 @@ dados informados permitem.
 | Cálculo | Saldo de salário, aviso prévio, 13º, férias vencidas e proporcionais + 1/3, multa FGTS, INSS, IRRF, outros descontos |
 | Resultado | Breakdown de proventos e descontos, total e líquido, com aviso legal |
 | Compartilhar | Texto completo/resumido, copiar |
-| Histórico | Salvamento automático dos cálculos (hoje 10 no gratuito) |
+| Histórico | Salvamento automático dos cálculos (até 100, FIFO, com aviso a partir de 90) |
 | Experiência | Onboarding, tema claro/escuro, responsivo, suporte por e-mail |
-| Monetização | Banner + intersticial (AdMob) |
-| **PRO (a extinguir)** | Exportar PDF, histórico ilimitado, sem anúncios, "modo offline", "suporte prioritário" |
+| Monetização | Banner adaptativo + intersticial ao sair do Resultado (AdMob), para todos |
+| ~~PRO~~ (extinto) | Exportar PDF, histórico ilimitado, sem anúncios, "modo offline", "suporte prioritário": tudo removido ou liberado |
 
-### 5.2 Escopo alvo (🎯 decidido)
+### 5.2 Escopo atual (✅ B1 entregue)
 
 **Tudo gratuito:**
 - **Exportar PDF** livre.
@@ -304,18 +304,22 @@ define KPIs de MRR, conversão ou churn.
 - Sem textos que explorem a ansiedade do usuário.
 - A experiência de cálculo é completa e idêntica para todos.
 
-### 8.4 Consentimento (🎯 Q13a, Q17a)
+### 8.4 Consentimento (✅ Q13a, Q17a)
 - **Um único aviso**, mostrado **após o primeiro resultado**, com o formulário de consentimento do Google
   (UMP) e a escolha sobre analytics.
 - **Anúncios não personalizados até o consentimento.**
 - **Analytics é opt-in.** O Crashlytics fica sob o mesmo consentimento.
+- **Quando:** ao primeiro retorno à Home depois do primeiro resultado, antes de qualquer intersticial; o
+  intersticial só é exibido depois da decisão. Recusar mantém toda a coleta desligada (por isso
+  `consent_decision` só sai quando `aceitou`).
 - 🧪 A contrapartida é um eCPM menor; reavaliar com dados reais do AdMob.
 
 ### 8.5 Encerramento do PRO
 - ✅ **Não há assinantes** (Q15). Não há reembolso nem aviso a fazer.
 - Desativar no Play Console o produto `calc_recisao_pro_monthly`.
-- Remover do app: `PurchaseService`, `ProScreen`, `ProUtils`, `OfflineService` e as dependências
-  `in_app_purchase*`. A exigência de Billing Library ≥ 8.0 deixa de se aplicar.
+- ✅ Removidos do app: `PurchaseService`, `ProScreen`, `ProUtils`, `OfflineService` e as dependências
+  `in_app_purchase*`; as chaves legadas do `SharedPreferences` são apagadas no boot. A exigência de Billing
+  Library ≥ 8.0 deixa de se aplicar.
 - Atualizar a listagem da loja, a política de privacidade e a Data Safety (§12).
 
 ### 8.6 Custos
@@ -328,7 +332,7 @@ anual das tabelas, hospedagem da política de privacidade (GitHub Pages — `_co
 
 Sem metas de receita. As métricas servem para **saber se o app é usado e se está correto**.
 
-### 9.1 Eventos (🎯 Q21a), apenas com consentimento
+### 9.1 Eventos (✅ Q21a), apenas com consentimento
 Nenhum evento carrega valores financeiros, salários ou datas.
 
 | Evento | Parâmetro |

@@ -1,51 +1,10 @@
 import 'package:url_launcher/url_launcher.dart';
-import '../utils/pro_utils.dart';
 import '../constants/app_constants.dart';
 
 class SupportService {
   static const String _supportSubject = 'Suporte - Calculadora de Rescisão CLT';
-  static const String _proSupportSubject = 'Suporte PRO - Calculadora de Rescisão CLT';
 
   static Future<void> openSupportChannel() async {
-    final isPro = await ProUtils.isProUser();
-
-    if (isPro) {
-      await _openProSupport();
-    } else {
-      await _openBasicSupport();
-    }
-  }
-
-  static Future<void> _openProSupport() async {
-    final email = AppConstants.proSupportEmail;
-    final subject = _proSupportSubject;
-    final body = '''
-Olá! Sou um usuário PRO da Calculadora de Rescisão CLT.
-
-[Descreva sua dúvida ou problema aqui]
-
-Informações do dispositivo:
-- Versão do app: [versão]
-- Dispositivo: [modelo]
-- Sistema operacional: [Android/iOS]
-
-Aguardo retorno em até ${AppConstants.proSupportResponseHours}h conforme prometido no plano PRO.
-
-Obrigado!
-''';
-
-    final uri = Uri(
-      scheme: 'mailto',
-      path: email,
-      query: 'subject=${Uri.encodeComponent(subject)}&body=${Uri.encodeComponent(body)}',
-    );
-
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    }
-  }
-
-  static Future<void> _openBasicSupport() async {
     final email = AppConstants.supportEmail;
     final subject = _supportSubject;
     final body = '''
@@ -77,17 +36,12 @@ Obrigado!
   }
 
   static Future<void> openFeatureRequest() async {
-    final isPro = await ProUtils.isProUser();
-
-    final email = isPro ? AppConstants.proSupportEmail : AppConstants.supportEmail;
-    final subject = isPro ? 'Sugestão de Funcionalidade PRO' : 'Sugestão de Funcionalidade';
-    final body =
-        '''
-${isPro ? 'Olá! Como usuário PRO, gostaria de sugerir:' : 'Olá! Gostaria de sugerir:'}
+    final email = AppConstants.supportEmail;
+    const subject = 'Sugestão de Funcionalidade';
+    const body = '''
+Olá! Gostaria de sugerir:
 
 [Descreva sua sugestão aqui]
-
-${isPro ? 'Como usuário PRO, espero que esta funcionalidade seja priorizada.' : ''}
 
 Obrigado!
 ''';
@@ -101,11 +55,6 @@ Obrigado!
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     }
-  }
-
-  static String getSupportResponseTime() {
-    // Em uma implementação real, isso viria de uma API
-    return '24 horas';
   }
 
   static String getBasicSupportResponseTime() {

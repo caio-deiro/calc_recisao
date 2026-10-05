@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../widgets/ad_banner.dart';
+
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
@@ -10,6 +12,7 @@ class AboutScreen extends StatelessWidget {
         title: const Text('Sobre'),
         leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.of(context).pop()),
       ),
+      bottomNavigationBar: const AdBanner(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -72,10 +75,12 @@ class AboutScreen extends StatelessWidget {
             const Text('Política de Privacidade', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             const Text(
-              'Esta aplicação não coleta dados pessoais sensíveis. '
-              'Todos os cálculos são realizados localmente no seu dispositivo. '
-              'Os anúncios exibidos são gerenciados pelo Google AdMob e seguem '
-              'as políticas de privacidade do Google.',
+              'Os cálculos são feitos no seu aparelho e o histórico fica só nele. '
+              'Salário, datas, valores e resultados nunca são enviados. '
+              'Se você aceitar, coletamos dados de uso anônimos (tipo de rescisão calculado, '
+              'uso de compartilhar e de PDF, e sua decisão sobre este aviso) e relatórios de falha. '
+              'Sem o seu aceite, nada disso é coletado. '
+              'Os anúncios são do Google AdMob e não são personalizados até você aceitar.',
             ),
             const SizedBox(height: 24),
             const Text('Suporte', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),

@@ -1,0 +1,62 @@
+appId: com.caiodeiro.calcclt
+name: Primeiro resultado, PDF sem bloqueio e consentimento uma única vez
+tags: [smoke, calculation, pdf, consent]
+env:
+  SALARY: "400000"
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Pular"
+    timeout: 20000
+- runFlow: ../../subflows/skip_onboarding.yaml
+- assertNotVisible:
+    text: ".*Ajude a melhorar o app.*"
+    label: "Sem aviso antes do primeiro resultado"
+- tapOn:
+    point: 50%,18%
+    label: "Sem Justa Causa"
+- runFlow: ../../subflows/fill_basic_form.yaml
+- extendedWaitUntil:
+    visible: ".*Valor Líquido.*"
+    timeout: 15000
+    label: "Resultado visível, sem intersticial ao entrar"
+- tapOn:
+    point: 94%,5%
+    label: "Abrir compartilhar"
+- assertVisible: "Exportar PDF.*"
+- assertVisible: "Salvar PDF.*"
+- assertNotVisible: "Recurso PRO.*"
+- tapOn:
+    point: 40%,86%
+    label: "Exportar PDF"
+- extendedWaitUntil:
+    visible: "Sharing 1 file|Compartilhando 1 arquivo"
+    timeout: 15000
+    label: "PDF gerado sem bloqueio"
+- pressKey: Back
+- tapOn:
+    point: 7%,5%
+    label: "Sai do Resultado"
+- tapOn:
+    point: 7%,5%
+    label: "Sai do Formulário"
+- extendedWaitUntil:
+    visible: ".*Ajude a melhorar o app.*"
+    timeout: 10000
+    label: "Aviso de consentimento após o primeiro resultado"
+- tapOn: "Agora não"
+- assertNotVisible: ".*Ajude a melhorar o app.*"
+- tapOn:
+    point: 50%,18%
+- runFlow: ../../subflows/fill_basic_form.yaml
+- extendedWaitUntil:
+    visible: ".*Valor Líquido.*"
+    timeout: 15000
+- tapOn:
+    point: 7%,5%
+- tapOn:
+    point: 7%,5%
+- assertNotVisible:
+    text: ".*Ajude a melhorar o app.*"
+    label: "Aviso não se repete"
