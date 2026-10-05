@@ -19,7 +19,8 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.caiodeiro.calcclt"
-    compileSdk = flutter.compileSdkVersion
+    // Pin explícito para compliance Google Play (API 36 / Android 16)
+    compileSdk = 36
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -34,7 +35,7 @@ android {
         // Application ID único para produção
         applicationId = "com.caiodeiro.calcclt"
         minSdk = 24
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

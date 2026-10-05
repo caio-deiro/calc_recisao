@@ -46,7 +46,7 @@ dependencies:
   google_mobile_ads: ^6.0.0
   
   # Firebase (opcional)
-  firebase_core: ^4.1.0
+  firebase_core: ^4.15.0
   firebase_analytics: ^12.0.1
   firebase_crashlytics: ^5.0.1
   
