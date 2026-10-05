@@ -7,27 +7,27 @@
 
 ## Resumo
 
-**31/76 requisitos entregues (41%)**
+**20/76 requisitos entregues (26%)**
 
 | Estado | Requisitos |
 |---|--:|
-| 🚀 Entregue | 31 |
-| ✔ Implementado | 0 |
-| 🔨 Em andamento | 0 |
-| 📋 Planejado | 0 |
-| 🎯 Sem plano | 45 |
+| 🚀 Entregue | 20 |
+| ✔ Implementado | 16 |
+| 🔨 Em andamento | 7 |
+| 📋 Planejado | 2 |
+| 🎯 Sem plano | 31 |
 
 ## Por bloco
 
 | Bloco | Título | Total | 🚀 | ✔ | 🔨 | 📋 | 🎯 | Entregue |
 |---|---|--:|--:|--:|--:|--:|--:|--:|
-| B0 | Convenções e pré-requisitos transversais | 8 | 5 | 0 | 0 | 0 | 3 | 62% |
+| B0 | Convenções e pré-requisitos transversais | 8 | 1 | 2 | 4 | 0 | 1 | 12% |
 | B1 | Remoção do PRO e monetização só com AdMob | 17 | 17 | 0 | 0 | 0 | 0 | 100% |
-| B2 | Núcleo de cálculo: modelo, correções e Decimal | 15 | 3 | 0 | 0 | 0 | 12 | 20% |
+| B2 | Núcleo de cálculo: modelo, correções e Decimal | 15 | 0 | 12 | 1 | 2 | 0 | 0% |
 | B3 | Períodos de férias e férias em dobro | 8 | 0 | 0 | 0 | 0 | 8 | 0% |
 | B4 | Contratos a prazo e rescisão indireta | 9 | 0 | 0 | 0 | 0 | 9 | 0% |
 | B5 | Resultado, compartilhamento e PDF | 6 | 0 | 0 | 0 | 0 | 6 | 0% |
-| B6 | Validação e infraestrutura de testes golden | 6 | 6 | 0 | 0 | 0 | 0 | 100% |
+| B6 | Validação e infraestrutura de testes golden | 6 | 2 | 2 | 2 | 0 | 0 | 33% |
 | B7 | Conformidade, privacidade e operação | 7 | 0 | 0 | 0 | 0 | 7 | 0% |
 
 ## Detalhe
@@ -36,14 +36,14 @@
 
 | ID | Estado | Requisito | Changes |
 |---|---|---|---|
-| B0-01 | 🚀 Entregue | flutter analyze sem novos avisos e flutter test verde antes de qualquer commi... | `2026-10-04-remove-pro-ads-only` |
-| B0-02 | 🎯 Sem plano | Teste antes da regra: mudança em cálculo só entra com teste que a cubra (gold... | — |
-| B0-03 | 🚀 Entregue | Nenhum dado pessoal em log, evento de analytics ou relatório de crash: sem sa... | `2026-10-04-remove-pro-ads-only` |
-| B0-04 | 🎯 Sem plano | Base legal no commit: mudança de regra trabalhista/tributária cita artigo, sú... | — |
-| B0-05 | 🚀 Entregue | Mudou camada, dependência, fluxo ou regra → atualizar docs/ARCHITECTURE.md e/... | `2026-10-04-remove-pro-ads-only` |
+| B0-01 | 🔨 Em andamento | flutter analyze sem novos avisos e flutter test verde antes de qualquer commi... | `2026-10-04-remove-pro-ads-only`, `fix-calculation-rules`, `migrate-money-to-decimal` |
+| B0-02 | ✔ Implementado | Teste antes da regra: mudança em cálculo só entra com teste que a cubra (gold... | `fix-calculation-rules` |
+| B0-03 | ✔ Implementado | Nenhum dado pessoal em log, evento de analytics ou relatório de crash: sem sa... | `2026-10-04-remove-pro-ads-only`, `fix-calculation-rules` |
+| B0-04 | 🔨 Em andamento | Base legal no commit: mudança de regra trabalhista/tributária cita artigo, sú... | `fix-calculation-rules` |
+| B0-05 | 🔨 Em andamento | Mudou camada, dependência, fluxo ou regra → atualizar docs/ARCHITECTURE.md e/... | `2026-10-04-remove-pro-ads-only`, `fix-calculation-rules`, `migrate-money-to-decimal` |
 | B0-06 | 🚀 Entregue | D3 — Firebase não é inicializado (main.dart não chama Firebase.initializeApp)... | `2026-10-04-remove-pro-ads-only` |
 | B0-07 | 🎯 Sem plano | Strings novas de UI vão em lib/l10n/app_localizations_pt.dart quando houver c... | — |
-| B0-08 | 🚀 Entregue | Cada bloco sai como versão publicável pequena; pubspec.yaml ganha bump de ver... | `2026-10-04-remove-pro-ads-only` |
+| B0-08 | 🔨 Em andamento | Cada bloco sai como versão publicável pequena; pubspec.yaml ganha bump de ver... | `2026-10-04-remove-pro-ads-only`, `fix-calculation-rules`, `migrate-money-to-decimal` |
 
 ### B1 — Remoção do PRO e monetização só com AdMob
 
@@ -71,21 +71,21 @@
 
 | ID | Estado | Requisito | Changes |
 |---|---|---|---|
-| B2-01 | 🚀 Entregue | Identidade de verba (D8): BreakdownItem ganha code (enum BreakdownCode: salar... | `2026-10-05-add-golden-test-infra` |
-| B2-02 | 🎯 Sem plano | Regras por tipo em tabela, não em if espalhados: um TerminationRules imutável... | — |
-| B2-03 | 🎯 Sem plano | O use case deixa de remover itens depois de adicioná-los (padrão atual para j... | — |
-| B2-04 | 🎯 Sem plano | C1 Justa causa paga férias vencidas | — |
-| B2-05 | 🎯 Sem plano | C2 Aviso indenizado projeta tempo | — |
-| B2-06 | 🎯 Sem plano | C3 Férias proporcionais pelo período aquisitivo | — |
-| B2-07 | 🎯 Sem plano | C4 Férias indenizadas sem IRRF e sem INSS | — |
-| B2-08 | 🎯 Sem plano | C5 INSS do 13º separado do salário | — |
-| B2-09 | 🎯 Sem plano | TerminationResult passa a expor paidAtTermination (soma dos proventos pagos −... | — |
-| B2-10 | 🚀 Entregue | Premissas: TerminationResult.assumptions: List<Assumption> com code, texto, o... | `2026-10-05-add-golden-test-infra` |
-| B2-11 | 🎯 Sem plano | Histórico compatível: CalculationHistory.toJson ganha schemaVersion (inteiro)... | — |
-| B2-12 | 🎯 Sem plano | O TerminationType.values.firstWhere(...) em CalculationHistory.fromJson não t... | — |
-| B2-13 | 🚀 Entregue | Introduzir Decimal (package:decimal, já no pubspec) em domain/. Cálculo inter... | `2026-10-05-add-golden-test-infra` |
-| B2-14 | 🎯 Sem plano | Fronteiras convertem para double (apresentação, toJson); o JSON do histórico ... | — |
-| B2-15 | 🎯 Sem plano | Critério de migração: os testes golden (B6) passam antes e depois da troca pa... | — |
+| B2-01 | ✔ Implementado | Identidade de verba (D8): BreakdownItem ganha code (enum BreakdownCode: salar... | `2026-10-05-add-golden-test-infra`, `fix-calculation-rules` |
+| B2-02 | ✔ Implementado | Regras por tipo em tabela, não em if espalhados: um TerminationRules imutável... | `fix-calculation-rules` |
+| B2-03 | ✔ Implementado | O use case deixa de remover itens depois de adicioná-los (padrão atual para j... | `fix-calculation-rules` |
+| B2-04 | ✔ Implementado | C1 Justa causa paga férias vencidas | `fix-calculation-rules` |
+| B2-05 | ✔ Implementado | C2 Aviso indenizado projeta tempo | `fix-calculation-rules` |
+| B2-06 | ✔ Implementado | C3 Férias proporcionais pelo período aquisitivo | `fix-calculation-rules` |
+| B2-07 | ✔ Implementado | C4 Férias indenizadas sem IRRF e sem INSS | `fix-calculation-rules` |
+| B2-08 | ✔ Implementado | C5 INSS do 13º separado do salário | `fix-calculation-rules` |
+| B2-09 | ✔ Implementado | TerminationResult passa a expor paidAtTermination (soma dos proventos pagos −... | `fix-calculation-rules` |
+| B2-10 | ✔ Implementado | Premissas: TerminationResult.assumptions: List<Assumption> com code, texto, o... | `2026-10-05-add-golden-test-infra`, `fix-calculation-rules` |
+| B2-11 | ✔ Implementado | Histórico compatível: CalculationHistory.toJson ganha schemaVersion (inteiro)... | `fix-calculation-rules` |
+| B2-12 | ✔ Implementado | O TerminationType.values.firstWhere(...) em CalculationHistory.fromJson não t... | `fix-calculation-rules` |
+| B2-13 | 🔨 Em andamento | Introduzir Decimal (package:decimal, já no pubspec) em domain/. Cálculo inter... | `2026-10-05-add-golden-test-infra`, `migrate-money-to-decimal` |
+| B2-14 | 📋 Planejado | Fronteiras convertem para double (apresentação, toJson); o JSON do histórico ... | `migrate-money-to-decimal` |
+| B2-15 | 📋 Planejado | Critério de migração: os testes golden (B6) passam antes da troca para Decima... | `migrate-money-to-decimal` |
 
 ### B3 — Períodos de férias e férias em dobro
 
@@ -130,11 +130,11 @@
 | ID | Estado | Requisito | Changes |
 |---|---|---|---|
 | B6-01 | 🚀 Entregue | Criar test/golden/cases/*.json. Cada arquivo: fonte (TRCT anonimizado, calcul... | `2026-10-05-add-golden-test-infra` |
-| B6-02 | 🚀 Entregue | Um único *runner* (test/golden/golden_test.dart) carrega todos os casos e com... | `2026-10-05-add-golden-test-infra` |
+| B6-02 | 🔨 Em andamento | Um único *runner* (test/golden/golden_test.dart) carrega todos os casos e com... | `2026-10-05-add-golden-test-infra`, `fix-calculation-rules`, `migrate-money-to-decimal` |
 | B6-03 | 🚀 Entregue | O resultado esperado vem sempre do documento externo, nunca da saída do app. ... | `2026-10-05-add-golden-test-infra` |
-| B6-04 | 🚀 Entregue | Plano B: regras cujo caso golden ainda não existe (art. 479/480, férias em do... | `2026-10-05-add-golden-test-infra` |
-| B6-05 | 🚀 Entregue | Cobertura mínima antes de publicar B2: um caso por tipo de rescisão ativo e p... | `2026-10-05-add-golden-test-infra` |
-| B6-06 | 🚀 Entregue | Pendências do responsável (bloqueiam a publicação, não o código): fornecer TR... | `2026-10-05-add-golden-test-infra` |
+| B6-04 | ✔ Implementado | Plano B: regras cujo caso golden ainda não existe (art. 479/480, férias em do... | `2026-10-05-add-golden-test-infra`, `fix-calculation-rules` |
+| B6-05 | ✔ Implementado | Cobertura mínima antes de publicar B2: um caso por tipo de rescisão ativo e p... | `2026-10-05-add-golden-test-infra`, `fix-calculation-rules` |
+| B6-06 | 🔨 Em andamento | Pendências do responsável (bloqueiam a publicação, não o código): fornecer TR... | `2026-10-05-add-golden-test-infra`, `fix-calculation-rules`, `migrate-money-to-decimal` |
 
 ### B7 — Conformidade, privacidade e operação
 
@@ -151,5 +151,4 @@
 ## Alertas
 
 **Buracos no plano** (bloco em andamento com requisitos sem task):
-- **B0** tem requisitos planejados, mas estes não têm task: B0-02, B0-04, B0-07
-- **B2** tem requisitos planejados, mas estes não têm task: B2-02, B2-03, B2-04, B2-05, B2-06, B2-07, B2-08, B2-09, B2-11, B2-12, B2-14, B2-15
+- **B0** tem requisitos planejados, mas estes não têm task: B0-07

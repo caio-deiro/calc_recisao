@@ -1,6 +1,15 @@
-class BreakdownItem {
-  const BreakdownItem({required this.description, required this.value, required this.type, this.details});
+import 'breakdown_code.dart';
 
+class BreakdownItem {
+  const BreakdownItem({
+    required this.code,
+    required this.description,
+    required this.value,
+    required this.type,
+    this.details,
+  });
+
+  final BreakdownCode code;
   final String description;
   final double value;
   final BreakdownType type;

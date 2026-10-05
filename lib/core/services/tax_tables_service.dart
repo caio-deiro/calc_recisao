@@ -53,10 +53,16 @@ class IrrfReducerConfig {
 }
 
 class TerminationTaxResult {
-  const TerminationTaxResult({required this.inss, required this.irrf});
+  const TerminationTaxResult({required this.inssSalary, required this.inssThirteenth, required this.irrf});
 
-  final double inss;
+  /// INSS do saldo de salário (tabela e teto próprios).
+  final double inssSalary;
+
+  /// INSS do 13º, apurado em separado (tabela e teto próprios).
+  final double inssThirteenth;
   final double irrf;
+
+  double get inss => inssSalary + inssThirteenth;
 }
 
 class TaxTablesService {
@@ -227,22 +233,28 @@ class TaxTablesService {
     return _applyAnnualReducer(grossIrrf, taxableBase);
   }
 
+  /// Apura INSS e IRRF da rescisão.
+  ///
+  /// C5: INSS do saldo e do 13º em bases independentes, cada uma com a tabela
+  /// progressiva e o teto próprios (Decreto 3.048/99 art. 214 §6º e §7º). IRRF
+  /// mensal deduz o INSS do saldo; o anual deduz o INSS do 13º.
+  /// C4: férias (vencidas ou proporcionais) ficam fora das duas bases
+  /// (Decreto 3.048/99 art. 214 §9º IV; Súmulas 125 e 386 STJ, AD PGFN 14/2008). ⚖️
   TerminationTaxResult calculateTerminationTaxes({
     required double salaryBalance,
     required double thirteenthSalary,
-    required double vacationAmount,
     required DateTime terminationDate,
     int dependents = 0,
   }) {
-    final double inssBase = salaryBalance + thirteenthSalary;
-    final double inss = calculateInss(inssBase, terminationDate);
-    final double inssSalaryShare = inssBase > 0 ? inss * (salaryBalance / inssBase) : 0.0;
-    final double inssThirteenthShare = inss - inssSalaryShare;
-    final double monthlyIrrfBase = salaryBalance - inssSalaryShare;
-    final double annualIrrfBase = thirteenthSalary + vacationAmount - inssThirteenthShare;
-    final double monthlyIrrf = calculateIrrf(monthlyIrrfBase, terminationDate, dependents: dependents);
-    final double annualIrrf = calculateIrrfAnnual(annualIrrfBase, terminationDate, dependents: dependents);
-    return TerminationTaxResult(inss: inss, irrf: monthlyIrrf + annualIrrf);
+    final double inssSalary = calculateInss(salaryBalance, terminationDate);
+    final double inssThirteenth = calculateInss(thirteenthSalary, terminationDate);
+    final double monthlyIrrf = calculateIrrf(salaryBalance - inssSalary, terminationDate, dependents: dependents);
+    final double annualIrrf = calculateIrrfAnnual(
+      thirteenthSalary - inssThirteenth,
+      terminationDate,
+      dependents: dependents,
+    );
+    return TerminationTaxResult(inssSalary: inssSalary, inssThirteenth: inssThirteenth, irrf: monthlyIrrf + annualIrrf);
   }
 
   double _calculateIrrfFromTable(double baseValue, TaxTable table) {

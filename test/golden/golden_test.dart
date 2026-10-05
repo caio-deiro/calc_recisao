@@ -31,10 +31,6 @@ void main() {
         c,
         const CalculateTerminationUseCase().execute(c.input, c.type),
       );
-      for (final s in outcome.skips) {
-        // ignore: avoid_print
-        print('[${c.id}] pulado: $s');
-      }
       expect(outcome.failures, isEmpty, reason: c.id);
     }, skip: skipReason);
   }

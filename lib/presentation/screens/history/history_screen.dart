@@ -17,6 +17,7 @@ class HistoryScreen extends StatefulWidget {
 
 class _HistoryScreenState extends State<HistoryScreen> {
   List<CalculationHistory> _history = [];
+  int _unreadableCount = 0;
   bool _isLoading = true;
 
   @override
@@ -31,6 +32,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     try {
       final repository = HistoryRepository();
       _history = await repository.getHistory();
+      _unreadableCount = await repository.unreadableCount();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao carregar histórico: $e')));
@@ -53,7 +55,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _history.isEmpty
+          : _history.isEmpty && _unreadableCount == 0
           ? _buildEmptyState()
           : _buildHistoryList(),
       bottomNavigationBar: const AdBanner(),
@@ -83,6 +85,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget _buildHistoryList() {
     return Column(
       children: [
+        if (_unreadableCount > 0) _buildUnreadableNotice(),
         if (_history.length >= AppConstants.historyWarningThreshold) _buildHistoryLimitNotice(),
         Expanded(
           child: ListView.builder(
@@ -96,6 +99,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
         const DisclaimerWidget(),
       ],
+    );
+  }
+
+  Widget _buildUnreadableNotice() {
+    return Semantics(
+      identifier: 'history_unreadable_notice',
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+        child: Text(
+          _unreadableCount == 1
+              ? '1 registro não pôde ser lido e foi mantido no aparelho.'
+              : '$_unreadableCount registros não puderam ser lidos e foram mantidos no aparelho.',
+          style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.error),
+        ),
+      ),
     );
   }
 
@@ -139,6 +157,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           Formatters.formatDate(calculation.timestamp),
                           style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                         ),
+                        if (calculation.isLegacy)
+                          Text(
+                            'Calculado em versão anterior',
+                            style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                          ),
                       ],
                     ),
                   ),
@@ -219,7 +242,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
       final repository = HistoryRepository();
       await repository.clearHistory();
 
-      setState(() => _history = []);
+      setState(() {
+        _history = [];
+        _unreadableCount = 0;
+      });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Histórico limpo com sucesso')));

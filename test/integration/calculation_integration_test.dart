@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:calc_recisao/domain/entities/breakdown_code.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:calc_recisao/domain/entities/termination_input.dart';
 import 'package:calc_recisao/domain/entities/termination_type.dart';
@@ -101,8 +102,8 @@ void main() {
         final result = useCase.execute(input, TerminationType.withJustCause);
 
         // Com justa causa não deve ter multa FGTS
-        expect(result.additions.any((item) => item.description.contains('Multa FGTS')), isFalse);
-        expect(result.additions.any((item) => item.description.contains('Aviso Prévio')), isFalse);
+        expect(result.fgtsDeposit.items.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
+        expect(result.additions.any((item) => item.code == BreakdownCode.notice), isFalse);
 
         await repository.saveCalculation(
           CalculationHistory(
@@ -158,14 +159,14 @@ void main() {
 
         // Acordo mútuo deve ter aviso prévio reduzido (50%)
         final noticeItem = result.additions.firstWhere(
-          (item) => item.description.contains('Aviso Prévio'),
+          (item) => item.code == BreakdownCode.notice,
           orElse: () => throw Exception('Aviso prévio não encontrado'),
         );
         expect(noticeItem.description, contains('50%'));
 
         // Multa FGTS deve ser 20% (reduzida de 40%)
-        final fgtsItem = result.additions.firstWhere(
-          (item) => item.description.contains('Multa FGTS'),
+        final fgtsItem = result.fgtsDeposit.items.firstWhere(
+          (item) => item.code == BreakdownCode.fgtsFine,
           orElse: () => throw Exception('Multa FGTS não encontrada'),
         );
         expect(fgtsItem.description, contains('20%'));
@@ -185,7 +186,7 @@ void main() {
         final result = useCase.execute(input, TerminationType.fixedTerm);
 
         // Prazo determinado não deve ter aviso prévio indenizado
-        expect(result.additions.any((item) => item.description.contains('Aviso Prévio Indenizado')), isFalse);
+        expect(result.additions.any((item) => item.code == BreakdownCode.notice), isFalse);
       });
     });
 

@@ -50,7 +50,7 @@ e atualize esta tabela.
 | `path_provider` | Salvar PDF em arquivo | |
 | `firebase_core` + `firebase_crashlytics` | Relato de erros não-fatais | Inicializados no `main`; coleta desligada por padrão e ligada só após o aceite (§7) |
 | `firebase_analytics` | 4 eventos mínimos | Só com consentimento, via `core/analytics/analytics_service.dart` (PROJECT.md §9) |
-| `decimal` | — | ⚠️ declarado, **não usado**. 🎯 Passa a ser o tipo do dinheiro no domínio (change `fix-calculation-rules`, depois dos testes golden) |
+| `decimal` | — | ⚠️ declarado, **não usado**. 🎯 Passa a ser o tipo do dinheiro no domínio (change `migrate-money-to-decimal`, depois dos testes golden) |
 | `cupertino_icons` | Ícones | |
 
 
@@ -86,7 +86,8 @@ lib/
 ├── data/
 │   └── repositories/          # history_repository.dart
 ├── domain/
-│   ├── entities/              # TerminationInput/Result/Type, BreakdownItem, CalculationHistory
+│   ├── entities/              # TerminationInput/Result/Type, BreakdownItem/BreakdownCode, Assumption, CalculationHistory
+│   ├── rules/                 # termination_rules.dart (tabela por tipo), avos.dart (13º, férias, projeção)
 │   └── usecases/              # calculate_termination.dart
 ├── l10n/                      # AppLocalizations manual (pt)
 └── presentation/
@@ -139,9 +140,10 @@ TerminationInput + TerminationType
     │
     ▼
 CalculateTermination.execute()          ← domain/usecases (função pura, síncrona)
-    ├─ regras por tipo de rescisão      ← ver PROJECT.md §6
+    ├─ regras por tipo de rescisão      ← `TerminationRules` (tabela imutável) + `avos.dart`; ver PROJECT.md §6
     ├─ TaxTablesService.calculateTerminationTaxes()  ← INSS/IRRF por data da rescisão
-    └─ retorna TerminationResult { additions[], deductions[], totalToReceive, totalDeductions, netAmount }
+    └─ retorna TerminationResult { additions[], deductions[], paidAtTermination, fgtsDeposit, assumptions[], totalDeductions;
+                                   netAmount/totalToReceive @Deprecated (incluem a multa) }
     │
     ▼
 ResultScreen ──► HistoryRepository.save() ──► SharedPreferences
@@ -149,8 +151,12 @@ ResultScreen ──► HistoryRepository.save() ──► SharedPreferences
              └─► PdfUtils (todos)
 ```
 
-- O resultado é uma lista de `BreakdownItem` (`addition`/`deduction`) — a UI renderiza o *breakdown*
-  sem recalcular. **Princípio de produto: transparência.** Não esconda itens do cálculo.
+- O resultado é uma lista de `BreakdownItem` (`addition`/`deduction`), cada um com `BreakdownCode` (nunca
+  use `description` como chave) — a UI renderiza o *breakdown* sem recalcular. A multa do FGTS fica em
+  `fgtsDeposit`; as telas, o PDF e o texto compartilhado a leem de lá.
+- Histórico: `schemaVersion` 2; registro sem versão é legado (itens `BreakdownCode.legacy`, marcado
+  "calculado em versão anterior", sem recalcular). Registro ilegível é preservado e contado
+  (`HistoryRepository.unreadableCount`); nomes antigos de tipo passam pela tabela de aliases. **Princípio de produto: transparência.** Não esconda itens do cálculo.
 - Erros de cálculo viram `CalculationException` (mensagem amigável + `originalError`).
 
 ### 5.2 Tabelas fiscais
@@ -236,7 +242,7 @@ removidas no boot por `LegacyCleanup` (idempotente).
 | `test/unit/` | Regras de cálculo (`calculate_termination`, `edge_cases`, `termination_2026`, `comprehensive_termination_review`), validação, repositório (FIFO de 100), limpeza legada, `AdManager`, analytics, PDF, logger, onboarding |
 | `test/widget/` | Onboarding, banner por tela, aviso de histórico cheio, aviso de consentimento |
 | `test/integration/` | Fluxo de cálculo ponta a ponta |
-| `test/golden/` | Infra de casos golden (B6): `cases/*.json` (oráculo externo, um arquivo por caso), `support/` (loader, comparador, `goldenTolerance`, mapa provisório `codeOf`), `golden_test.dart` (runner único), `validation_status.dart` (regras ⚖️ pendentes), `coverage_test.dart` (gate `release-gate`). Hoje sem casos reais (pendência B6-06) |
+| `test/golden/` | Infra de casos golden (B6): `cases/*.json` (oráculo externo, um arquivo por caso), `support/` (loader, comparador por `item.code.name`, `goldenTolerance`), `golden_test.dart` (runner único), `validation_status.dart` (regras ⚖️ pendentes), `coverage_test.dart` (gate `release-gate`). Hoje sem casos reais (pendência B6-06) |
 | `test/mocks`, `test_helpers/` | Setup de `SharedPreferences` |
 
 Comandos:
@@ -285,9 +291,9 @@ limpo, `flutter test` verde. Mudança de regra trabalhista exige citar a base le
 | D5 | Strings de domínio hardcoded; l10n manual | Bloqueia en-US real | Migrar para ARB/`gen-l10n` |
 | D6 | Singletons estáticos (`TaxTablesService`, `AdManager`, `AnalyticsService`) | Testes dependem de estado global | Injeção simples por construtor nos use cases/repositórios |
 | D7 | ~~`OfflineService` sem consumidor~~ | ✅ **Resolvida pela remoção** | — |
-| D8 | Descrições de itens do cálculo usadas como *chave* (`removeWhere(item.description == ...)`) | Frágil a renomeações; piora com férias em dobro e art. 479/480 | Usar enum/ID no `BreakdownItem` **antes** de adicionar verbas |
+| D8 | ~~Descrições de itens do cálculo usadas como *chave*~~ ✅ **Resolvida** (B2-01): `BreakdownCode`; mantida a descrição só como texto de UI. Antes: (`removeWhere(item.description == ...)`) | Frágil a renomeações; piora com férias em dobro e art. 479/480 | Usar enum/ID no `BreakdownItem` **antes** de adicionar verbas |
 | D9 | ~~Intersticial exibido ao renderizar o Resultado~~ | ✅ **Resolvida**: só ao **sair** do Resultado, ≤ 1/3 min e 1/sessão | — |
-| D10 | Cálculo e apresentação misturam "a receber" e multa do FGTS | Total enganoso | 🎯 `TerminationResult` com dois totais (pago na rescisão × depositado no FGTS) e premissas |
+| D10 | ~~Cálculo e apresentação misturam "a receber" e multa do FGTS~~ | ✅ **Resolvida no domínio** (B2-09/10): `paidAtTermination`, `fgtsDeposit`, `assumptions`. 🎯 UI nova em B5; `netAmount` @Deprecated até lá | — |
 | D11 | `hasAccruedVacation` booleano e meses por ano-calendário | Não modela períodos nem dobro | 🎯 Modelo de períodos derivado da admissão (change `add-vacation-periods`) |
 
 ---

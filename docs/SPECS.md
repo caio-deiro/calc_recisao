@@ -31,7 +31,7 @@
 |---|---|---|---|---|
 | **B0** | Convenções e pré-requisitos transversais | — | — | §4, §10 |
 | **B1** | Remoção do PRO e monetização só com AdMob | `remove-pro-ads-only` | B0 | §5.2, §8, §9 |
-| **B2** | Núcleo de cálculo: modelo, correções e `Decimal` | `fix-calculation-rules` | B0, B6 | §6.2–6.3, §6.5, §6.7 |
+| **B2** | Núcleo de cálculo: modelo, correções e `Decimal` | `fix-calculation-rules` (B2-01..12) e `migrate-money-to-decimal` (B2-13..15) | B0, B6 | §6.2–6.3, §6.5, §6.7 |
 | **B3** | Períodos de férias e férias em dobro | `add-vacation-periods` | B2 | §6.4 |
 | **B4** | Contratos a prazo e rescisão indireta | `add-fixed-term-and-indirect` | B2 | §6.1, §6.6 |
 | **B5** | Resultado, compartilhamento e PDF | (distribuída: B1 e B2) | B1, B2 | §6.5, §7 |
@@ -142,7 +142,7 @@ serialização mudar (mitigação: B1 não altera o JSON do histórico).
 
 ## B2 — Núcleo de cálculo: modelo, correções e `Decimal`
 
-**Change:** `fix-calculation-rules` · **PRD:** §6.2–6.3, §6.5, §6.7, Q1–Q3, Q7, Q9, Q11, Q22 · **Persona:** ambas
+**Change:** `fix-calculation-rules` (B2-01..12) e `migrate-money-to-decimal` (B2-13..15, só começa com golden real, B6-06) · **PRD:** §6.2–6.3, §6.5, §6.7, Q1–Q3, Q7, Q9, Q11, Q22 · **Persona:** ambas
 
 **Objetivo técnico:** tornar o cálculo **data-driven, identificável e preciso**, corrigir C1–C5 e
 entregar o resultado com dois totais e premissas.
@@ -180,7 +180,7 @@ entregar o resultado com dois totais e premissas.
 |---|---|
 | B2-13 | Introduzir `Decimal` (`package:decimal`, já no `pubspec`) em `domain/`. Cálculo interno todo em `Decimal`/`Rational`; divisões convertidas com escala explícita; **arredondamento half-up a 2 casas por item**, como hoje (`_roundCurrency`), aplicado nos mesmos pontos. |
 | B2-14 | Fronteiras convertem para `double` (apresentação, `toJson`); o JSON do histórico continua com números. `TerminationInput` mantém `double` na borda e converte na entrada do use case. |
-| B2-15 | **Critério de migração:** os testes golden (B6) passam **antes e depois** da troca para `Decimal`, sem alterar tolerância nem valores esperados. Divergência de centavos entre as duas versões deve ser explicada, e quem está certo é o documento oficial. |
+| B2-15 | **Critério de migração:** os testes golden (B6) passam **antes** da troca para `Decimal` (tolerância 0,01) e **depois** dela (tolerância 0,00, B2-13), sem alterar os valores esperados. Divergência de centavos entre as duas versões deve ser explicada, e quem está certo é o documento oficial. |
 
 ### Módulos afetados
 `lib/domain/usecases/calculate_termination.dart`, `lib/domain/entities/{termination_type,termination_result,breakdown_item,calculation_history,termination_input}.dart`,

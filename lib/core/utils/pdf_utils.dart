@@ -125,7 +125,7 @@ class PdfUtils {
             style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold, color: PdfColors.green800),
           ),
           pw.SizedBox(height: 12),
-          ...result.additions.map(
+          ...[...result.additions, ...result.fgtsDeposit.items].map(
             (addition) =>
                 _buildItemRow(addition.description, Formatters.formatCurrency(addition.value), addition.details),
           ),

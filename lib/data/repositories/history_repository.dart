@@ -19,33 +19,50 @@ class HistoryRepository {
   /// [prefs] - Instância de SharedPreferences (opcional, para testes)
   HistoryRepository({SharedPreferences? prefs}) : _prefs = prefs;
 
+  /// Lê as entradas gravadas: registros legíveis e as strings brutas ilegíveis.
+  ///
+  /// Registro que falha ao decodificar NUNCA é descartado: o dado bruto é mantido
+  /// e devolvido em [_StoredHistory.unreadable]. O log não leva conteúdo do registro
+  /// (B0-03), só o tipo do erro.
+  Future<_StoredHistory> _read(SharedPreferences prefs) async {
+    final readable = <CalculationHistory>[];
+    final unreadable = <String>[];
+    for (final raw in prefs.getStringList(_historyKey) ?? <String>[]) {
+      try {
+        readable.add(CalculationHistory.fromJson(jsonDecode(raw)));
+      } catch (e) {
+        AppLogger.warning('Registro do histórico ilegível (${e.runtimeType})');
+        unreadable.add(raw);
+      }
+    }
+    readable.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    return _StoredHistory(readable, unreadable);
+  }
+
+  Future<void> _write(SharedPreferences prefs, List<CalculationHistory> history, List<String> unreadable) {
+    return prefs.setStringList(_historyKey, [...history.map((calc) => jsonEncode(calc.toJson())), ...unreadable]);
+  }
+
   /// Recupera todo o histórico de cálculos, ordenado por data (mais recente primeiro).
   ///
-  /// Retorna lista vazia se não houver histórico.
-  /// Ignora itens inválidos no histórico.
+  /// Retorna lista vazia se não houver histórico. Registros ilegíveis não entram
+  /// na lista, mas continuam armazenados (veja [unreadableCount]).
   ///
   /// Throws [StorageException] se houver erro ao acessar o armazenamento
   Future<List<CalculationHistory>> getHistory() async {
     try {
       final prefs = _prefs ?? await SharedPreferences.getInstance();
-      final historyJson = prefs.getStringList(_historyKey) ?? [];
-
-      return historyJson
-          .map((json) {
-            try {
-              return CalculationHistory.fromJson(jsonDecode(json));
-            } catch (e) {
-              AppLogger.warning('Erro ao decodificar item do histórico', e);
-              return null;
-            }
-          })
-          .whereType<CalculationHistory>()
-          .toList()
-        ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      return (await _read(prefs)).readable;
     } catch (e, stackTrace) {
       AppLogger.error('Erro ao obter histórico', e, stackTrace);
       throw StorageException('Erro ao carregar histórico de cálculos', originalError: e);
     }
+  }
+
+  /// Quantidade de registros gravados que não puderam ser lidos.
+  Future<int> unreadableCount() async {
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    return (await _read(prefs)).unreadable.length;
   }
 
   /// Salva um novo cálculo no histórico.
@@ -57,7 +74,8 @@ class HistoryRepository {
   Future<void> saveCalculation(CalculationHistory calculation) async {
     try {
       final prefs = _prefs ?? await SharedPreferences.getInstance();
-      final history = await getHistory();
+      final stored = await _read(prefs);
+      final history = stored.readable;
 
       // Adicionar novo cálculo no início
       history.insert(0, calculation);
@@ -67,10 +85,7 @@ class HistoryRepository {
         history.removeRange(AppConstants.maxHistorySize, history.length);
       }
 
-      // Salvar no SharedPreferences
-      final historyJson = history.map((calc) => jsonEncode(calc.toJson())).toList();
-
-      await prefs.setStringList(_historyKey, historyJson);
+      await _write(prefs, history, stored.unreadable);
     } catch (e, stackTrace) {
       AppLogger.error('Erro ao salvar cálculo no histórico', e, stackTrace);
       throw StorageException('Erro ao salvar cálculo no histórico', originalError: e);
@@ -83,13 +98,12 @@ class HistoryRepository {
   /// Não faz nada se o cálculo não existir
   Future<void> deleteCalculation(String id) async {
     final prefs = _prefs ?? await SharedPreferences.getInstance();
-    final history = await getHistory();
+    final stored = await _read(prefs);
+    final history = stored.readable;
 
     history.removeWhere((calc) => calc.id == id);
 
-    final historyJson = history.map((calc) => jsonEncode(calc.toJson())).toList();
-
-    await prefs.setStringList(_historyKey, historyJson);
+    await _write(prefs, history, stored.unreadable);
   }
 
   /// Remove todo o histórico de cálculos.
@@ -107,7 +121,8 @@ class HistoryRepository {
   /// Não faz nada se o cálculo não existir
   Future<void> addNote(String id, String note) async {
     final prefs = _prefs ?? await SharedPreferences.getInstance();
-    final history = await getHistory();
+    final stored = await _read(prefs);
+    final history = stored.readable;
 
     final index = history.indexWhere((calc) => calc.id == id);
     if (index != -1) {
@@ -118,13 +133,19 @@ class HistoryRepository {
         terminationType: history[index].terminationType,
         timestamp: history[index].timestamp,
         note: note,
+        schemaVersion: history[index].schemaVersion,
       );
 
       history[index] = updatedCalc;
 
-      final historyJson = history.map((calc) => jsonEncode(calc.toJson())).toList();
-
-      await prefs.setStringList(_historyKey, historyJson);
+      await _write(prefs, history, stored.unreadable);
     }
   }
+}
+
+class _StoredHistory {
+  const _StoredHistory(this.readable, this.unreadable);
+
+  final List<CalculationHistory> readable;
+  final List<String> unreadable;
 }

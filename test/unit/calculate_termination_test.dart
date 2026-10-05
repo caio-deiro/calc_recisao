@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:calc_recisao/domain/entities/breakdown_code.dart';
 import 'package:calc_recisao/domain/entities/termination_input.dart';
 import 'package:calc_recisao/domain/entities/termination_type.dart';
 import 'package:calc_recisao/domain/usecases/calculate_termination.dart';
@@ -39,7 +40,7 @@ void main() {
         expect(result.netAmount, greaterThan(0));
 
         // Verificar se tem multa FGTS
-        final fgtsPenalty = result.additions.where((item) => item.description.contains('Multa FGTS'));
+        final fgtsPenalty = result.fgtsDeposit.items.where((item) => item.code == BreakdownCode.fgtsFine);
         expect(fgtsPenalty.length, 1);
       });
 
@@ -60,7 +61,7 @@ void main() {
         expect(result.deductions.length, greaterThan(0));
 
         // Verificar se não tem férias vencidas
-        final accruedVacation = result.additions.where((item) => item.description.contains('Férias Vencidas'));
+        final accruedVacation = result.additions.where((item) => item.code == BreakdownCode.accruedVacation);
         expect(accruedVacation.length, 0);
       });
     });
@@ -83,7 +84,7 @@ void main() {
         expect(result.deductions.length, greaterThan(0));
 
         // Verificar se não tem multa FGTS
-        final fgtsPenalty = result.additions.where((item) => item.description.contains('Multa FGTS'));
+        final fgtsPenalty = result.fgtsDeposit.items.where((item) => item.code == BreakdownCode.fgtsFine);
         expect(fgtsPenalty.length, 0);
       });
     });
@@ -106,7 +107,7 @@ void main() {
         expect(result.deductions.length, greaterThan(0));
 
         // Verificar se não tem multa FGTS
-        final fgtsPenalty = result.additions.where((item) => item.description.contains('Multa FGTS'));
+        final fgtsPenalty = result.fgtsDeposit.items.where((item) => item.code == BreakdownCode.fgtsFine);
         expect(fgtsPenalty.length, 0);
       });
     });
@@ -121,7 +122,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final salaryBalance = result.additions.where((item) => item.description.contains('Saldo de Salário')).first;
+        final salaryBalance = result.additions.where((item) => item.code == BreakdownCode.salaryBalance).first;
 
         expect(salaryBalance.value, 1500.0); // 3000 / 30 * 15
       });
@@ -132,10 +133,11 @@ void main() {
           terminationDate: DateTime(2024, 6, 30),
           baseSalary: 3000.0,
           averageAdditions: 500.0,
+          noticeWorked: true, // sem projeção do aviso (C2), isola as avos do ano
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final thirteenthSalary = result.additions.where((item) => item.description.contains('13º Salário')).first;
+        final thirteenthSalary = result.additions.where((item) => item.code == BreakdownCode.thirteenth).first;
 
         // 6 meses trabalhados (jan-jun, junho conta porque >= 15 dias): (3000 + 500) * 6/12 = 1750.0
         expect(thirteenthSalary.value, closeTo(1750.0, 0.01));
