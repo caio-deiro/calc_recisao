@@ -199,7 +199,14 @@ caso golden com fonte (B6-06). `Decimal` (C6) segue 🎯 na change `migrate-mone
 > C2 a C5 devem ser confirmados contra os casos de validação (§11) **antes** de entrar em produção.
 > Se a validação contradisser a leitura acima, a validação vence.
 
-### 6.4 Períodos de férias e férias em dobro (🎯 ⚖️)
+### 6.4 Períodos de férias e férias em dobro (✅ ⚖️)
+
+✅ Implementado na change `add-vacation-periods` (B3). Decisões de implementação: o período `i` é em dobro só se a
+rescisão for **estritamente posterior** ao fim do concessivo `A+(i+1)a` (no próprio dia, ainda simples), com a
+mesma âncora de fim de mês dos avos (29/02 vira 28/02); a projeção do aviso **não** cria período vencido (só
+aumenta avos do proporcional); o stepper do formulário acompanha `n` (anos completos) até o toque; registro antigo
+com `hasAccruedVacation` só é preservado. Dobro continua **em validação** (⚖️ `doubleVacation`, Súmula 328 TST;
+CLT art. 137), com a marca visível no resultado.
 
 - **Entrada única:** "quantos períodos de férias você já gozou?" (Q24a).
 - O app **deriva**, a partir da data de admissão e da data da rescisão, cada período como:

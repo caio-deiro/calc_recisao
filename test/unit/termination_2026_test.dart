@@ -100,13 +100,13 @@ void main() {
         admissionDate: DateTime(2024, 3, 1),
         terminationDate: terminationDate,
         baseSalary: 4000.0,
-        hasAccruedVacation: true,
+        vacationPeriodsTaken: 1,
         calculateTaxes: false,
       );
 
       final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-      expect(result.additions.any((item) => item.code == BreakdownCode.accruedVacation), isTrue);
+      expect(result.additions.any((item) => item.code == BreakdownCode.accruedVacationSimple), isTrue);
       expect(result.additions.any((item) => item.code == BreakdownCode.proportionalVacation), isTrue);
     });
   });

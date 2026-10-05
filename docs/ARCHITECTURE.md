@@ -87,7 +87,7 @@ lib/
 │   └── repositories/          # history_repository.dart
 ├── domain/
 │   ├── entities/              # TerminationInput/Result/Type, BreakdownItem/BreakdownCode, Assumption, CalculationHistory
-│   ├── rules/                 # termination_rules.dart (tabela por tipo), avos.dart (13º, férias, projeção)
+│   ├── rules/                 # termination_rules.dart (tabela por tipo), avos.dart (13º, férias, projeção, âncora de meses), vacation_periods.dart (períodos de férias)
 │   └── usecases/              # calculate_termination.dart
 ├── l10n/                      # AppLocalizations manual (pt)
 └── presentation/
@@ -299,7 +299,7 @@ limpo, `flutter test` verde. Mudança de regra trabalhista exige citar a base le
 | D8 | ~~Descrições de itens do cálculo usadas como *chave*~~ ✅ **Resolvida** (B2-01): `BreakdownCode`; mantida a descrição só como texto de UI. Antes: (`removeWhere(item.description == ...)`) | Frágil a renomeações; piora com férias em dobro e art. 479/480 | Usar enum/ID no `BreakdownItem` **antes** de adicionar verbas |
 | D9 | ~~Intersticial exibido ao renderizar o Resultado~~ | ✅ **Resolvida**: só ao **sair** do Resultado, ≤ 1/3 min e 1/sessão | — |
 | D10 | ~~Cálculo e apresentação misturam "a receber" e multa do FGTS~~ | ✅ **Resolvida** (B2-09/10 e B5): `paidAtTermination`, `fgtsDeposit`, `assumptions` no domínio e na UI; alias `netAmount` removido | — |
-| D11 | `hasAccruedVacation` booleano e meses por ano-calendário | Não modela períodos nem dobro | 🎯 Modelo de períodos derivado da admissão (change `add-vacation-periods`) |
+| D11 | ~~`hasAccruedVacation` booleano e meses por ano-calendário~~ | ✅ **Resolvida** (B3): `vacationPeriodsTaken` (int) e `VacationPeriods.derive` (puro, `rules/vacation_periods.dart`) derivam períodos simples, em dobro e proporcional; legado `hasAccruedVacation` só preservado (`legacyHasAccruedVacation`, fora do cálculo) | — |
 
 ---
 

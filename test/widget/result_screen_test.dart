@@ -4,8 +4,10 @@ import 'package:calc_recisao/core/analytics/consent_service.dart';
 import 'package:calc_recisao/core/services/tax_tables_service.dart';
 import 'package:calc_recisao/core/utils/formatters.dart';
 import 'package:calc_recisao/domain/entities/calculation_history.dart';
+import 'package:calc_recisao/domain/entities/termination_input.dart';
 import 'package:calc_recisao/domain/entities/termination_result.dart';
 import 'package:calc_recisao/domain/entities/termination_type.dart';
+import 'package:calc_recisao/domain/usecases/calculate_termination.dart';
 import 'package:calc_recisao/presentation/screens/result/result_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -112,6 +114,29 @@ void main() {
       await pumpSaved(tester, savedRecord(TerminationType.mutualAgreement, fgts: 10000));
       expect(byId('result_validation_notice'), findsOneWidget);
       expect(byId('result_assumption_validationPending'), findsNothing);
+    });
+
+    testWidgets('férias em dobro: aviso visível e tabela de períodos nas premissas', (tester) async {
+      final result = const CalculateTerminationUseCase().execute(
+        TerminationInput(
+          admissionDate: DateTime(2022, 6, 15),
+          terminationDate: DateTime(2024, 6, 16),
+          baseSalary: 3000,
+          calculateTaxes: false,
+        ),
+        TerminationType.withoutJustCause,
+      );
+      await pumpSaved(tester, savedRecord(TerminationType.withoutJustCause, result: result));
+
+      expect(byId('result_validation_notice'), findsOneWidget);
+      expect(find.textContaining('Cálculo em validação: férias em dobro'), findsOneWidget);
+      expect(find.textContaining('Férias em Dobro'), findsWidgets);
+      expect(byId('result_assumption_vacationPeriods'), findsNothing);
+
+      await tester.tap(find.text('Premissas desta estimativa'));
+      await tester.pumpAndSettle();
+      expect(byId('result_assumption_vacationPeriods'), findsOneWidget);
+      expect(find.textContaining(': dobro'), findsWidgets);
     });
 
     testWidgets('sem regra pendente não há aviso de validação', (tester) async {

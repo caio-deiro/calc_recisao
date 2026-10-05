@@ -27,7 +27,7 @@ void main() {
           terminationDate: DateTime(2024, 1, 1),
           baseSalary: 3000.0,
           averageAdditions: 500.0,
-          hasAccruedVacation: false,
+          vacationPeriodsTaken: 1,
           noticeWorked: false,
           calculateTaxes: true,
         );
@@ -52,7 +52,7 @@ void main() {
           terminationDate: DateTime(2024, 1, 1),
           baseSalary: 5000.0,
           averageAdditions: 1000.0,
-          hasAccruedVacation: false,
+          vacationPeriodsTaken: 3,
           noticeWorked: false,
           calculateTaxes: true,
         );
@@ -81,7 +81,7 @@ void main() {
           terminationDate: DateTime(2024, 1, 1),
           baseSalary: 3000.0,
           averageAdditions: 500.0,
-          hasAccruedVacation: false,
+          vacationPeriodsTaken: 1,
           noticeWorked: false,
           calculateTaxes: true,
         );
@@ -111,7 +111,7 @@ void main() {
           terminationDate: DateTime(2024, 1, 1),
           baseSalary: 4000.0,
           averageAdditions: 0.0,
-          hasAccruedVacation: false,
+          vacationPeriodsTaken: 0,
           noticeWorked: false,
           calculateTaxes: true,
         );
@@ -145,7 +145,7 @@ void main() {
           terminationDate: DateTime(2024, 1, 1),
           baseSalary: 3500.0,
           averageAdditions: 300.0,
-          hasAccruedVacation: false,
+          vacationPeriodsTaken: 2,
           noticeWorked: false,
           calculateTaxes: true,
         );
@@ -176,7 +176,7 @@ void main() {
           terminationDate: DateTime(2024, 1, 1),
           baseSalary: 3000.0,
           averageAdditions: 500.0,
-          hasAccruedVacation: false,
+          vacationPeriodsTaken: 1,
           noticeWorked: false,
           calculateTaxes: true,
         );
@@ -206,7 +206,7 @@ void main() {
           terminationDate: DateTime(2024, 1, 1),
           baseSalary: 3000.0,
           averageAdditions: 500.0,
-          hasAccruedVacation: false,
+          vacationPeriodsTaken: 1,
           noticeWorked: false,
           calculateTaxes: true,
         );
@@ -217,7 +217,7 @@ void main() {
           terminationDate: input.terminationDate,
           baseSalary: input.baseSalary,
           averageAdditions: input.averageAdditions,
-          hasAccruedVacation: input.hasAccruedVacation,
+          vacationPeriodsTaken: input.vacationPeriodsTaken,
           noticeWorked: true,
           calculateTaxes: input.calculateTaxes,
         );
@@ -271,7 +271,7 @@ void main() {
           terminationDate: DateTime(2024, 1, 1),
           baseSalary: 3000.0,
           averageAdditions: 500.0,
-          hasAccruedVacation: true, // Férias vencidas
+          vacationPeriodsTaken: 0,
           noticeWorked: false,
           calculateTaxes: true,
         );
@@ -283,7 +283,7 @@ void main() {
         }
 
         // Verificações específicas para férias vencidas e proporcionais
-        expect(result.additions.any((item) => item.code == BreakdownCode.accruedVacation), isTrue);
+        expect(result.additions.any((item) => item.code == BreakdownCode.accruedVacationSimple), isTrue);
         expect(result.additions.any((item) => item.code == BreakdownCode.proportionalVacation), isTrue);
       });
 
@@ -293,7 +293,7 @@ void main() {
           terminationDate: DateTime(2024, 1, 1),
           baseSalary: 3000.0,
           averageAdditions: 500.0,
-          hasAccruedVacation: false,
+          vacationPeriodsTaken: 1,
           noticeWorked: true, // Aviso prévio trabalhado
           calculateTaxes: true,
         );

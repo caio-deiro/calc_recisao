@@ -149,5 +149,36 @@ void main() {
       );
     });
   });
-}
 
+  group('TerminationInputValidator: períodos de férias gozados', () {
+    TerminationInput input(int taken, {DateTime? termination}) => TerminationInput(
+      admissionDate: DateTime(2022, 6, 15),
+      terminationDate: termination ?? DateTime(2024, 6, 16), // n = 2
+      baseSalary: 3000.0,
+      vacationPeriodsTaken: taken,
+    );
+
+    test('deve rejeitar taken acima de n', () {
+      final result = TerminationInputValidator.validate(input(3));
+      expect(result.isValid, isFalse);
+      expect(result.fieldErrors.containsKey('vacationPeriodsTaken'), isTrue);
+    });
+
+    test('deve rejeitar taken negativo', () {
+      final result = TerminationInputValidator.validate(input(-1));
+      expect(result.fieldErrors.containsKey('vacationPeriodsTaken'), isTrue);
+    });
+
+    test('deve aceitar taken igual a n', () {
+      final result = TerminationInputValidator.validate(input(2));
+      expect(result.isValid, isTrue);
+      expect(result.fieldErrors.containsKey('vacationPeriodsTaken'), isFalse);
+    });
+
+    test('deve reportar só erro de data com rescisão anterior à admissão', () {
+      final result = TerminationInputValidator.validate(input(3, termination: DateTime(2021, 1, 1)));
+      expect(result.fieldErrors.containsKey('vacationPeriodsTaken'), isFalse);
+      expect(result.fieldErrors.containsKey('terminationDate'), isTrue);
+    });
+  });
+}

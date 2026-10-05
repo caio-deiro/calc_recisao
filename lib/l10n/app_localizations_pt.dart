@@ -53,7 +53,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get options => 'Opções';
 
   @override
-  String get hasAccruedVacation => 'Férias vencidas?';
+  String get vacationPeriodsTaken => 'Períodos de férias já gozados';
+
+  @override
+  String get vacationPeriodsWarning =>
+      'Férias fracionadas, abono pecuniário (venda de férias) e férias parcialmente gozadas não são tratados.';
 
   @override
   String get noticeWorked => 'Aviso prévio trabalhado';

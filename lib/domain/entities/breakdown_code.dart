@@ -4,6 +4,10 @@ enum BreakdownCode {
   notice,
   noticeDiscount,
   thirteenth,
+  accruedVacationSimple,
+  accruedVacationDouble,
+
+  /// Só para leitura de histórico gravado antes de B3 (um único item de férias vencidas).
   accruedVacation,
   proportionalVacation,
   fgtsFine,

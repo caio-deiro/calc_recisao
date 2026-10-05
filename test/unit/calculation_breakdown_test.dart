@@ -195,14 +195,14 @@ void main() {
           terminationDate: DateTime(2024, 6, 1),
           baseSalary: 3000.0,
           averageAdditions: 0.0,
-          hasAccruedVacation: true,
+          vacationPeriodsTaken: 1,
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final vacation = result.additions.firstWhere((item) => item.code == BreakdownCode.accruedVacation);
+        final vacation = result.additions.firstWhere((item) => item.code == BreakdownCode.accruedVacationSimple);
 
         expect(vacation.value, 4000.0); // 3000 + (3000 / 3)
-        expect(vacation.details, 'Salário + 1/3 constitucional');
+        expect(vacation.details, '1 período (salário + 1/3 constitucional)');
       });
 
       test('não deve incluir férias vencidas quando não há', () {
@@ -210,11 +210,11 @@ void main() {
           admissionDate: DateTime(2022, 1, 1),
           terminationDate: DateTime(2024, 6, 1),
           baseSalary: 3000.0,
-          hasAccruedVacation: false,
+          vacationPeriodsTaken: 2,
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final vacation = result.additions.where((item) => item.code == BreakdownCode.accruedVacation);
+        final vacation = result.additions.where((item) => item.code == BreakdownCode.accruedVacationSimple);
 
         expect(vacation.length, 0);
       });

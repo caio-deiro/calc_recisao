@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../domain/entities/termination_type.dart';
 import '../../../domain/entities/termination_input.dart';
+import '../../../domain/rules/vacation_periods.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/logger.dart';
 import '../../../core/validators/termination_input_validator.dart';
@@ -10,6 +11,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../widgets/disclaimer_widget.dart';
 import '../../widgets/currency_text_field.dart';
 import '../../widgets/date_input_field.dart';
+import '../../widgets/vacation_taken_field.dart';
 import '../result/result_screen.dart';
 
 class FormScreen extends StatefulWidget {
@@ -33,7 +35,11 @@ class _FormScreenState extends State<FormScreen> {
   final _dependentsController = TextEditingController();
   final _otherDiscountsController = TextEditingController();
 
-  bool _hasAccruedVacation = false;
+  int _vacationTaken = 0;
+  bool _vacationTouched = false;
+
+  /// Anos completos entre as datas (`n`); nulo enquanto as datas forem inválidas.
+  int? _vacationLimit;
   bool _noticeWorked = false;
   bool _hasExistingFgts = false;
   bool _calculateTaxes = true;
@@ -41,6 +47,32 @@ class _FormScreenState extends State<FormScreen> {
   @override
   void initState() {
     super.initState();
+    _admissionDateController.addListener(_updateVacationLimit);
+    _terminationDateController.addListener(_updateVacationLimit);
+  }
+
+  /// Recalcula `n` ao mudar as datas: o valor acompanha `n` até o toque e nunca o excede.
+  void _updateVacationLimit() {
+    int? limit;
+    try {
+      if (_admissionDateController.text.length != 10 || _terminationDateController.text.length != 10) {
+        throw const FormatException('data incompleta');
+      }
+      final admission = Formatters.parseDate(_admissionDateController.text);
+      final termination = Formatters.parseDate(_terminationDateController.text);
+      if (!termination.isBefore(admission)) {
+        limit = fullServiceYears(admission, termination);
+      }
+    } catch (_) {
+      limit = null;
+    }
+    // Data incompleta (digitando): o valor tocado é guardado e reaparece quando as datas voltam a valer.
+    final taken = _vacationTouched ? (limit == null ? _vacationTaken : _vacationTaken.clamp(0, limit)) : (limit ?? 0);
+    if (limit == _vacationLimit && taken == _vacationTaken) return;
+    setState(() {
+      _vacationLimit = limit;
+      _vacationTaken = taken;
+    });
   }
 
   @override
@@ -174,16 +206,15 @@ class _FormScreenState extends State<FormScreen> {
       children: [
         Text(l10n?.options ?? 'Opções', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
-        Semantics(
-          label: l10n?.hasAccruedVacation ?? 'Férias vencidas',
-          hint: 'Possui férias não gozadas',
-          child: CheckboxListTile(
-            title: Text(l10n?.hasAccruedVacation ?? 'Férias vencidas?'),
-            subtitle: const Text('Possui férias não gozadas'),
-            value: _hasAccruedVacation,
-            onChanged: (value) => setState(() => _hasAccruedVacation = value ?? false),
-          ),
+        VacationTakenField(
+          value: _vacationLimit == null ? 0 : _vacationTaken,
+          maxPeriods: _vacationLimit,
+          onChanged: (value) => setState(() {
+            _vacationTaken = value;
+            _vacationTouched = true;
+          }),
         ),
+        const SizedBox(height: 8),
         Semantics(
           identifier: 'form_notice_worked_checkbox',
           label: l10n?.noticeWorked ?? 'Aviso prévio trabalhado',
@@ -312,7 +343,7 @@ class _FormScreenState extends State<FormScreen> {
           terminationDate: terminationDate,
           baseSalary: baseSalary,
           averageAdditions: averageAdditions,
-          hasAccruedVacation: _hasAccruedVacation,
+          vacationPeriodsTaken: _vacationTaken,
           workedDaysInMonth: workedDaysInMonth,
           noticeWorked: _noticeWorked,
           hasExistingFgts: _hasExistingFgts,

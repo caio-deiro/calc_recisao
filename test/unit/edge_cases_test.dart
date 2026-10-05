@@ -290,13 +290,13 @@ void main() {
           terminationDate: DateTime(2024, 6, 30),
           baseSalary: 3000.0,
           averageAdditions: 500.0,
-          hasAccruedVacation: true,
+          vacationPeriodsTaken: 1,
           calculateTaxes: true,
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-        expect(result.additions.any((item) => item.code == BreakdownCode.accruedVacation), isTrue);
+        expect(result.additions.any((item) => item.code == BreakdownCode.accruedVacationSimple), isTrue);
       });
 
       test('não deve incluir férias vencidas quando não marcado', () {
@@ -305,13 +305,13 @@ void main() {
           terminationDate: DateTime(2024, 6, 30),
           baseSalary: 3000.0,
           averageAdditions: 500.0,
-          hasAccruedVacation: false,
+          vacationPeriodsTaken: 2,
           calculateTaxes: true,
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-        expect(result.additions.any((item) => item.code == BreakdownCode.accruedVacation), isFalse);
+        expect(result.additions.any((item) => item.code == BreakdownCode.accruedVacationSimple), isFalse);
       });
     });
 
