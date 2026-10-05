@@ -59,9 +59,8 @@ void main() {
             details: '6% sobre R\$ 3.000,00',
           ),
         ],
-        totalToReceive: 4000.0,
         totalDeductions: 540.0,
-        netAmount: 3460.0,
+        paidAtTermination: 3460.0,
         calculationDate: DateTime.now(),
       );
     });
@@ -118,9 +117,8 @@ void main() {
         final invalidResult = TerminationResult(
           additions: [],
           deductions: [],
-          totalToReceive: -1000.0,
           totalDeductions: 0.0,
-          netAmount: -1000.0,
+          paidAtTermination: -1000.0,
           calculationDate: DateTime.now(),
         );
 

@@ -6,6 +6,8 @@ import '../../../data/repositories/history_repository.dart';
 import '../../../domain/entities/calculation_history.dart';
 import '../../widgets/ad_banner.dart';
 import '../../widgets/disclaimer_widget.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_localizations_pt.dart';
 import '../result/result_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -93,7 +95,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             itemCount: _history.length,
             itemBuilder: (context, index) {
               final calculation = _history[index];
-              return _buildHistoryCard(calculation);
+              return _buildHistoryCard(calculation, index);
             },
           ),
         ),
@@ -131,74 +133,84 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Widget _buildHistoryCard(CalculationHistory calculation) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: () => _viewCalculation(calculation),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          calculation.terminationType.label,
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          Formatters.formatDate(calculation.timestamp),
-                          style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                        ),
-                        if (calculation.isLegacy)
+  Widget _buildHistoryCard(CalculationHistory calculation, int index) {
+    return Semantics(
+      identifier: 'history_item_$index',
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 12),
+        child: InkWell(
+          onTap: () => _viewCalculation(calculation),
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Text(
-                            'Calculado em versão anterior',
+                            calculation.terminationType.label,
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            Formatters.formatDate(calculation.timestamp),
                             style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                           ),
+                          if (calculation.isLegacy)
+                            Semantics(
+                              identifier: 'history_legacy_mark',
+                              child: Text(
+                                (AppLocalizations.of(context) ?? AppLocalizationsPt()).legacyMark,
+                                style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          Formatters.formatCurrency(
+                            calculation.isLegacy
+                                ? (calculation.legacyNetAmount ?? 0)
+                                : calculation.result.paidAtTermination,
+                          ),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                        Text(
+                          'Salário: ${Formatters.formatCurrency(calculation.input.baseSalary)}',
+                          style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        ),
                       ],
                     ),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        Formatters.formatCurrency(calculation.result.netAmount),
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                      Text(
-                        'Salário: ${Formatters.formatCurrency(calculation.input.baseSalary)}',
-                        style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                      ),
-                    ],
+                  ],
+                ),
+                if (calculation.note != null) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      calculation.note!,
+                      style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    ),
                   ),
                 ],
-              ),
-              if (calculation.note != null) ...[
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    calculation.note!,
-                    style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                  ),
-                ),
               ],
-            ],
+            ),
           ),
         ),
       ),
@@ -206,11 +218,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   void _viewCalculation(CalculationHistory calculation) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => ResultScreen(input: calculation.input, terminationType: calculation.terminationType),
-      ),
-    );
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => ResultScreen.fromHistory(calculation)));
   }
 
   void _showClearHistoryDialog() {

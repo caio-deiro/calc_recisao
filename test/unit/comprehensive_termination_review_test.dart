@@ -165,7 +165,7 @@ void main() {
         expect(result.fgtsDeposit.items.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
         expect(result.additions.any((item) => item.code == BreakdownCode.notice), isFalse);
         // Com justa causa pode ter valor negativo devido aos descontos
-        expect(result.netAmount, lessThan(1000));
+        expect((result.paidAtTermination + result.fgtsDeposit.total), lessThan(1000));
       });
     });
 
@@ -227,19 +227,40 @@ void main() {
         final mutualAgreement = useCase.execute(input, TerminationType.mutualAgreement);
 
         // Verificações de hierarquia esperada
-        expect(withoutJustCause.netAmount, greaterThan(resignation.netAmount));
-        expect(withoutJustCause.netAmount, greaterThan(fixedTerm.netAmount));
-        expect(withoutJustCause.netAmount, greaterThan(withJustCause.netAmount));
-        expect(withoutJustCause.netAmount, greaterThan(mutualAgreement.netAmount));
+        expect(
+          (withoutJustCause.paidAtTermination + withoutJustCause.fgtsDeposit.total),
+          greaterThan((resignation.paidAtTermination + resignation.fgtsDeposit.total)),
+        );
+        expect(
+          (withoutJustCause.paidAtTermination + withoutJustCause.fgtsDeposit.total),
+          greaterThan((fixedTerm.paidAtTermination + fixedTerm.fgtsDeposit.total)),
+        );
+        expect(
+          (withoutJustCause.paidAtTermination + withoutJustCause.fgtsDeposit.total),
+          greaterThan((withJustCause.paidAtTermination + withJustCause.fgtsDeposit.total)),
+        );
+        expect(
+          (withoutJustCause.paidAtTermination + withoutJustCause.fgtsDeposit.total),
+          greaterThan((mutualAgreement.paidAtTermination + mutualAgreement.fgtsDeposit.total)),
+        );
 
         // Em 01/01/2024 o 13º e as férias do período novo valem zero (menos de 15 dias), então empatam.
-        expect(resignation.netAmount, greaterThanOrEqualTo(withJustCause.netAmount));
-        expect(fixedTerm.netAmount, greaterThanOrEqualTo(withJustCause.netAmount));
-        expect(mutualAgreement.netAmount, greaterThan(withJustCause.netAmount));
+        expect(
+          (resignation.paidAtTermination + resignation.fgtsDeposit.total),
+          greaterThanOrEqualTo((withJustCause.paidAtTermination + withJustCause.fgtsDeposit.total)),
+        );
+        expect(
+          (fixedTerm.paidAtTermination + fixedTerm.fgtsDeposit.total),
+          greaterThanOrEqualTo((withJustCause.paidAtTermination + withJustCause.fgtsDeposit.total)),
+        );
+        expect(
+          (mutualAgreement.paidAtTermination + mutualAgreement.fgtsDeposit.total),
+          greaterThan((withJustCause.paidAtTermination + withJustCause.fgtsDeposit.total)),
+        );
 
         // Verificar que com justa causa e prazo determinado têm valores baixos/negativos
-        expect(withJustCause.netAmount, lessThan(1000));
-        expect(fixedTerm.netAmount, lessThan(1000));
+        expect((withJustCause.paidAtTermination + withJustCause.fgtsDeposit.total), lessThan(1000));
+        expect((fixedTerm.paidAtTermination + fixedTerm.fgtsDeposit.total), lessThan(1000));
       });
     });
 

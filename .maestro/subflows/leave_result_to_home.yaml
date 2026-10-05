@@ -1,0 +1,20 @@
+appId: com.caiodeiro.calcclt
+---
+- tapOn:
+    id: "result_back_button"
+    label: "Sai do Resultado"
+- extendedWaitUntil:
+    visible:
+      id: "adContainer"
+    timeout: 5000
+    optional: true
+    label: "Intersticial ao sair do Resultado (opcional)"
+- runFlow:
+    when:
+      visible:
+        id: "adContainer"
+    commands:
+      - back
+- tapOn:
+    id: "form_back_button"
+    label: "Sai do Formulário"

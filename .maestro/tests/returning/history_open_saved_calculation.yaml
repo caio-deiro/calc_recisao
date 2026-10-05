@@ -1,0 +1,63 @@
+appId: com.caiodeiro.calcclt
+name: Reabrir cálculo salvo mostra os mesmos totais, sem novo registro
+tags: [history]
+env:
+  SALARY: "400000"
+  ADMISSION: "01012023"
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/skip_onboarding.yaml
+- tapOn:
+    id: "home_type_withoutJustCause"
+- runFlow: ../../subflows/fill_basic_form.yaml
+- extendedWaitUntil:
+    visible:
+      id: "result_paid_total"
+    timeout: 15000
+- copyTextFrom:
+    id: "result_paid_total"
+- evalScript: ${output.paid = maestro.copiedText}
+- copyTextFrom:
+    id: "result_fgts_total"
+- evalScript: ${output.fgts = maestro.copiedText}
+- runFlow: ../../subflows/leave_result_to_home.yaml
+- runFlow:
+    when:
+      visible:
+        id: "consent_decline_button"
+    commands:
+      - tapOn:
+          id: "consent_decline_button"
+- tapOn:
+    id: "home_history_button"
+    label: "Abrir Histórico"
+- assertVisible:
+    id: "history_item_0"
+- assertNotVisible:
+    id: "history_item_1"
+    label: "Um único registro"
+- tapOn:
+    id: "history_item_0"
+    label: "Reabrir o cálculo salvo"
+- extendedWaitUntil:
+    visible:
+      id: "result_paid_total"
+    timeout: 15000
+- copyTextFrom:
+    id: "result_paid_total"
+- assertTrue:
+    condition: ${maestro.copiedText == output.paid}
+    label: "Pago na rescisão igual ao do cálculo"
+- copyTextFrom:
+    id: "result_fgts_total"
+- assertTrue:
+    condition: ${maestro.copiedText == output.fgts}
+    label: "Depositado no FGTS igual ao do cálculo"
+- tapOn:
+    id: "result_back_button"
+- assertVisible:
+    id: "history_item_0"
+- assertNotVisible:
+    id: "history_item_1"
+    label: "Reabrir não gravou novo registro"

@@ -3,6 +3,7 @@ name: Primeiro resultado, PDF sem bloqueio e consentimento uma única vez
 tags: [smoke, calculation, pdf, consent]
 env:
   SALARY: "400000"
+  ADMISSION: "01012023"
 ---
 - launchApp:
     clearState: true
@@ -14,33 +15,31 @@ env:
     text: ".*Ajude a melhorar o app.*"
     label: "Sem aviso antes do primeiro resultado"
 - tapOn:
-    point: 50%,18%
+    id: "home_type_withoutJustCause"
     label: "Sem Justa Causa"
 - runFlow: ../../subflows/fill_basic_form.yaml
 - extendedWaitUntil:
-    visible: ".*Valor Líquido.*"
+    visible:
+      id: "result_paid_total"
     timeout: 15000
     label: "Resultado visível, sem intersticial ao entrar"
 - tapOn:
-    point: 94%,5%
+    id: "result_share_button"
     label: "Abrir compartilhar"
-- assertVisible: "Exportar PDF.*"
-- assertVisible: "Salvar PDF.*"
+- assertVisible:
+    id: "share_export_pdf"
+- assertVisible:
+    id: "share_save_pdf"
 - assertNotVisible: "Recurso PRO.*"
 - tapOn:
-    point: 40%,86%
+    id: "share_export_pdf"
     label: "Exportar PDF"
 - extendedWaitUntil:
     visible: "Sharing 1 file|Compartilhando 1 arquivo"
     timeout: 15000
     label: "PDF gerado sem bloqueio"
 - pressKey: Back
-- tapOn:
-    point: 7%,5%
-    label: "Sai do Resultado"
-- tapOn:
-    point: 7%,5%
-    label: "Sai do Formulário"
+- runFlow: ../../subflows/leave_result_to_home.yaml
 - extendedWaitUntil:
     visible: ".*Ajude a melhorar o app.*"
     timeout: 10000
@@ -48,15 +47,13 @@ env:
 - tapOn: "Agora não"
 - assertNotVisible: ".*Ajude a melhorar o app.*"
 - tapOn:
-    point: 50%,18%
+    id: "home_type_withoutJustCause"
 - runFlow: ../../subflows/fill_basic_form.yaml
 - extendedWaitUntil:
-    visible: ".*Valor Líquido.*"
+    visible:
+      id: "result_paid_total"
     timeout: 15000
-- tapOn:
-    point: 7%,5%
-- tapOn:
-    point: 7%,5%
+- runFlow: ../../subflows/leave_result_to_home.yaml
 - assertNotVisible:
     text: ".*Ajude a melhorar o app.*"
     label: "Aviso não se repete"

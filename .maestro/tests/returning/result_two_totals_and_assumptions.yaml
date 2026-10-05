@@ -1,0 +1,46 @@
+appId: com.caiodeiro.calcclt
+name: Resultado com dois totais, saque do FGTS e premissas
+tags: [smoke, calculation]
+env:
+  SALARY: "400000"
+  ADMISSION: "01012023"
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/skip_onboarding.yaml
+- tapOn:
+    id: "home_type_withoutJustCause"
+    label: "Sem Justa Causa"
+- runFlow: ../../subflows/fill_basic_form.yaml
+- extendedWaitUntil:
+    visible:
+      id: "result_paid_total"
+    timeout: 15000
+    label: "Resultado visível"
+- assertVisible:
+    text: "Pago na rescisão.*"
+- assertVisible:
+    id: "result_fgts_total"
+    label: "Segundo total: Depositado no FGTS"
+- assertVisible:
+    id: "result_fgts_withdrawal_info"
+    label: "Linha de saque (sem justa causa)"
+- assertVisible:
+    id: "result_estimated_marker"
+    label: "FGTS estimado (saldo não informado)"
+- assertNotVisible:
+    text: ".*Valor Líquido.*"
+- assertNotVisible:
+    text: ".*Total a Receber.*"
+- assertNotVisible:
+    id: "result_validation_notice"
+    label: "Sem regra pendente, sem aviso de validação"
+- assertNotVisible:
+    id: "result_assumption_.*"
+    label: "Premissas fechadas por padrão"
+- tapOn:
+    id: "result_assumptions_toggle"
+    label: "Abrir premissas"
+- assertVisible:
+    id: "result_assumption_.*"
+    label: "Premissas visíveis"

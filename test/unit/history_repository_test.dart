@@ -24,13 +24,16 @@ void main() {
     group('limite de 100 itens (FIFO)', () {
       CalculationHistory item(int i) => CalculationHistory(
         id: 'calc_$i',
-        input: TerminationInput(admissionDate: DateTime(2023, 1, 1), terminationDate: DateTime(2024, 6, 30), baseSalary: 5000.0),
+        input: TerminationInput(
+          admissionDate: DateTime(2023, 1, 1),
+          terminationDate: DateTime(2024, 6, 30),
+          baseSalary: 5000.0,
+        ),
         result: TerminationResult(
           additions: [],
           deductions: [],
-          totalToReceive: 1000.0,
           totalDeductions: 200.0,
-          netAmount: 800.0,
+          paidAtTermination: 800.0,
           calculationDate: DateTime(2024, 6, 30),
         ),
         terminationType: TerminationType.withoutJustCause,
@@ -67,9 +70,8 @@ void main() {
         final result = TerminationResult(
           additions: [],
           deductions: [],
-          totalToReceive: 1000.0,
           totalDeductions: 200.0,
-          netAmount: 800.0,
+          paidAtTermination: 800.0,
           calculationDate: DateTime.now(),
         );
 
@@ -131,9 +133,8 @@ void main() {
             ),
           ],
           deductions: [],
-          totalToReceive: 1000.0,
           totalDeductions: 0.0,
-          netAmount: 1000.0,
+          paidAtTermination: 1000.0,
           calculationDate: DateTime.now(),
         );
 
@@ -164,9 +165,8 @@ void main() {
         final result = TerminationResult(
           additions: [],
           deductions: [],
-          totalToReceive: 1000.0,
           totalDeductions: 0.0,
-          netAmount: 1000.0,
+          paidAtTermination: 1000.0,
           calculationDate: DateTime.now(),
         );
 
@@ -210,9 +210,8 @@ void main() {
         final result = TerminationResult(
           additions: [],
           deductions: [],
-          totalToReceive: 1000.0,
           totalDeductions: 0.0,
-          netAmount: 1000.0,
+          paidAtTermination: 1000.0,
           calculationDate: DateTime.now(),
         );
 
@@ -265,9 +264,8 @@ void main() {
         final result = TerminationResult(
           additions: [],
           deductions: [],
-          totalToReceive: 1000.0,
           totalDeductions: 0.0,
-          netAmount: 1000.0,
+          paidAtTermination: 1000.0,
           calculationDate: DateTime.now(),
         );
 
@@ -307,9 +305,8 @@ void main() {
         final result = TerminationResult(
           additions: [],
           deductions: [],
-          totalToReceive: 1000.0,
           totalDeductions: 0.0,
-          netAmount: 1000.0,
+          paidAtTermination: 1000.0,
           calculationDate: DateTime.now(),
         );
 
@@ -343,9 +340,8 @@ void main() {
         final result = TerminationResult(
           additions: [],
           deductions: [],
-          totalToReceive: 1000.0,
           totalDeductions: 0.0,
-          netAmount: 1000.0,
+          paidAtTermination: 1000.0,
           calculationDate: DateTime.now(),
         );
 
@@ -378,4 +374,3 @@ void main() {
     });
   });
 }
-

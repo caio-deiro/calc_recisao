@@ -34,7 +34,7 @@
 | **B2** | Núcleo de cálculo: modelo, correções e `Decimal` | `fix-calculation-rules` (B2-01..12) e `migrate-money-to-decimal` (B2-13..15) | B0, B6 | §6.2–6.3, §6.5, §6.7 |
 | **B3** | Períodos de férias e férias em dobro | `add-vacation-periods` | B2 | §6.4 |
 | **B4** | Contratos a prazo e rescisão indireta | `add-fixed-term-and-indirect` | B2 | §6.1, §6.6 |
-| **B5** | Resultado, compartilhamento e PDF | (distribuída: B1 e B2) | B1, B2 | §6.5, §7 |
+| **B5** | Resultado, compartilhamento e PDF | `result-assumptions-and-two-totals` | B1, B2 | §6.5, §7 |
 | **B6** | Validação e infraestrutura de testes golden | (distribuída; começa em B2) | — | §11 |
 | **B7** | Conformidade, privacidade e operação | (fora do código, com checklist) | B1 | §12–14 |
 
@@ -251,7 +251,7 @@ validação" se não houver revisão (B6-04).
 
 ## B5 — Resultado, compartilhamento e PDF
 
-**Change:** distribuída (a UI do resultado muda em B1 e em B2) · **PRD:** §6.5, §7, Q1, Q3, Q11
+**Change:** `result-assumptions-and-two-totals` (a UI do resultado herda o modelo de B2) · **PRD:** §6.5, §7, Q1, Q3, Q11
 
 | ID | Requisito |
 |---|---|

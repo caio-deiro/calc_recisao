@@ -45,10 +45,13 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text(l10n?.homeTitle ?? 'Calculadora de Rescisão CLT'),
         actions: [
-          IconButton(
-            tooltip: 'Ver histórico de cálculos',
-            icon: const Icon(Icons.history),
-            onPressed: () => _openAndAskConsent(const HistoryScreen()),
+          Semantics(
+            identifier: 'home_history_button',
+            child: IconButton(
+              tooltip: 'Ver histórico de cálculos',
+              icon: const Icon(Icons.history),
+              onPressed: () => _openAndAskConsent(const HistoryScreen()),
+            ),
           ),
           IconButton(
             tooltip: l10n?.supportTitle ?? 'Suporte',

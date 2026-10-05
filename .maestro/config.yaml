@@ -1,2 +1,4 @@
+excludeTags:
+  - seeded
 flows:
   - tests/**

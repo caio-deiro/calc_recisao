@@ -36,8 +36,8 @@ void main() {
 
         expect(result.additions.length, greaterThan(0));
         expect(result.deductions.length, greaterThan(0));
-        expect(result.totalToReceive, greaterThan(0));
-        expect(result.netAmount, greaterThan(0));
+        expect((result.totalAdditions + result.fgtsDeposit.total), greaterThan(0));
+        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThan(0));
 
         // Verificar se tem multa FGTS
         final fgtsPenalty = result.fgtsDeposit.items.where((item) => item.code == BreakdownCode.fgtsFine);

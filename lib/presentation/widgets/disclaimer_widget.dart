@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
+import '../../l10n/app_localizations_pt.dart';
+
 class DisclaimerWidget extends StatelessWidget {
   const DisclaimerWidget({super.key});
 
@@ -33,9 +36,7 @@ class DisclaimerWidget extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Esta calculadora fornece estimativas com base em regras gerais da CLT. '
-            'Situações específicas podem exigir outras verbas. '
-            'Consulte um profissional (contador/advogado) antes de tomar decisões.',
+            (AppLocalizations.of(context) ?? AppLocalizationsPt()).disclaimerText,
             style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
         ],
