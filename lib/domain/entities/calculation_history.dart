@@ -1,5 +1,3 @@
-// O histórico grava e lê os totais legados (netAmount/totalToReceive) para registros antigos.
-// ignore_for_file: deprecated_member_use_from_same_package
 import 'assumption.dart';
 import 'breakdown_code.dart';
 import 'breakdown_item.dart';
@@ -15,10 +13,7 @@ const int currentHistorySchemaVersion = 2;
 const Map<String, String> terminationTypeAliases = {};
 
 /// Resolve o tipo gravado; `null` se o nome não existe nem tem alias.
-TerminationType? resolveTerminationType(
-  String? name, {
-  Map<String, String> aliases = terminationTypeAliases,
-}) {
+TerminationType? resolveTerminationType(String? name, {Map<String, String> aliases = terminationTypeAliases}) {
   final resolved = aliases[name] ?? name;
   for (final type in TerminationType.values) {
     if (type.name == resolved) {
@@ -37,6 +32,7 @@ class CalculationHistory {
     required this.timestamp,
     this.note,
     this.schemaVersion = currentHistorySchemaVersion,
+    this.legacyNetAmount,
   });
 
   final String id;
@@ -46,6 +42,10 @@ class CalculationHistory {
   final DateTime timestamp;
   final String? note;
   final int schemaVersion;
+
+  /// Valor líquido gravado por versão anterior (chave de JSON legada `netAmount`); nulo em
+  /// registro atual. É o único valor exibido de um registro legado; nada é inferido dele.
+  final double? legacyNetAmount;
 
   /// Calculado em versão anterior do app: não é recalculado, só marcado na UI.
   bool get isLegacy => schemaVersion < currentHistorySchemaVersion;
@@ -58,18 +58,13 @@ class CalculationHistory {
     'details': item.details,
   };
 
-  static BreakdownItem _itemFromJson(Map<String, dynamic> item) =>
-      BreakdownItem(
-        code:
-            BreakdownCode.values
-                .where((e) => e.name == item['code'])
-                .firstOrNull ??
-            BreakdownCode.legacy,
-        description: item['description'],
-        value: item['value'].toDouble(),
-        type: BreakdownType.values.firstWhere((e) => e.name == item['type']),
-        details: item['details'],
-      );
+  static BreakdownItem _itemFromJson(Map<String, dynamic> item) => BreakdownItem(
+    code: BreakdownCode.values.where((e) => e.name == item['code']).firstOrNull ?? BreakdownCode.legacy,
+    description: item['description'],
+    value: item['value'].toDouble(),
+    type: BreakdownType.values.firstWhere((e) => e.name == item['type']),
+    details: item['details'],
+  );
 
   Map<String, dynamic> toJson() {
     return {
@@ -79,14 +74,11 @@ class CalculationHistory {
       'result': {
         'additions': result.additions.map(_itemToJson).toList(),
         'deductions': result.deductions.map(_itemToJson).toList(),
-        'totalToReceive': result.totalToReceive,
         'totalDeductions': result.totalDeductions,
-        'netAmount': result.netAmount,
+        if (legacyNetAmount != null) 'netAmount': legacyNetAmount,
         'calculationDate': result.calculationDate.toIso8601String(),
         'paidAtTermination': result.paidAtTermination,
-        'fgtsDeposit': {
-          'items': result.fgtsDeposit.items.map(_itemToJson).toList(),
-        },
+        'fgtsDeposit': {'items': result.fgtsDeposit.items.map(_itemToJson).toList()},
         'assumptions': result.assumptions.map((a) => a.toJson()).toList(),
       },
       'terminationType': terminationType.name,
@@ -104,9 +96,9 @@ class CalculationHistory {
       throw const FormatException('Tipo de rescisão desconhecido no histórico');
     }
     final r = json['result'];
-    List<BreakdownItem> items(Object? list) => ((list ?? const []) as List)
-        .map((e) => _itemFromJson(e as Map<String, dynamic>))
-        .toList();
+    final int schemaVersion = json['schemaVersion'] ?? 1;
+    List<BreakdownItem> items(Object? list) =>
+        ((list ?? const []) as List).map((e) => _itemFromJson(e as Map<String, dynamic>)).toList();
 
     return CalculationHistory(
       id: json['id'],
@@ -114,9 +106,7 @@ class CalculationHistory {
       result: TerminationResult(
         additions: items(r['additions']),
         deductions: items(r['deductions']),
-        totalToReceive: r['totalToReceive'].toDouble(),
         totalDeductions: r['totalDeductions'].toDouble(),
-        netAmount: r['netAmount'].toDouble(),
         calculationDate: DateTime.parse(r['calculationDate']),
         paidAtTermination: (r['paidAtTermination'] ?? 0).toDouble(),
         fgtsDeposit: FgtsDeposit(items: items(r['fgtsDeposit']?['items'])),
@@ -127,7 +117,8 @@ class CalculationHistory {
       terminationType: type,
       timestamp: DateTime.parse(json['timestamp']),
       note: json['note'],
-      schemaVersion: json['schemaVersion'] ?? 1,
+      schemaVersion: schemaVersion,
+      legacyNetAmount: schemaVersion < currentHistorySchemaVersion ? r['netAmount']?.toDouble() : null,
     );
   }
 }

@@ -142,13 +142,13 @@ TerminationInput + TerminationType
 CalculateTermination.execute()          ← domain/usecases (função pura, síncrona)
     ├─ regras por tipo de rescisão      ← `TerminationRules` (tabela imutável) + `avos.dart`; ver PROJECT.md §6
     ├─ TaxTablesService.calculateTerminationTaxes()  ← INSS/IRRF por data da rescisão
-    └─ retorna TerminationResult { additions[], deductions[], paidAtTermination, fgtsDeposit, assumptions[], totalDeductions;
-                                   netAmount/totalToReceive @Deprecated (incluem a multa) }
+    └─ retorna TerminationResult { additions[], deductions[], paidAtTermination, fgtsDeposit, assumptions[], totalDeductions }
     │
     ▼
 ResultScreen ──► HistoryRepository.save() ──► SharedPreferences
-             ├─► ShareUtils (texto) 
-             └─► PdfUtils (todos)
+             ├─► ShareUtils (texto)   ┐ ambos usam `buildResultSections` (core/utils/result_content.dart):
+             └─► PdfUtils (todos)     ┘ mesma ordem da tela, premissas só no completo
+HistoryScreen ──► ResultScreen.fromHistory(registro)   ← resultado salvo: sem use case, sem gravar, sem evento
 ```
 
 - O resultado é uma lista de `BreakdownItem` (`addition`/`deduction`), cada um com `BreakdownCode` (nunca
@@ -156,7 +156,11 @@ ResultScreen ──► HistoryRepository.save() ──► SharedPreferences
   `fgtsDeposit`; as telas, o PDF e o texto compartilhado a leem de lá.
 - Histórico: `schemaVersion` 2; registro sem versão é legado (itens `BreakdownCode.legacy`, marcado
   "calculado em versão anterior", sem recalcular). Registro ilegível é preservado e contado
-  (`HistoryRepository.unreadableCount`); nomes antigos de tipo passam pela tabela de aliases. **Princípio de produto: transparência.** Não esconda itens do cálculo.
+  (`HistoryRepository.unreadableCount`); nomes antigos de tipo passam pela tabela de aliases. O registro legado guarda
+  só `legacyNetAmount` (valor salvo, sem inferir `paidAtTermination`); o JSON novo não grava `netAmount`.
+- Resultado: `fgtsWithdrawalPercent` (linha informativa de saque) vem de `TerminationRules`, sem `switch` por tipo na UI.
+  Widgets em `presentation/widgets/result_summary.dart`; todo elemento tocado por fluxo E2E tem `Semantics.identifier`
+  (`result_*`, `history_*`, `form_*`, `home_*`). **Princípio de produto: transparência.** Não esconda itens do cálculo.
 - Erros de cálculo viram `CalculationException` (mensagem amigável + `originalError`).
 
 ### 5.2 Tabelas fiscais
@@ -240,10 +244,11 @@ removidas no boot por `LegacyCleanup` (idempotente).
 | Pasta | Foco |
 |---|---|
 | `test/unit/` | Regras de cálculo (`calculate_termination`, `edge_cases`, `termination_2026`, `comprehensive_termination_review`), validação, repositório (FIFO de 100), limpeza legada, `AdManager`, analytics, PDF, logger, onboarding |
-| `test/widget/` | Onboarding, banner por tela, aviso de histórico cheio, aviso de consentimento |
+| `test/widget/` | Onboarding, banner por tela, aviso de histórico cheio, aviso de consentimento, Resultado (dois totais, premissas, validação, legado), histórico abre o resultado salvo, aviso legal nas 4 telas |
 | `test/integration/` | Fluxo de cálculo ponta a ponta |
 | `test/golden/` | Infra de casos golden (B6): `cases/*.json` (oráculo externo, um arquivo por caso), `support/` (loader, comparador por `item.code.name`, `goldenTolerance`), `golden_test.dart` (runner único), `validation_status.dart` (regras ⚖️ pendentes), `coverage_test.dart` (gate `release-gate`). Hoje sem casos reais (pendência B6-06) |
 | `test/mocks`, `test_helpers/` | Setup de `SharedPreferences` |
+| `.maestro/` | E2E Maestro por jornada (`tests/first_run`, `tests/returning`), seletores por `Semantics.identifier` (sem coordenadas, sem `hideKeyboard`). Subfluxos não definem defaults de `env`. Tag `seeded` fica fora da suíte padrão (`excludeTags` em `config.yaml`): rode `.maestro/utils/seed_history.sh` (escreve o `SharedPreferences` do APK debug via `run-as`, frágil ao formato do plugin) e depois o fluxo, sem `clearState` |
 
 Comandos:
 
@@ -293,7 +298,7 @@ limpo, `flutter test` verde. Mudança de regra trabalhista exige citar a base le
 | D7 | ~~`OfflineService` sem consumidor~~ | ✅ **Resolvida pela remoção** | — |
 | D8 | ~~Descrições de itens do cálculo usadas como *chave*~~ ✅ **Resolvida** (B2-01): `BreakdownCode`; mantida a descrição só como texto de UI. Antes: (`removeWhere(item.description == ...)`) | Frágil a renomeações; piora com férias em dobro e art. 479/480 | Usar enum/ID no `BreakdownItem` **antes** de adicionar verbas |
 | D9 | ~~Intersticial exibido ao renderizar o Resultado~~ | ✅ **Resolvida**: só ao **sair** do Resultado, ≤ 1/3 min e 1/sessão | — |
-| D10 | ~~Cálculo e apresentação misturam "a receber" e multa do FGTS~~ | ✅ **Resolvida no domínio** (B2-09/10): `paidAtTermination`, `fgtsDeposit`, `assumptions`. 🎯 UI nova em B5; `netAmount` @Deprecated até lá | — |
+| D10 | ~~Cálculo e apresentação misturam "a receber" e multa do FGTS~~ | ✅ **Resolvida** (B2-09/10 e B5): `paidAtTermination`, `fgtsDeposit`, `assumptions` no domínio e na UI; alias `netAmount` removido | — |
 | D11 | `hasAccruedVacation` booleano e meses por ano-calendário | Não modela períodos nem dobro | 🎯 Modelo de períodos derivado da admissão (change `add-vacation-periods`) |
 
 ---

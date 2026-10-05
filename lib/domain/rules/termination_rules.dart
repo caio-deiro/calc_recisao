@@ -11,6 +11,7 @@ class TerminationRules {
     required this.paysProportionalVacation,
     required this.paysAccruedVacation,
     required this.noticeDeductible,
+    this.fgtsWithdrawalPercent,
     this.hasIndemnity479 = false,
     this.hasDiscount480 = false,
   });
@@ -31,6 +32,11 @@ class TerminationRules {
   /// Aviso não cumprido pelo empregado é descontado (CLT art. 487 §2º).
   final bool noticeDeductible;
 
+  /// Percentual do saldo do FGTS que o trabalhador pode sacar (informativo, sem valor
+  /// calculado): 100 sem justa causa; 80 no acordo (CLT art. 484-A §1º). Nulo = sem
+  /// linha de saque (B4 completa a tabela). ⚖️ 80 % vem do PRD, não reverificado em fonte.
+  final int? fgtsWithdrawalPercent;
+
   /// Art. 479 CLT (B4): sempre falso até B4.
   final bool hasIndemnity479;
 
@@ -47,6 +53,7 @@ class TerminationRules {
       paysProportionalVacation: true,
       paysAccruedVacation: true,
       noticeDeductible: false,
+      fgtsWithdrawalPercent: 100,
     ),
     // ⚖️ Proporcionais pagas com menos de 12 meses: segue o PRD; contador deve confirmar.
     TerminationType.resignation: TerminationRules(
@@ -81,6 +88,7 @@ class TerminationRules {
       paysProportionalVacation: true,
       paysAccruedVacation: true,
       noticeDeductible: false,
+      fgtsWithdrawalPercent: 80,
     ),
   };
 

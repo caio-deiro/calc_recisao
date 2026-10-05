@@ -65,5 +65,13 @@ void main() {
         expect(r.hasDiscount480, isFalse);
       }
     });
+
+    test('deve informar o percentual de saque do FGTS só onde há regra', () {
+      expect(TerminationRules.of(TerminationType.withoutJustCause).fgtsWithdrawalPercent, 100);
+      expect(TerminationRules.of(TerminationType.mutualAgreement).fgtsWithdrawalPercent, 80);
+      expect(TerminationRules.of(TerminationType.resignation).fgtsWithdrawalPercent, isNull);
+      expect(TerminationRules.of(TerminationType.fixedTerm).fgtsWithdrawalPercent, isNull);
+      expect(TerminationRules.of(TerminationType.withJustCause).fgtsWithdrawalPercent, isNull);
+    });
   });
 }

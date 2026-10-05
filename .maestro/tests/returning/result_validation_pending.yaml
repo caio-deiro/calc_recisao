@@ -1,0 +1,27 @@
+appId: com.caiodeiro.calcclt
+name: Acordo mútuo com aviso indenizado mostra cálculo em validação
+tags: [calculation]
+env:
+  SALARY: "400000"
+  # 15 anos de serviço: 50% do aviso (37 dias) passa de 30 e projeta 1 mês nas avos.
+  ADMISSION: "01012010"
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/skip_onboarding.yaml
+- tapOn:
+    id: "home_type_mutualAgreement"
+    label: "Acordo Mútuo"
+- runFlow: ../../subflows/fill_basic_form.yaml
+- extendedWaitUntil:
+    visible:
+      id: "result_paid_total"
+    timeout: 15000
+- assertVisible:
+    id: "result_validation_notice"
+    label: "Aviso de validação visível com as premissas fechadas"
+- assertVisible:
+    text: ".*Cálculo em validação.*"
+- assertNotVisible:
+    id: "result_assumption_.*"
+    label: "Premissas continuam fechadas"

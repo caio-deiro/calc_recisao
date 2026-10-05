@@ -35,7 +35,7 @@ sem contador e sem cadastro — e veja de onde vem cada centavo."*
 
 ### O que mudou nesta revisão
 - ✅ **O plano PRO foi extinto** (change `remove-pro-ads-only`). Tudo é gratuito; a monetização é só AdMob (§8).
-- 🎯 O resultado separa **"Pago na rescisão"** de **"Depositado no FGTS"** (§6.5).
+- ✅ O resultado separa **"Pago na rescisão"** de **"Depositado no FGTS"** (§6.5).
 - 🎯 Regras de cálculo serão corrigidas e ampliadas: períodos de férias, **férias em dobro**, **art.
   479/480**, rescisão indireta (§6).
 - 🎯 Consentimento único para anúncios personalizados e analytics (§8.4, §9).
@@ -218,11 +218,14 @@ caso golden com fonte (B6-06). `Decimal` (C6) segue 🎯 na change `migrate-mone
   (indenização)"**.
 - Tributação: indenizadas, **sem IRRF e sem INSS** (C4).
 
-### 6.5 Resultado: dois totais e premissas (✅ modelo / 🎯 UI)
+### 6.5 Resultado: dois totais e premissas (✅)
 
-✅ O modelo de domínio já separa `paidAtTermination` e `fgtsDeposit` e traz `assumptions` (B2-09/10);
-`netAmount`/`totalToReceive` ficam `@Deprecated` (semântica antiga, com a multa) até a UI nova (B5). A multa
-é **depositada na conta do FGTS**, não paga no TRCT em dinheiro. Alvo de UI (🎯):
+✅ Modelo e UI (change `result-assumptions-and-two-totals`, B5): o resultado separa `paidAtTermination` e
+`fgtsDeposit` e traz `assumptions`; `netAmount`/`totalToReceive` foram removidos. A multa é **depositada na
+conta do FGTS**, não paga no TRCT em dinheiro. A tela, o texto compartilhado e o PDF seguem a mesma ordem:
+aviso de validação, totais, verbas pagas, descontos, depositado no FGTS e premissas. O histórico reabre o
+resultado **salvo** (não recalcula); registro legado mostra só o valor salvo e a marca "Calculado em versão
+anterior", sem compartilhar nem PDF.
 
 - **Pago na rescisão** — o líquido que o trabalhador recebe.
 - **Depositado no FGTS** — multa (40 % ou 20 %), com linha informativa de saque: 100 % no sem justa

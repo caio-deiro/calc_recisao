@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Localizações da aplicação
-/// 
+///
 /// Classe base para internacionalização
 abstract class AppLocalizations {
   static AppLocalizations? of(BuildContext context) {
@@ -40,9 +40,18 @@ abstract class AppLocalizations {
   // Resultado
   String get additions;
   String get deductions;
-  String get totalToReceive;
+  String get paidAtTermination;
+  String get fgtsDeposit;
+  String fgtsWithdrawalInfo(int percent);
+  String get assumptionsTitle;
+  String get estimatedMarker;
+  String get validationNotice;
+  String get legacyMark;
+  String get disclaimerText;
+  String get legacyValueLabel;
+  String get assumptionInformed;
+  String get assumptionEstimated;
   String get totalDeductions;
-  String get netAmount;
   String get share;
   String get shareSimple;
   String get copy;
@@ -72,4 +81,3 @@ abstract class AppLocalizations {
   String get networkError;
   String get validationError;
 }
-

@@ -134,6 +134,7 @@ class HistoryRepository {
         timestamp: history[index].timestamp,
         note: note,
         schemaVersion: history[index].schemaVersion,
+        legacyNetAmount: history[index].legacyNetAmount,
       );
 
       history[index] = updatedCalc;

@@ -6,7 +6,6 @@ import '../../../domain/entities/termination_type.dart';
 import '../../../domain/entities/calculation_history.dart';
 import '../../../domain/usecases/calculate_termination.dart';
 import '../../../data/repositories/history_repository.dart';
-import '../../../core/utils/formatters.dart';
 import '../../../core/utils/share_utils.dart';
 import '../../../core/utils/logger.dart';
 import '../../../core/exceptions/app_exceptions.dart';
@@ -17,14 +16,26 @@ import '../../../core/analytics/consent_service.dart';
 import '../../widgets/ad_banner.dart';
 import '../../widgets/disclaimer_widget.dart';
 import '../../widgets/breakdown_item_card.dart';
+import '../../widgets/result_summary.dart';
+import '../../../domain/entities/assumption.dart';
+import '../../../domain/rules/termination_rules.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_localizations_pt.dart';
 
 enum ShareAction { share, shareSimple, copy, copySimple, exportPdf, savePdf }
 
 class ResultScreen extends StatefulWidget {
-  const ResultScreen({super.key, required this.input, required this.terminationType});
+  const ResultScreen({super.key, required this.input, required this.terminationType}) : history = null;
+
+  /// Abre o resultado **salvo** de um registro do histórico: não recalcula, não grava
+  /// histórico, não pede consentimento e não emite evento (B5-06, B0-03).
+  ResultScreen.fromHistory(CalculationHistory this.history, {super.key})
+    : input = history.input,
+      terminationType = history.terminationType;
 
   final TerminationInput input;
   final TerminationType terminationType;
+  final CalculationHistory? history;
 
   @override
   State<ResultScreen> createState() => _ResultScreenState();
@@ -34,9 +45,17 @@ class _ResultScreenState extends State<ResultScreen> {
   TerminationResult? _result;
   bool _isLoading = true;
 
+  bool get _isLegacy => widget.history?.isLegacy ?? false;
+
   @override
   void initState() {
     super.initState();
+    final saved = widget.history;
+    if (saved != null) {
+      _result = saved.result;
+      _isLoading = false;
+      return;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadResult();
     });
@@ -106,8 +125,17 @@ class _ResultScreenState extends State<ResultScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Resultado da Rescisão'),
-          leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.of(context).pop()),
-          actions: [if (_result != null) IconButton(icon: const Icon(Icons.share), onPressed: _shareResult)],
+          leading: Semantics(
+            identifier: 'result_back_button',
+            child: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.of(context).pop()),
+          ),
+          actions: [
+            if (_result != null && !_isLegacy)
+              Semantics(
+                identifier: 'result_share_button',
+                child: IconButton(icon: const Icon(Icons.share), onPressed: _shareResult),
+              ),
+          ],
         ),
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -128,7 +156,7 @@ class _ResultScreenState extends State<ResultScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSummaryCard(),
+                ..._buildSummary(),
                 const SizedBox(height: 24),
                 _buildBreakdownSection(),
                 const SizedBox(height: 24),
@@ -142,74 +170,35 @@ class _ResultScreenState extends State<ResultScreen> {
     );
   }
 
-  Widget _buildSummaryCard() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Resumo da Rescisão',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(child: _buildSummaryItem('Total a Receber', _result!.totalToReceive, Colors.green)),
-                const SizedBox(width: 16),
-                Expanded(child: _buildSummaryItem('Total Descontos', _result!.totalDeductions, Colors.red)),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    'Valor Líquido',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    Formatters.formatCurrency(_result!.netAmount),
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+  /// Registro legado: só o valor salvo e a marca. Resultado atual: aviso de validação,
+  /// os dois totais e as premissas (fechadas por padrão).
+  List<Widget> _buildSummary() {
+    final result = _result!;
+    if (_isLegacy) {
+      return [LegacyResultCard(legacyNetAmount: widget.history!.legacyNetAmount ?? 0)];
+    }
+    final validation = result.assumptions.where((a) => a.code == AssumptionCode.validationPending).toList();
+    return [
+      if (validation.isNotEmpty) ValidationNotice(assumptions: validation),
+      ResultTotalsCard(
+        paidAtTermination: result.paidAtTermination,
+        fgtsTotal: result.fgtsDeposit.total,
+        fgtsEstimated: _fgtsEstimated,
+        withdrawalPercent: TerminationRules.of(widget.terminationType).fgtsWithdrawalPercent,
       ),
-    );
-  }
-
-  Widget _buildSummaryItem(String label, double value, Color color) {
-    return Column(
-      children: [
-        Text(label, style: Theme.of(context).textTheme.titleSmall, textAlign: TextAlign.center),
-        const SizedBox(height: 8),
-        Text(
-          Formatters.formatCurrency(value),
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: color),
-          textAlign: TextAlign.center,
-        ),
+      if (result.assumptions.isNotEmpty) ...[
+        const SizedBox(height: 16),
+        AssumptionsSection(assumptions: result.assumptions),
       ],
-    );
+    ];
   }
 
-  /// Proventos pagos mais a multa do FGTS (que vem de `fgtsDeposit`), mantendo o layout atual.
-  List<BreakdownItem> get _additionsWithFgtsFine => [..._result!.additions, ..._result!.fgtsDeposit.items];
+  /// O marcador "estimado" só vale para o FGTS aproximado por premissa.
+  bool get _fgtsEstimated =>
+      _result!.assumptions.any((a) => a.code == AssumptionCode.fgtsBalance && a.origin == AssumptionOrigin.estimated);
 
   Widget _buildBreakdownSection() {
+    final result = _result!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -218,34 +207,45 @@ class _ResultScreenState extends State<ResultScreen> {
           style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
-        if (_additionsWithFgtsFine.isNotEmpty) ...[
-          Text(
-            'Adicionais',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.green, fontWeight: FontWeight.bold),
+        if (result.additions.isNotEmpty) _buildItemGroup('Verbas pagas na rescisão', Colors.green, result.additions),
+        if (result.deductions.isNotEmpty) _buildItemGroup('Descontos', Colors.red, result.deductions),
+        if (result.fgtsDeposit.items.isNotEmpty)
+          _buildItemGroup(
+            _l10n.fgtsDeposit,
+            Theme.of(context).colorScheme.primary,
+            result.fgtsDeposit.items,
+            estimated: _fgtsEstimated,
           ),
-          const SizedBox(height: 12),
-          ..._additionsWithFgtsFine.map(
-            (item) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: BreakdownItemCard(item: item),
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
-        if (_result!.deductions.isNotEmpty) ...[
-          Text(
-            'Descontos',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.red, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          ..._result!.deductions.map(
-            (item) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: BreakdownItemCard(item: item),
-            ),
-          ),
-        ],
       ],
+    );
+  }
+
+  AppLocalizations get _l10n => AppLocalizations.of(context) ?? AppLocalizationsPt();
+
+  Widget _buildItemGroup(String title, Color color, List<BreakdownItem> items, {bool estimated = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(color: color, fontWeight: FontWeight.bold),
+              ),
+              if (estimated) const EstimatedMarker(),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...items.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: BreakdownItemCard(item: item),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -411,17 +411,23 @@ class _ResultScreenState extends State<ResultScreen> {
                   onTap: () => Navigator.pop(context, ShareAction.copySimple),
                 ),
                 const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.picture_as_pdf),
-                  title: const Text('Exportar PDF'),
-                  subtitle: const Text('Gera e compartilha PDF'),
-                  onTap: () => Navigator.pop(context, ShareAction.exportPdf),
+                Semantics(
+                  identifier: 'share_export_pdf',
+                  child: ListTile(
+                    leading: const Icon(Icons.picture_as_pdf),
+                    title: const Text('Exportar PDF'),
+                    subtitle: const Text('Gera e compartilha PDF'),
+                    onTap: () => Navigator.pop(context, ShareAction.exportPdf),
+                  ),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.save_alt),
-                  title: const Text('Salvar PDF'),
-                  subtitle: const Text('Salva PDF no dispositivo'),
-                  onTap: () => Navigator.pop(context, ShareAction.savePdf),
+                Semantics(
+                  identifier: 'share_save_pdf',
+                  child: ListTile(
+                    leading: const Icon(Icons.save_alt),
+                    title: const Text('Salvar PDF'),
+                    subtitle: const Text('Salva PDF no dispositivo'),
+                    onTap: () => Navigator.pop(context, ShareAction.savePdf),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),

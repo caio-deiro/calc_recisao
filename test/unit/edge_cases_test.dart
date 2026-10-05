@@ -34,8 +34,8 @@ void main() {
 
         expect(result.additions.length, greaterThan(0));
         expect(result.deductions.length, greaterThan(0));
-        expect(result.netAmount, greaterThan(0));
-        expect(result.netAmount, lessThan(10000)); // Valor razoável
+        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThan(0));
+        expect((result.paidAtTermination + result.fgtsDeposit.total), lessThan(10000)); // Valor razoável
       });
 
       test('deve lidar com salário alto', () {
@@ -51,8 +51,8 @@ void main() {
 
         expect(result.additions.length, greaterThan(0));
         expect(result.deductions.length, greaterThan(0));
-        expect(result.netAmount, greaterThan(0));
-        expect(result.netAmount, greaterThan(100000)); // Valor alto esperado
+        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThan(0));
+        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThan(100000)); // Valor alto esperado
       });
 
       test('deve lidar com salário zero', () {
@@ -68,7 +68,7 @@ void main() {
 
         expect(result.additions.length, greaterThan(0));
         expect(result.deductions.length, 0);
-        expect(result.netAmount, 0.0);
+        expect((result.paidAtTermination + result.fgtsDeposit.total), 0.0);
       });
 
       test('deve lidar com adicionais altos', () {
@@ -84,7 +84,7 @@ void main() {
 
         expect(result.additions.length, greaterThan(0));
         expect(result.deductions.length, greaterThan(0));
-        expect(result.netAmount, greaterThan(0));
+        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThan(0));
       });
     });
 
@@ -102,8 +102,8 @@ void main() {
 
         expect(result.additions.length, greaterThan(0));
         expect(result.deductions.length, greaterThan(0));
-        expect(result.netAmount, greaterThan(0));
-        expect(result.netAmount, greaterThan(0)); // Deve ser positivo
+        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThan(0));
+        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThan(0)); // Deve ser positivo
       });
 
       test('deve lidar com contrato de 30 anos', () {
@@ -119,9 +119,12 @@ void main() {
 
         expect(result.additions.length, greaterThan(0));
         expect(result.deductions.length, greaterThan(0));
-        expect(result.netAmount, greaterThan(0));
+        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThan(0));
         // Com INSS/IRRF calculados sobre total, o valor líquido pode ser menor
-        expect(result.netAmount, greaterThan(30000)); // Valor alto esperado (ajustado)
+        expect(
+          (result.paidAtTermination + result.fgtsDeposit.total),
+          greaterThan(30000),
+        ); // Valor alto esperado (ajustado)
       });
 
       test('deve lidar com rescisão no mesmo dia da admissão', () {
@@ -137,7 +140,7 @@ void main() {
 
         expect(result.additions.length, greaterThan(0));
         expect(result.deductions.length, greaterThan(0));
-        expect(result.netAmount, greaterThanOrEqualTo(0));
+        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThanOrEqualTo(0));
       });
     });
 
@@ -204,7 +207,10 @@ void main() {
 
         expect(result.deductions.any((item) => item.code == BreakdownCode.otherDiscounts), isTrue);
         // Com descontos altos, o valor pode ser negativo (isso é válido)
-        expect(result.netAmount, isA<double>()); // Apenas verifica que é um número válido
+        expect(
+          (result.paidAtTermination + result.fgtsDeposit.total),
+          isA<double>(),
+        ); // Apenas verifica que é um número válido
       });
 
       test('deve lidar com outros descontos iguais ao salário', () {
@@ -220,7 +226,7 @@ void main() {
         final result = useCase.execute(input, TerminationType.withoutJustCause);
 
         expect(result.deductions.any((item) => item.code == BreakdownCode.otherDiscounts), isTrue);
-        expect(result.netAmount, greaterThan(0)); // Ainda deve ser positivo
+        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThan(0)); // Ainda deve ser positivo
       });
     });
 
@@ -357,12 +363,9 @@ void main() {
         final calculatedDeductions = result.deductions.fold(0.0, (sum, item) => sum + item.value);
         final calculatedNet = calculatedAdditions - calculatedDeductions;
 
-        // A multa do FGTS sai de `additions` e vai para `fgtsDeposit` (B2-09); os totais antigos a incluem.
-        final fgtsFine = result.fgtsDeposit.total;
+        // A multa do FGTS está em `fgtsDeposit`, fora de `additions` e de `paidAtTermination` (B2-09).
         expect(result.paidAtTermination, closeTo(calculatedNet, 0.01));
-        expect(result.totalToReceive, closeTo(calculatedAdditions + fgtsFine, 0.01));
         expect(result.totalDeductions, closeTo(calculatedDeductions, 0.01));
-        expect(result.netAmount, closeTo(calculatedNet + fgtsFine, 0.01));
       });
 
       test('deve ter data de cálculo atual', () {
@@ -418,7 +421,7 @@ void main() {
         // Mesmo com datas invertidas, não deve quebrar
         expect(result.additions.length, greaterThan(0));
         expect(result.deductions.length, greaterThan(0));
-        expect(result.netAmount, isA<double>());
+        expect((result.paidAtTermination + result.fgtsDeposit.total), isA<double>());
       });
 
       test('deve lidar com valores muito pequenos', () {
@@ -434,7 +437,7 @@ void main() {
 
         expect(result.additions.length, greaterThan(0));
         expect(result.deductions.length, greaterThan(0));
-        expect(result.netAmount, greaterThanOrEqualTo(0));
+        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThanOrEqualTo(0));
       });
 
       test('deve lidar com valores muito grandes', () {
@@ -450,8 +453,8 @@ void main() {
 
         expect(result.additions.length, greaterThan(0));
         expect(result.deductions.length, greaterThan(0));
-        expect(result.netAmount, greaterThan(0));
-        expect(result.netAmount.isFinite, isTrue); // Não deve ser infinito
+        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThan(0));
+        expect((result.paidAtTermination + result.fgtsDeposit.total).isFinite, isTrue); // Não deve ser infinito
       });
     });
   });

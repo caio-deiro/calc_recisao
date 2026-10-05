@@ -10,6 +10,7 @@ class TerminationTypeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
+      identifier: 'home_type_${type.name}',
       label: '${type.label}. ${type.description}',
       button: true,
       child: Card(

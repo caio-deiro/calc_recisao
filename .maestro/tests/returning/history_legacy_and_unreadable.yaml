@@ -1,0 +1,38 @@
+appId: com.caiodeiro.calcclt
+name: Histórico com registro legado e ilegível (semeado por adb run-as)
+# Pré-requisito: sh .maestro/utils/seed_history.sh (APK debug). Sem clearState, de propósito.
+# Tag `seeded`: fora da suíte padrão (config.yaml); rode pelo run_seeded.sh ou pelo arquivo.
+tags: [history, seeded]
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "home_history_button"
+    timeout: 20000
+- tapOn:
+    id: "home_history_button"
+    label: "Abrir Histórico"
+- assertVisible:
+    id: "history_unreadable_notice"
+    label: "Aviso de registro ilegível"
+- assertVisible:
+    id: "history_legacy_mark"
+    label: "Marca de versão anterior no card"
+- assertVisible:
+    text: ".*12[.]345,67.*"
+    label: "Card mostra o valor salvo"
+- tapOn:
+    id: "history_item_0"
+    label: "Abrir o registro legado"
+- assertVisible:
+    id: "result_legacy_mark"
+    label: "Marca de versão anterior no Resultado"
+- assertVisible:
+    text: ".*12[.]345,67.*"
+    label: "Resultado mostra o valor salvo"
+- assertNotVisible:
+    id: "result_fgts_total"
+    label: "Legado sem dois totais"
+- assertNotVisible:
+    id: "result_share_button"
+    label: "Legado sem compartilhar"

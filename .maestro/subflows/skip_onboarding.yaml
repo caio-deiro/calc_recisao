@@ -1,5 +1,10 @@
 appId: com.caiodeiro.calcclt
 ---
+- extendedWaitUntil:
+    visible: "Pular"
+    timeout: 20000
+    optional: true
+    label: "Aguarda o onboarding (só na 1ª abertura)"
 - runFlow:
     when:
       visible: "Pular"

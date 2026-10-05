@@ -24,7 +24,7 @@ void main() {
     setUp(() async {
       // Limpar SharedPreferences antes de cada teste
       SharedPreferences.setMockInitialValues({});
-      
+
       useCase = const CalculateTerminationUseCase();
       taxService = TaxTablesService.instance;
       await taxService.loadTaxTables();
@@ -61,8 +61,8 @@ void main() {
         // 4. Verificar resultado
         expect(result.additions.length, greaterThan(0));
         expect(result.deductions.length, greaterThan(0));
-        expect(result.netAmount, greaterThan(0));
-        expect(result.totalToReceive, greaterThan(result.totalDeductions));
+        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThan(0));
+        expect((result.totalAdditions + result.fgtsDeposit.total), greaterThan(result.totalDeductions));
 
         // 5. Salvar no histórico
         final history = await repository.getHistory();
@@ -82,7 +82,10 @@ void main() {
         final updatedHistory = await repository.getHistory();
         expect(updatedHistory.length, initialCount + 1);
         expect(updatedHistory.first.input.baseSalary, input.baseSalary);
-        expect(updatedHistory.first.result.netAmount, result.netAmount);
+        expect(
+          (updatedHistory.first.result.paidAtTermination + updatedHistory.first.result.fgtsDeposit.total),
+          (result.paidAtTermination + result.fgtsDeposit.total),
+        );
       });
 
       test('deve executar fluxo completo com justa causa', () async {
@@ -263,4 +266,3 @@ void main() {
     });
   });
 }
-
