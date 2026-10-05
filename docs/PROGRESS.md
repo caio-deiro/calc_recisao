@@ -7,12 +7,12 @@
 
 ## Resumo
 
-**22/76 requisitos entregues (29%)**
+**31/76 requisitos entregues (41%)**
 
 | Estado | Requisitos |
 |---|--:|
-| 🚀 Entregue | 22 |
-| ✔ Implementado | 9 |
+| 🚀 Entregue | 31 |
+| ✔ Implementado | 0 |
 | 🔨 Em andamento | 0 |
 | 📋 Planejado | 0 |
 | 🎯 Sem plano | 45 |
@@ -23,11 +23,11 @@
 |---|---|--:|--:|--:|--:|--:|--:|--:|
 | B0 | Convenções e pré-requisitos transversais | 8 | 5 | 0 | 0 | 0 | 3 | 62% |
 | B1 | Remoção do PRO e monetização só com AdMob | 17 | 17 | 0 | 0 | 0 | 0 | 100% |
-| B2 | Núcleo de cálculo: modelo, correções e Decimal | 15 | 0 | 3 | 0 | 0 | 12 | 0% |
+| B2 | Núcleo de cálculo: modelo, correções e Decimal | 15 | 3 | 0 | 0 | 0 | 12 | 20% |
 | B3 | Períodos de férias e férias em dobro | 8 | 0 | 0 | 0 | 0 | 8 | 0% |
 | B4 | Contratos a prazo e rescisão indireta | 9 | 0 | 0 | 0 | 0 | 9 | 0% |
 | B5 | Resultado, compartilhamento e PDF | 6 | 0 | 0 | 0 | 0 | 6 | 0% |
-| B6 | Validação e infraestrutura de testes golden | 6 | 0 | 6 | 0 | 0 | 0 | 0% |
+| B6 | Validação e infraestrutura de testes golden | 6 | 6 | 0 | 0 | 0 | 0 | 100% |
 | B7 | Conformidade, privacidade e operação | 7 | 0 | 0 | 0 | 0 | 7 | 0% |
 
 ## Detalhe
@@ -71,7 +71,7 @@
 
 | ID | Estado | Requisito | Changes |
 |---|---|---|---|
-| B2-01 | ✔ Implementado | Identidade de verba (D8): BreakdownItem ganha code (enum BreakdownCode: salar... | `add-golden-test-infra` |
+| B2-01 | 🚀 Entregue | Identidade de verba (D8): BreakdownItem ganha code (enum BreakdownCode: salar... | `2026-10-05-add-golden-test-infra` |
 | B2-02 | 🎯 Sem plano | Regras por tipo em tabela, não em if espalhados: um TerminationRules imutável... | — |
 | B2-03 | 🎯 Sem plano | O use case deixa de remover itens depois de adicioná-los (padrão atual para j... | — |
 | B2-04 | 🎯 Sem plano | C1 Justa causa paga férias vencidas | — |
@@ -80,10 +80,10 @@
 | B2-07 | 🎯 Sem plano | C4 Férias indenizadas sem IRRF e sem INSS | — |
 | B2-08 | 🎯 Sem plano | C5 INSS do 13º separado do salário | — |
 | B2-09 | 🎯 Sem plano | TerminationResult passa a expor paidAtTermination (soma dos proventos pagos −... | — |
-| B2-10 | ✔ Implementado | Premissas: TerminationResult.assumptions: List<Assumption> com code, texto, o... | `add-golden-test-infra` |
+| B2-10 | 🚀 Entregue | Premissas: TerminationResult.assumptions: List<Assumption> com code, texto, o... | `2026-10-05-add-golden-test-infra` |
 | B2-11 | 🎯 Sem plano | Histórico compatível: CalculationHistory.toJson ganha schemaVersion (inteiro)... | — |
 | B2-12 | 🎯 Sem plano | O TerminationType.values.firstWhere(...) em CalculationHistory.fromJson não t... | — |
-| B2-13 | ✔ Implementado | Introduzir Decimal (package:decimal, já no pubspec) em domain/. Cálculo inter... | `add-golden-test-infra` |
+| B2-13 | 🚀 Entregue | Introduzir Decimal (package:decimal, já no pubspec) em domain/. Cálculo inter... | `2026-10-05-add-golden-test-infra` |
 | B2-14 | 🎯 Sem plano | Fronteiras convertem para double (apresentação, toJson); o JSON do histórico ... | — |
 | B2-15 | 🎯 Sem plano | Critério de migração: os testes golden (B6) passam antes e depois da troca pa... | — |
 
@@ -129,12 +129,12 @@
 
 | ID | Estado | Requisito | Changes |
 |---|---|---|---|
-| B6-01 | ✔ Implementado | Criar test/golden/cases/*.json. Cada arquivo: fonte (TRCT anonimizado, calcul... | `add-golden-test-infra` |
-| B6-02 | ✔ Implementado | Um único *runner* (test/golden/golden_test.dart) carrega todos os casos e com... | `add-golden-test-infra` |
-| B6-03 | ✔ Implementado | O resultado esperado vem sempre do documento externo, nunca da saída do app. ... | `add-golden-test-infra` |
-| B6-04 | ✔ Implementado | Plano B: regras cujo caso golden ainda não existe (art. 479/480, férias em do... | `add-golden-test-infra` |
-| B6-05 | ✔ Implementado | Cobertura mínima antes de publicar B2: um caso por tipo de rescisão ativo e p... | `add-golden-test-infra` |
-| B6-06 | ✔ Implementado | Pendências do responsável (bloqueiam a publicação, não o código): fornecer TR... | `add-golden-test-infra` |
+| B6-01 | 🚀 Entregue | Criar test/golden/cases/*.json. Cada arquivo: fonte (TRCT anonimizado, calcul... | `2026-10-05-add-golden-test-infra` |
+| B6-02 | 🚀 Entregue | Um único *runner* (test/golden/golden_test.dart) carrega todos os casos e com... | `2026-10-05-add-golden-test-infra` |
+| B6-03 | 🚀 Entregue | O resultado esperado vem sempre do documento externo, nunca da saída do app. ... | `2026-10-05-add-golden-test-infra` |
+| B6-04 | 🚀 Entregue | Plano B: regras cujo caso golden ainda não existe (art. 479/480, férias em do... | `2026-10-05-add-golden-test-infra` |
+| B6-05 | 🚀 Entregue | Cobertura mínima antes de publicar B2: um caso por tipo de rescisão ativo e p... | `2026-10-05-add-golden-test-infra` |
+| B6-06 | 🚀 Entregue | Pendências do responsável (bloqueiam a publicação, não o código): fornecer TR... | `2026-10-05-add-golden-test-infra` |
 
 ### B7 — Conformidade, privacidade e operação
 
