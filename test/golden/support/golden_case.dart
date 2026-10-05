@@ -10,7 +10,8 @@ const goldenVerbaCodes = {
   'notice',
   'noticeDiscount',
   'thirteenth',
-  'accruedVacation',
+  'accruedVacationSimple',
+  'accruedVacationDouble',
   'proportionalVacation',
   'fgtsFine',
   'inss',
@@ -135,7 +136,7 @@ class GoldenCase {
       existingFgtsAmount: fgts == null
           ? 0.0
           : number(fgts, 'entrada.fgtsInformado'),
-      hasAccruedVacation: entrada['feriasVencidas'] == true,
+      vacationPeriodsTaken: (entrada['feriasGozadas'] ?? 0) as int,
       noticeWorked: entrada['avisoTrabalhado'] == true,
       workedDaysInMonth: (entrada['diasTrabalhadosNoMes'] ?? 0) as int,
       otherDiscounts: number(

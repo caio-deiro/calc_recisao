@@ -27,7 +27,8 @@ abstract class AppLocalizations {
   String get averageAdditions;
   String get workedDaysInMonth;
   String get options;
-  String get hasAccruedVacation;
+  String get vacationPeriodsTaken;
+  String get vacationPeriodsWarning;
   String get noticeWorked;
   String get hasExistingFgts;
   String get existingFgtsAmount;

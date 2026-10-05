@@ -43,6 +43,22 @@ void main() {
       },
     );
 
+    test('deve ler feriasGozadas como int e assumir 0 quando ausente', () {
+      expect(parseFixture(fixtureJson()).input.vacationPeriodsTaken, 0);
+      final json = fixtureJson();
+      (json['entrada'] as Map<String, dynamic>)['feriasGozadas'] = 2;
+      expect(parseFixture(json).input.vacationPeriodsTaken, 2);
+    });
+
+    test('deve aceitar os codes de férias simples e em dobro no esperado', () {
+      final json = fixtureJson();
+      (json['esperado']['verbas'] as Map<String, dynamic>)
+        ..['accruedVacationSimple'] = 4000.00
+        ..['accruedVacationDouble'] = 8000.00;
+      final c = parseFixture(json);
+      expect(c.verbas['accruedVacationDouble'], 8000.0);
+    });
+
     test('deve rejeitar caso sem fonte citando o arquivo', () {
       final json = fixtureJson()..remove('fonte');
       expect(

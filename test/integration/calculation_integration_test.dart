@@ -44,7 +44,7 @@ void main() {
           terminationDate: DateTime(2024, 6, 30),
           baseSalary: 5000.0,
           averageAdditions: 500.0,
-          hasAccruedVacation: false,
+          vacationPeriodsTaken: 1,
           noticeWorked: false,
           calculateTaxes: true,
           dependents: 1,
@@ -94,7 +94,7 @@ void main() {
           terminationDate: DateTime(2024, 6, 30),
           baseSalary: 5000.0,
           averageAdditions: 0.0,
-          hasAccruedVacation: false,
+          vacationPeriodsTaken: 1,
           noticeWorked: false,
           calculateTaxes: true,
         );
@@ -153,7 +153,7 @@ void main() {
           terminationDate: DateTime(2024, 6, 30),
           baseSalary: 5000.0,
           averageAdditions: 500.0,
-          hasAccruedVacation: false,
+          vacationPeriodsTaken: 1,
           noticeWorked: false,
           calculateTaxes: true,
         );
@@ -181,7 +181,7 @@ void main() {
           terminationDate: DateTime(2024, 12, 31),
           baseSalary: 5000.0,
           averageAdditions: 0.0,
-          hasAccruedVacation: false,
+          vacationPeriodsTaken: 0,
           noticeWorked: false,
           calculateTaxes: true,
         );

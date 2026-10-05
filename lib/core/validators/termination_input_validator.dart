@@ -1,4 +1,5 @@
 import '../../domain/entities/termination_input.dart';
+import '../../domain/rules/vacation_periods.dart';
 import '../exceptions/app_exceptions.dart';
 
 /// Resultado da validação
@@ -153,6 +154,16 @@ class TerminationInputValidator {
       if (input.workedDaysInMonth > daysInMonth) {
         // Apenas aviso, não erro crítico
         // Pode ser que o usuário queira especificar manualmente
+      }
+    }
+
+    // Períodos de férias gozados entre 0 e n (anos completos). Com datas
+    // inconsistentes, só os erros de data são reportados.
+    if (!input.terminationDate.isBefore(input.admissionDate)) {
+      final n = fullServiceYears(input.admissionDate, input.terminationDate);
+      if (input.vacationPeriodsTaken < 0 || input.vacationPeriodsTaken > n) {
+        errors.add('Períodos de férias gozados devem estar entre 0 e $n');
+        fieldErrors['vacationPeriodsTaken'] = 'Valor inválido';
       }
     }
 

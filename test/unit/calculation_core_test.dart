@@ -4,6 +4,7 @@ import 'package:calc_recisao/core/services/tax_tables_service.dart';
 import 'package:calc_recisao/domain/entities/assumption.dart';
 import 'package:calc_recisao/domain/entities/breakdown_code.dart';
 import 'package:calc_recisao/domain/entities/termination_input.dart';
+import 'package:calc_recisao/domain/rules/vacation_periods.dart';
 import 'package:calc_recisao/domain/entities/termination_result.dart';
 import 'package:calc_recisao/domain/entities/termination_type.dart';
 import 'package:calc_recisao/domain/usecases/calculate_termination.dart';
@@ -34,7 +35,8 @@ void main() {
     admissionDate: admission ?? DateTime(2020, 3, 10),
     terminationDate: termination ?? DateTime(2025, 8, 26),
     baseSalary: salary,
-    hasAccruedVacation: accrued,
+    vacationPeriodsTaken:
+        fullServiceYears(admission ?? DateTime(2020, 3, 10), termination ?? DateTime(2025, 8, 26)) - (accrued ? 1 : 0),
     noticeWorked: noticeWorked,
     hasExistingFgts: fgts != null,
     existingFgtsAmount: fgts ?? 0,
@@ -59,7 +61,7 @@ void main() {
           BreakdownCode.salaryBalance,
           BreakdownCode.notice,
           BreakdownCode.thirteenth,
-          BreakdownCode.accruedVacation,
+          BreakdownCode.accruedVacationSimple,
           BreakdownCode.proportionalVacation,
           BreakdownCode.fgtsFine,
           BreakdownCode.inss,
@@ -78,7 +80,7 @@ void main() {
   group('C1: férias vencidas na justa causa (CLT art. 146 caput)', () {
     test('deve pagar só férias vencidas, (3000) x 4/3 = 4000,00', () {
       final r = useCase.execute(input(accrued: true), TerminationType.withJustCause);
-      expect(valueOf(r, BreakdownCode.accruedVacation), 4000.00);
+      expect(valueOf(r, BreakdownCode.accruedVacationSimple), 4000.00);
       expect(valueOf(r, BreakdownCode.proportionalVacation), isNull);
       expect(valueOf(r, BreakdownCode.thirteenth), isNull);
       expect(valueOf(r, BreakdownCode.notice), isNull);

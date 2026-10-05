@@ -6,6 +6,7 @@ enum AssumptionCode {
   vacationMonths,
   thirtyDayMonth,
   fifteenDayRule,
+  vacationPeriods,
   validationPending,
 }
 

@@ -6,10 +6,12 @@ import '../entities/termination_result.dart';
 import '../entities/termination_type.dart';
 import '../rules/avos.dart';
 import '../rules/termination_rules.dart';
+import '../rules/vacation_periods.dart';
 import '../../core/services/tax_tables_service.dart';
 import '../../core/utils/logger.dart';
 import '../../core/exceptions/app_exceptions.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/utils/formatters.dart';
 
 /// Use case responsável por calcular rescisões trabalhistas conforme a CLT.
 ///
@@ -49,19 +51,24 @@ class CalculateTerminationUseCase {
       final noticeDays = _noticeDays(input);
       final monthlyBase = input.baseSalary + input.averageAdditions;
       final noticeIndemnified = rules.noticePercent > 0 && !input.noticeWorked;
-      final paidNoticeDays = noticeIndemnified ? noticeDays * rules.noticePercent ~/ 100 : 0;
+      final paidNoticeDays = noticeIndemnified
+          ? noticeDays * rules.noticePercent ~/ 100
+          : 0;
       // C2: projeção do aviso indenizado nas avos (CLT art. 487 §1º; OJ 82 SDI-1 TST). ⚖️
       final projection = noticeProjectionMonths(paidNoticeDays);
 
       // 1. Saldo de salário
-      final daysWorked = input.workedDaysInMonth > 0 ? input.workedDaysInMonth : input.terminationDate.day;
+      final daysWorked = input.workedDaysInMonth > 0
+          ? input.workedDaysInMonth
+          : input.terminationDate.day;
       additions.add(
         BreakdownItem(
           code: BreakdownCode.salaryBalance,
           description: 'Saldo de Salário',
           value: _roundCurrency((input.baseSalary / 30) * daysWorked),
           type: BreakdownType.addition,
-          details: '$daysWorked dias × R\$ ${(input.baseSalary / 30).toStringAsFixed(2)}',
+          details:
+              '$daysWorked dias × R\$ ${(input.baseSalary / 30).toStringAsFixed(2)}',
         ),
       );
 
@@ -71,8 +78,12 @@ class CalculateTerminationUseCase {
         additions.add(
           BreakdownItem(
             code: BreakdownCode.notice,
-            description: isFull ? 'Aviso Prévio Indenizado' : 'Aviso Prévio Indenizado (${rules.noticePercent}%)',
-            value: _roundCurrency((monthlyBase / 30) * noticeDays * rules.noticePercent / 100),
+            description: isFull
+                ? 'Aviso Prévio Indenizado'
+                : 'Aviso Prévio Indenizado (${rules.noticePercent}%)',
+            value: _roundCurrency(
+              (monthlyBase / 30) * noticeDays * rules.noticePercent / 100,
+            ),
             type: BreakdownType.addition,
             details: isFull
                 ? '30 dias + adicional por tempo de serviço'
@@ -98,21 +109,34 @@ class CalculateTerminationUseCase {
         assumptions.add(
           Assumption(
             code: AssumptionCode.noticeProjection,
-            text: 'Aviso indenizado projetado em 13º e férias proporcionais: +$projection mês(es).',
+            text:
+                'Aviso indenizado projetado em 13º e férias proporcionais: +$projection mês(es).',
             origin: AssumptionOrigin.estimated,
             value: projection.toDouble(),
           ),
         );
         if (type == TerminationType.mutualAgreement) {
-          assumptions.addAll(_validationPending('noticeProjectionMutualAgreement'));
+          assumptions.addAll(
+            _validationPending('noticeProjectionMutualAgreement'),
+          );
         }
       }
 
       // 3. 13º salário proporcional (Lei 4.090/62)
       var thirteenthSalary = 0.0;
       if (rules.paysThirteenth) {
-        final avos = thirteenthMonths(input.admissionDate, input.terminationDate, projection: projection);
-        assumptions.add(_monthsAssumption(AssumptionCode.thirteenthMonths, '13º salário', avos));
+        final avos = thirteenthMonths(
+          input.admissionDate,
+          input.terminationDate,
+          projection: projection,
+        );
+        assumptions.add(
+          _monthsAssumption(
+            AssumptionCode.thirteenthMonths,
+            '13º salário',
+            avos,
+          ),
+        );
         thirteenthSalary = _roundCurrency(monthlyBase * avos / 12);
         if (thirteenthSalary > 0) {
           additions.add(
@@ -127,31 +151,56 @@ class CalculateTerminationUseCase {
         }
       }
 
-      // 4. Férias vencidas + 1/3 (C1: devidas em qualquer rescisão, CLT art. 146 caput) ⚖️
-      if (input.hasAccruedVacation && rules.paysAccruedVacation) {
-        additions.add(
-          BreakdownItem(
-            code: BreakdownCode.accruedVacation,
-            description: 'Férias Vencidas + 1/3',
-            value: _roundCurrency(monthlyBase + (monthlyBase / 3)),
-            type: BreakdownType.addition,
-            details: 'Salário + 1/3 constitucional',
-          ),
-        );
+      // 4. Férias vencidas: simples e em dobro por período derivado (C1: devidas em
+      // qualquer rescisão, CLT art. 146 caput; dobro: CLT art. 137, Súmula 328 TST) ⚖️
+      final vacation = VacationPeriods.derive(
+        input.admissionDate,
+        input.terminationDate,
+        input.vacationPeriodsTaken,
+      );
+      final hasDoublePeriod = vacation.periods.any(
+        (p) => p.status == VacationPeriodStatus.double,
+      );
+      if (rules.paysAccruedVacation) {
+        additions.addAll(_accruedVacationItems(monthlyBase, vacation.periods));
+      }
+      final hasOverduePeriod = vacation.periods.any(
+        (p) =>
+            p.status == VacationPeriodStatus.simple ||
+            p.status == VacationPeriodStatus.double,
+      );
+      if (rules.paysProportionalVacation ||
+          (rules.paysAccruedVacation && hasOverduePeriod)) {
+        assumptions.add(_vacationPeriodsAssumption(vacation.periods));
+      }
+      if (rules.paysAccruedVacation && hasDoublePeriod) {
+        assumptions.addAll(_validationPending('doubleVacation'));
       }
 
       // 5. Férias proporcionais + 1/3 (C3: período aquisitivo desde o aniversário) ⚖️
       if (rules.paysProportionalVacation) {
-        final avos = proportionalVacationMonths(input.admissionDate, input.terminationDate, projection: projection);
-        assumptions.add(_monthsAssumption(AssumptionCode.vacationMonths, 'férias proporcionais', avos));
+        final avos = proportionalVacationMonths(
+          input.admissionDate,
+          input.terminationDate,
+          projection: projection,
+        );
+        assumptions.add(
+          _monthsAssumption(
+            AssumptionCode.vacationMonths,
+            'férias proporcionais',
+            avos,
+          ),
+        );
         final proportionalSalary = (monthlyBase * avos) / 12;
-        final vacation = _roundCurrency(proportionalSalary + (proportionalSalary / 3));
-        if (vacation > 0) {
+        final proportionalVacation = _roundCurrency(
+          proportionalSalary + (proportionalSalary / 3),
+        );
+        if (proportionalVacation > 0) {
           additions.add(
             BreakdownItem(
               code: BreakdownCode.proportionalVacation,
               description: 'Férias Proporcionais + 1/3',
-              value: vacation,
+              value: proportionalVacation,
               type: BreakdownType.addition,
               details: '$avos/12 do período aquisitivo',
             ),
@@ -171,15 +220,23 @@ class CalculateTerminationUseCase {
       // 6. Multa do FGTS: depositada na conta do FGTS, não paga na rescisão
       if (rules.paysFgtsFine) {
         final taxService = TaxTablesService.instance;
-        final fgtsInformed = input.hasExistingFgts && input.existingFgtsAmount > 0;
-        final fgtsBalance = fgtsInformed ? input.existingFgtsAmount : _estimateFgts(input);
-        final fineRate = taxService.getFgtsPenaltyAliquota() * rules.fgtsFineShare;
+        final fgtsInformed =
+            input.hasExistingFgts && input.existingFgtsAmount > 0;
+        final fgtsBalance = fgtsInformed
+            ? input.existingFgtsAmount
+            : _estimateFgts(input);
+        final fineRate =
+            taxService.getFgtsPenaltyAliquota() * rules.fgtsFineShare;
         final percent = (fineRate * 100).round();
         assumptions.add(
           Assumption(
             code: AssumptionCode.fgtsBalance,
-            text: fgtsInformed ? 'Saldo do FGTS informado por você.' : 'Saldo do FGTS estimado pelo tempo de serviço.',
-            origin: fgtsInformed ? AssumptionOrigin.informed : AssumptionOrigin.estimated,
+            text: fgtsInformed
+                ? 'Saldo do FGTS informado por você.'
+                : 'Saldo do FGTS estimado pelo tempo de serviço.',
+            origin: fgtsInformed
+                ? AssumptionOrigin.informed
+                : AssumptionOrigin.estimated,
             value: _roundCurrency(fgtsBalance),
           ),
         );
@@ -221,7 +278,8 @@ class CalculateTerminationUseCase {
               description: 'IRRF',
               value: _roundCurrency(taxes.irrf),
               type: BreakdownType.deduction,
-              details: 'Sobre saldo de salário e 13º (férias não entram na base)',
+              details:
+                  'Sobre saldo de salário e 13º (férias não entram na base)',
             ),
           );
         }
@@ -240,10 +298,16 @@ class CalculateTerminationUseCase {
         );
       }
 
-      final totalAdditions = _roundCurrency(additions.fold(0.0, (sum, item) => sum + item.value));
-      final totalDeductions = _roundCurrency(deductions.fold(0.0, (sum, item) => sum + item.value));
+      final totalAdditions = _roundCurrency(
+        additions.fold(0.0, (sum, item) => sum + item.value),
+      );
+      final totalDeductions = _roundCurrency(
+        deductions.fold(0.0, (sum, item) => sum + item.value),
+      );
       final fgtsDeposit = FgtsDeposit(items: fgtsItems);
-      final paidAtTermination = _roundCurrency(totalAdditions - totalDeductions);
+      final paidAtTermination = _roundCurrency(
+        totalAdditions - totalDeductions,
+      );
 
       final result = TerminationResult(
         additions: additions,
@@ -259,7 +323,10 @@ class CalculateTerminationUseCase {
       return result;
     } catch (e, stackTrace) {
       AppLogger.error('Erro ao calcular rescisão', e, stackTrace);
-      throw CalculationException('Erro ao calcular rescisão. Verifique os dados informados.', originalError: e);
+      throw CalculationException(
+        'Erro ao calcular rescisão. Verifique os dados informados.',
+        originalError: e,
+      );
     }
   }
 
@@ -277,22 +344,92 @@ class CalculateTerminationUseCase {
     if (!validationPendingRules.contains(ruleId)) {
       return const [];
     }
+    final text = switch (ruleId) {
+      'doubleVacation' =>
+        'Cálculo em validação: férias em dobro quando o prazo de concessão venceu (CLT art. 137; Súmula 328 TST).',
+      _ =>
+        'Cálculo em validação: projeção do aviso no acordo mútuo (CLT art. 484-A).',
+    };
     return [
       Assumption(
         code: AssumptionCode.validationPending,
-        text: 'Cálculo em validação: projeção do aviso no acordo mútuo (CLT art. 484-A).',
+        text: text,
         origin: AssumptionOrigin.estimated,
         ruleId: ruleId,
       ),
     ];
   }
 
+  /// Um item por código: simples = base × 4/3 por período; dobro = 2 × base × 4/3
+  /// (1/3 sobre o total dobrado, Súmula 328 TST). Fora de INSS/IRRF (C4).
+  List<BreakdownItem> _accruedVacationItems(
+    double base,
+    List<VacationPeriod> periods,
+  ) {
+    final simple = periods
+        .where((p) => p.status == VacationPeriodStatus.simple)
+        .length;
+    final doubled = periods
+        .where((p) => p.status == VacationPeriodStatus.double)
+        .length;
+    return [
+      if (simple > 0)
+        BreakdownItem(
+          code: BreakdownCode.accruedVacationSimple,
+          description: 'Férias Vencidas + 1/3',
+          value: _roundCurrency(simple * base * 4 / 3),
+          type: BreakdownType.addition,
+          details:
+              '$simple ${simple == 1 ? 'período' : 'períodos'} (salário + 1/3 constitucional)',
+        ),
+      if (doubled > 0)
+        BreakdownItem(
+          code: BreakdownCode.accruedVacationDouble,
+          description: 'Férias em Dobro + 1/3 (indenização)',
+          value: _roundCurrency(doubled * 2 * base * 4 / 3),
+          type: BreakdownType.addition,
+          details:
+              '$doubled ${doubled == 1 ? 'período' : 'períodos'} com prazo de concessão vencido',
+        ),
+    ];
+  }
+
+  /// Tabela dos períodos derivados, uma linha por período (B3-07).
+  Assumption _vacationPeriodsAssumption(List<VacationPeriod> periods) {
+    final lines = periods.map((p) {
+      final start = Formatters.formatDate(p.acquisitiveStart);
+      if (p.status == VacationPeriodStatus.proportional) {
+        return '${p.index}) desde $start: proporcional';
+      }
+      final end = Formatters.formatDate(
+        DateTime(
+          p.acquisitiveEnd.year,
+          p.acquisitiveEnd.month,
+          p.acquisitiveEnd.day - 1,
+        ),
+      );
+      final status = switch (p.status) {
+        VacationPeriodStatus.taken => 'gozado',
+        VacationPeriodStatus.simple => 'simples',
+        _ => 'dobro',
+      };
+      return '${p.index}) $start–$end, concessivo até ${Formatters.formatDate(p.concessiveEnd)}: $status';
+    });
+    return Assumption(
+      code: AssumptionCode.vacationPeriods,
+      text: lines.join('\n'),
+      origin: AssumptionOrigin.estimated,
+    );
+  }
+
   /// Dias do aviso prévio: base + dias por ano de serviço, até o máximo da tabela.
   int _noticeDays(TerminationInput input) {
     final taxService = TaxTablesService.instance;
-    final yearsOfService = input.terminationDate.difference(input.admissionDate).inDays / 365;
+    final yearsOfService =
+        input.terminationDate.difference(input.admissionDate).inDays / 365;
     final noticeDays =
-        taxService.getAvisoPrevioBaseDays() + (yearsOfService.floor() * taxService.getAvisoPrevioDaysPerYear());
+        taxService.getAvisoPrevioBaseDays() +
+        (yearsOfService.floor() * taxService.getAvisoPrevioDaysPerYear());
     final maxDays = taxService.getAvisoPrevioMaxDays();
     return noticeDays > maxDays ? maxDays : noticeDays;
   }
@@ -300,7 +437,9 @@ class CalculateTerminationUseCase {
   /// Estima o saldo do FGTS pelo tempo de serviço quando o usuário não informa.
   double _estimateFgts(TerminationInput input) {
     final averageMonthlySalary = input.baseSalary + input.averageAdditions;
-    return (averageMonthlySalary * TaxTablesService.instance.getFgtsAliquota()) * _calculateMonthsWorked(input);
+    return (averageMonthlySalary *
+            TaxTablesService.instance.getFgtsAliquota()) *
+        _calculateMonthsWorked(input);
   }
 
   /// Meses entre admissão e rescisão (conta o mês se o dia da rescisão >= dia da admissão).

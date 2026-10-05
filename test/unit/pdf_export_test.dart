@@ -22,7 +22,7 @@ void main() {
         terminationDate: DateTime(2024, 12, 31),
         baseSalary: 3000.0,
         averageAdditions: 500.0,
-        hasAccruedVacation: true,
+        vacationPeriodsTaken: 0,
         workedDaysInMonth: 30,
       );
 

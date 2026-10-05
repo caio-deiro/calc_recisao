@@ -40,8 +40,9 @@ int thirteenthMonths(
   return (months + projection).clamp(0, _maxAvos);
 }
 
-/// Soma [months] meses a [date], ajustando o dia ao último do mês de destino.
-DateTime _addMonths(DateTime date, int months) {
+/// Soma [months] meses a [date], ajustando o dia ao último do mês de destino
+/// (ex.: 29/02 vira 28/02 em ano não bissexto). Âncora única de avos e férias.
+DateTime addMonths(DateTime date, int months) {
   final total = date.year * 12 + (date.month - 1) + months;
   final year = total ~/ 12;
   final month = total % 12 + 1;
@@ -60,20 +61,20 @@ int proportionalVacationMonths(
   int projection = 0,
 }) {
   var years = termination.year - admission.year;
-  if (_addMonths(admission, years * 12).isAfter(termination)) {
+  if (addMonths(admission, years * 12).isAfter(termination)) {
     years--;
   }
-  final periodStart = _addMonths(admission, years * 12);
+  final periodStart = addMonths(admission, years * 12);
 
   var months =
       (termination.year - periodStart.year) * 12 +
       termination.month -
       periodStart.month;
-  if (_addMonths(periodStart, months).isAfter(termination)) {
+  if (addMonths(periodStart, months).isAfter(termination)) {
     months--;
   }
   final restDays =
-      termination.difference(_addMonths(periodStart, months)).inDays + 1;
+      termination.difference(addMonths(periodStart, months)).inDays + 1;
   if (countsAsMonth(restDays)) {
     months++;
   }
