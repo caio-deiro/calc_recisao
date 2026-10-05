@@ -176,13 +176,16 @@ múltiplos vínculos. Essas limitações devem constar na tela e na listagem da 
 |---|---|
 | Saldo de salário | `salário / 30 × dias trabalhados` |
 | Aviso prévio | `(salário + média) / 30 × dias`, `dias = 30 + 3 × anos completos`, máx. **90** |
-| 13º proporcional | `(salário + média) × meses / 12`; mês com ≥ 15 dias conta inteiro |
-| Férias vencidas | `(salário + média) × 4/3` (um período, sim/não) |
-| Férias proporcionais | `(salário + média) × meses / 12 × 4/3`, com meses do **ano-calendário** |
-| Multa FGTS | `FGTS informado × 40 %`; senão estima `(salário + média) × 8 % × meses × 40 %` |
-| Acordo mútuo | Aviso × 50 %; multa × 50 % (20 %) |
+| 13º proporcional | `(salário + média) × avos / 12`, avos do **ano-calendário** + projeção do aviso (C2), teto 12; mês com **menos de 15 dias conta zero** (Lei 4.090/62 art. 1º §2º, ⚖️) |
+| Férias vencidas | `(salário + média) × 4/3` (um período, sim/não); **devidas também na justa causa** (C1, CLT art. 146 caput) |
+| Férias proporcionais | `(salário + média) × avos / 12 × 4/3`, avos **desde o último aniversário da admissão** (C3, CLT art. 146 par. único) + projeção (C2), teto 12 |
+| Multa FGTS | `FGTS informado × 40 %`; senão estima `(salário + média) × 8 % × meses × 40 %`. Vai para "Depositado no FGTS", fora do pago na rescisão |
+| Acordo mútuo | Aviso × 50 %; multa × 50 % (20 %); projeção pelo aviso pago (50 %), marcada "cálculo em validação" (CLT art. 484-A, ⚖️) |
 
-### 6.3 Correções decididas (🎯 ⚖️)
+### 6.3 Correções decididas (✅ implementadas, ⚖️ a validar)
+
+✅ C1 a C5 estão implementadas na change `fix-calculation-rules` (B2-04 a B2-08); seguem ⚖️ até haver
+caso golden com fonte (B6-06). `Decimal` (C6) segue 🎯 na change `migrate-money-to-decimal`.
 
 | # | Correção | Motivo |
 |---|---|---|
@@ -215,10 +218,11 @@ múltiplos vínculos. Essas limitações devem constar na tela e na listagem da 
   (indenização)"**.
 - Tributação: indenizadas, **sem IRRF e sem INSS** (C4).
 
-### 6.5 Resultado: dois totais e premissas (🎯)
+### 6.5 Resultado: dois totais e premissas (✅ modelo / 🎯 UI)
 
-Hoje a multa do FGTS entra no total "a receber". Na prática ela é **depositada na conta do FGTS**, não
-paga no TRCT em dinheiro. Alvo:
+✅ O modelo de domínio já separa `paidAtTermination` e `fgtsDeposit` e traz `assumptions` (B2-09/10);
+`netAmount`/`totalToReceive` ficam `@Deprecated` (semântica antiga, com a multa) até a UI nova (B5). A multa
+é **depositada na conta do FGTS**, não paga no TRCT em dinheiro. Alvo de UI (🎯):
 
 - **Pago na rescisão** — o líquido que o trabalhador recebe.
 - **Depositado no FGTS** — multa (40 % ou 20 %), com linha informativa de saque: 100 % no sem justa
@@ -253,9 +257,9 @@ Tributação: a indenização do art. 479 **não sofre IRRF nem INSS**; o descon
 não altera a base dos impostos.
 
 ### 6.7 Descontos (✅ + 🎯)
-- **INSS:** tabela progressiva por **data da rescisão**, com teto. (🎯 13º calculado à parte, C5.)
-- **IRRF:** tabelas mensal/anual por ano, dedução por dependente, redutor 2026. (🎯 sem férias
-  indenizadas, C4.)
+- **INSS:** tabela progressiva por **data da rescisão**, com teto. ✅ Saldo e 13º apurados em separado, cada um com tabela e teto próprios (C5, Decreto 3.048/99 art. 214 §6º e §7º).
+- **IRRF:** tabelas mensal/anual por ano, dedução por dependente, redutor 2026. ✅ Férias (vencidas ou
+  proporcionais) fora das bases de IRRF e INSS (C4; Decreto 3.048/99 art. 214 §9º IV; Súmulas 125 e 386 STJ).
 - **Outros descontos:** valor livre. O usuário pode **desligar o cálculo de impostos**.
 - Valores arredondados a 2 casas.
 
@@ -438,7 +442,7 @@ Quatro changes de OpenSpec, **em sequência**, cada uma como uma versão pequena
 | # | Change | Conteúdo |
 |---|---|---|
 | 1 | `remove-pro-ads-only` | Remove PRO, compras e `OfflineService`; PDF livre e histórico de 100; novo posicionamento de anúncios; consentimento (UMP + analytics); eventos |
-| 2 | `fix-calculation-rules` | C1 a C5, dois totais e premissas (§6.5), golden tests, depois `Decimal` (C6) |
+| 2 | `fix-calculation-rules` e `migrate-money-to-decimal` | C1 a C5, dois totais e premissas (§6.5), golden tests (B6); depois `Decimal` (C6) na segunda change |
 | 3 | `add-vacation-periods` | Períodos de férias e férias em dobro (§6.4) |
 | 4 | `add-fixed-term-and-indirect` | Tipos de prazo determinado, art. 479/480, assecuratória, rescisão indireta (§6.6) |
 

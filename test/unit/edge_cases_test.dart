@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:calc_recisao/domain/entities/breakdown_code.dart';
 import 'package:calc_recisao/domain/entities/termination_input.dart';
 import 'package:calc_recisao/domain/entities/termination_type.dart';
 import 'package:calc_recisao/domain/usecases/calculate_termination.dart';
@@ -151,7 +152,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final salaryBalance = result.additions.firstWhere((item) => item.description == 'Saldo de Salário');
+        final salaryBalance = result.additions.firstWhere((item) => item.code == BreakdownCode.salaryBalance);
 
         expect(salaryBalance.value, 100.0); // 3000 / 30 * 1
       });
@@ -166,7 +167,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final salaryBalance = result.additions.firstWhere((item) => item.description == 'Saldo de Salário');
+        final salaryBalance = result.additions.firstWhere((item) => item.code == BreakdownCode.salaryBalance);
 
         expect(salaryBalance.value, 3100.0); // 3000 / 30 * 31
       });
@@ -181,7 +182,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final salaryBalance = result.additions.firstWhere((item) => item.description == 'Saldo de Salário');
+        final salaryBalance = result.additions.firstWhere((item) => item.code == BreakdownCode.salaryBalance);
 
         // Deve usar o dia da rescisão (15) em vez do valor negativo
         expect(salaryBalance.value, 1500.0); // 3000 / 30 * 15
@@ -201,7 +202,7 @@ void main() {
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-        expect(result.deductions.any((item) => item.description == 'Outros Descontos'), isTrue);
+        expect(result.deductions.any((item) => item.code == BreakdownCode.otherDiscounts), isTrue);
         // Com descontos altos, o valor pode ser negativo (isso é válido)
         expect(result.netAmount, isA<double>()); // Apenas verifica que é um número válido
       });
@@ -218,7 +219,7 @@ void main() {
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-        expect(result.deductions.any((item) => item.description == 'Outros Descontos'), isTrue);
+        expect(result.deductions.any((item) => item.code == BreakdownCode.otherDiscounts), isTrue);
         expect(result.netAmount, greaterThan(0)); // Ainda deve ser positivo
       });
     });
@@ -236,7 +237,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final fgtsPenalty = result.additions.firstWhere((item) => item.description == 'Multa FGTS (40%)');
+        final fgtsPenalty = result.fgtsDeposit.items.firstWhere((item) => item.code == BreakdownCode.fgtsFine);
 
         expect(fgtsPenalty.value, 4000.0); // 10000 * 0.4
       });
@@ -253,7 +254,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final fgtsPenalty = result.additions.firstWhere((item) => item.description == 'Multa FGTS (40%)');
+        final fgtsPenalty = result.fgtsDeposit.items.firstWhere((item) => item.code == BreakdownCode.fgtsFine);
 
         expect(fgtsPenalty.value, greaterThan(0)); // Deve calcular baseado no tempo
       });
@@ -270,7 +271,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final fgtsPenalty = result.additions.firstWhere((item) => item.description == 'Multa FGTS (40%)');
+        final fgtsPenalty = result.fgtsDeposit.items.firstWhere((item) => item.code == BreakdownCode.fgtsFine);
 
         expect(fgtsPenalty.value, greaterThan(0)); // Deve calcular baseado no tempo
       });
@@ -289,7 +290,7 @@ void main() {
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-        expect(result.additions.any((item) => item.description == 'Férias Vencidas + 1/3'), isTrue);
+        expect(result.additions.any((item) => item.code == BreakdownCode.accruedVacation), isTrue);
       });
 
       test('não deve incluir férias vencidas quando não marcado', () {
@@ -304,7 +305,7 @@ void main() {
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-        expect(result.additions.any((item) => item.description == 'Férias Vencidas + 1/3'), isFalse);
+        expect(result.additions.any((item) => item.code == BreakdownCode.accruedVacation), isFalse);
       });
     });
 
@@ -320,8 +321,8 @@ void main() {
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-        expect(result.deductions.any((item) => item.description == 'INSS'), isTrue);
-        expect(result.deductions.any((item) => item.description == 'IRRF'), isTrue);
+        expect(result.deductions.any((item) => item.code == BreakdownCode.inss), isTrue);
+        expect(result.deductions.any((item) => item.code == BreakdownCode.irrf), isTrue);
       });
 
       test('não deve calcular impostos quando desabilitado', () {
@@ -335,8 +336,8 @@ void main() {
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-        expect(result.deductions.any((item) => item.description == 'INSS'), isFalse);
-        expect(result.deductions.any((item) => item.description == 'IRRF'), isFalse);
+        expect(result.deductions.any((item) => item.code == BreakdownCode.inss), isFalse);
+        expect(result.deductions.any((item) => item.code == BreakdownCode.irrf), isFalse);
       });
     });
 
@@ -356,9 +357,12 @@ void main() {
         final calculatedDeductions = result.deductions.fold(0.0, (sum, item) => sum + item.value);
         final calculatedNet = calculatedAdditions - calculatedDeductions;
 
-        expect(result.totalToReceive, closeTo(calculatedAdditions, 0.01));
+        // A multa do FGTS sai de `additions` e vai para `fgtsDeposit` (B2-09); os totais antigos a incluem.
+        final fgtsFine = result.fgtsDeposit.total;
+        expect(result.paidAtTermination, closeTo(calculatedNet, 0.01));
+        expect(result.totalToReceive, closeTo(calculatedAdditions + fgtsFine, 0.01));
         expect(result.totalDeductions, closeTo(calculatedDeductions, 0.01));
-        expect(result.netAmount, closeTo(calculatedNet, 0.01));
+        expect(result.netAmount, closeTo(calculatedNet + fgtsFine, 0.01));
       });
 
       test('deve ter data de cálculo atual', () {

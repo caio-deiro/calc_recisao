@@ -4,6 +4,7 @@ import 'package:calc_recisao/core/utils/pdf_utils.dart';
 import 'package:calc_recisao/domain/entities/termination_input.dart';
 import 'package:calc_recisao/domain/entities/termination_result.dart';
 import 'package:calc_recisao/domain/entities/termination_type.dart';
+import 'package:calc_recisao/domain/entities/breakdown_code.dart';
 import 'package:calc_recisao/domain/entities/breakdown_item.dart';
 
 void main() {
@@ -28,12 +29,14 @@ void main() {
       testResult = TerminationResult(
         additions: [
           BreakdownItem(
+            code: BreakdownCode.salaryBalance,
             description: 'Salário Proporcional',
             value: 3000.0,
             type: BreakdownType.addition,
             details: '30 dias trabalhados',
           ),
           BreakdownItem(
+            code: BreakdownCode.accruedVacation,
             description: 'Férias Vencidas',
             value: 1000.0,
             type: BreakdownType.addition,
@@ -42,12 +45,14 @@ void main() {
         ],
         deductions: [
           BreakdownItem(
+            code: BreakdownCode.inss,
             description: 'INSS',
             value: 360.0,
             type: BreakdownType.deduction,
             details: '12% sobre R\$ 3.000,00',
           ),
           BreakdownItem(
+            code: BreakdownCode.irrf,
             description: 'IRRF',
             value: 180.0,
             type: BreakdownType.deduction,

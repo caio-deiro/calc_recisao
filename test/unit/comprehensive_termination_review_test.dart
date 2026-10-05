@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:calc_recisao/domain/entities/breakdown_code.dart';
 import 'package:calc_recisao/domain/entities/termination_input.dart';
 import 'package:calc_recisao/domain/entities/termination_type.dart';
 import 'package:calc_recisao/domain/usecases/calculate_termination.dart';
@@ -40,9 +41,9 @@ void main() {
 
         // Verificações específicas para sem justa causa
         // FGTS não é pago na rescisão, apenas a multa
-        expect(result.additions.any((item) => item.description == 'FGTS'), isFalse);
-        expect(result.additions.any((item) => item.description == 'Multa FGTS (40%)'), isTrue);
-        expect(result.additions.any((item) => item.description == 'Aviso Prévio Indenizado'), isTrue);
+        expect(result.additions.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
+        expect(result.fgtsDeposit.items.any((item) => item.code == BreakdownCode.fgtsFine), isTrue);
+        expect(result.additions.any((item) => item.code == BreakdownCode.notice), isTrue);
       });
 
       test('deve calcular rescisão sem justa causa - 3 anos', () {
@@ -68,8 +69,8 @@ void main() {
 
         // Verificações específicas para sem justa causa
         // FGTS não é pago na rescisão, apenas a multa
-        expect(result.additions.any((item) => item.description == 'FGTS'), isFalse);
-        expect(result.additions.any((item) => item.description == 'Multa FGTS (40%)'), isTrue);
+        expect(result.additions.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
+        expect(result.fgtsDeposit.items.any((item) => item.code == BreakdownCode.fgtsFine), isTrue);
       });
     });
 
@@ -96,10 +97,10 @@ void main() {
         }
 
         // Verificações específicas para pedido de demissão
-        expect(result.additions.any((item) => item.description == 'FGTS'), isFalse);
-        expect(result.additions.any((item) => item.description == 'Multa FGTS (40%)'), isFalse);
-        expect(result.additions.any((item) => item.description == 'Aviso Prévio Indenizado'), isFalse);
-        expect(result.deductions.any((item) => item.description == 'Desconto Aviso Prévio'), isTrue);
+        expect(result.additions.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
+        expect(result.fgtsDeposit.items.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
+        expect(result.additions.any((item) => item.code == BreakdownCode.notice), isFalse);
+        expect(result.deductions.any((item) => item.code == BreakdownCode.noticeDiscount), isTrue);
       });
     });
 
@@ -126,11 +127,14 @@ void main() {
         }
 
         // Verificações específicas para prazo determinado
-        expect(result.additions.any((item) => item.description == 'FGTS'), isFalse);
-        expect(result.additions.any((item) => item.description == 'Multa FGTS (40%)'), isFalse);
-        expect(result.additions.any((item) => item.description == 'Aviso Prévio Indenizado'), isFalse);
-        // Prazo determinado pode ter valor negativo devido aos descontos
-        expect(result.netAmount, lessThan(1000));
+        expect(result.additions.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
+        expect(result.fgtsDeposit.items.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
+        expect(result.additions.any((item) => item.code == BreakdownCode.notice), isFalse);
+        // Rescisão em 01/01/2024: o dia 1 não completa 15 dias, então 13º = 0 (Lei 4.090/62 art. 1º §2º).
+        expect(result.additions.any((item) => item.code == BreakdownCode.thirteenth), isFalse);
+        // C3: 01/07/2023 a 01/01/2024 = 6 avos de férias: 4000 x 6/12 x 4/3 = 2666,67 (CLT art. 146 parágrafo único).
+        final vacation = result.additions.firstWhere((item) => item.code == BreakdownCode.proportionalVacation);
+        expect(vacation.value, closeTo(2666.67, 0.01));
       });
     });
 
@@ -157,9 +161,9 @@ void main() {
         }
 
         // Verificações específicas para com justa causa
-        expect(result.additions.any((item) => item.description == 'FGTS'), isFalse);
-        expect(result.additions.any((item) => item.description == 'Multa FGTS (40%)'), isFalse);
-        expect(result.additions.any((item) => item.description == 'Aviso Prévio Indenizado'), isFalse);
+        expect(result.additions.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
+        expect(result.fgtsDeposit.items.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
+        expect(result.additions.any((item) => item.code == BreakdownCode.notice), isFalse);
         // Com justa causa pode ter valor negativo devido aos descontos
         expect(result.netAmount, lessThan(1000));
       });
@@ -189,9 +193,9 @@ void main() {
 
         // Verificações específicas para acordo mútuo
         // FGTS não é pago na rescisão, apenas a multa
-        expect(result.additions.any((item) => item.description == 'FGTS'), isFalse);
-        expect(result.additions.any((item) => item.description == 'Multa FGTS (20%)'), isTrue);
-        expect(result.additions.any((item) => item.description == 'Aviso Prévio Indenizado (50%)'), isTrue);
+        expect(result.additions.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
+        expect(result.fgtsDeposit.items.any((item) => item.code == BreakdownCode.fgtsFine), isTrue);
+        expect(result.additions.any((item) => item.code == BreakdownCode.notice), isTrue);
       });
     });
 
@@ -228,7 +232,8 @@ void main() {
         expect(withoutJustCause.netAmount, greaterThan(withJustCause.netAmount));
         expect(withoutJustCause.netAmount, greaterThan(mutualAgreement.netAmount));
 
-        expect(resignation.netAmount, greaterThan(withJustCause.netAmount));
+        // Em 01/01/2024 o 13º e as férias do período novo valem zero (menos de 15 dias), então empatam.
+        expect(resignation.netAmount, greaterThanOrEqualTo(withJustCause.netAmount));
         expect(fixedTerm.netAmount, greaterThanOrEqualTo(withJustCause.netAmount));
         expect(mutualAgreement.netAmount, greaterThan(withJustCause.netAmount));
 
@@ -257,8 +262,8 @@ void main() {
         }
 
         // Verificações específicas para férias vencidas e proporcionais
-        expect(result.additions.any((item) => item.description == 'Férias Vencidas + 1/3'), isTrue);
-        expect(result.additions.any((item) => item.description == 'Férias Proporcionais + 1/3'), isTrue);
+        expect(result.additions.any((item) => item.code == BreakdownCode.accruedVacation), isTrue);
+        expect(result.additions.any((item) => item.code == BreakdownCode.proportionalVacation), isTrue);
       });
 
       test('deve calcular com aviso prévio trabalhado', () {
@@ -279,7 +284,7 @@ void main() {
         }
 
         // Verificações específicas para aviso prévio trabalhado
-        expect(result.additions.any((item) => item.description == 'Aviso Prévio Indenizado'), isFalse);
+        expect(result.additions.any((item) => item.code == BreakdownCode.notice), isFalse);
       });
     });
   });

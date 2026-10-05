@@ -130,32 +130,53 @@ void main() {
     });
 
     group('Impostos na rescisão', () {
-      test('deve calcular INSS apenas sobre saldo e 13º', () {
+      test('C5: INSS do saldo e do 13º apurados em separado, somados', () {
         final TerminationTaxResult taxes = taxService.calculateTerminationTaxes(
           salaryBalance: 2000.0,
           thirteenthSalary: 2000.0,
-          vacationAmount: 2666.67,
           terminationDate: date2026,
         );
-        final double expectedInss = taxService.calculateInss(4000.0, date2026);
-        expect(taxes.inss, closeTo(expectedInss, 0.01));
+        final double each = taxService.calculateInss(2000.0, date2026);
+        expect(taxes.inssSalary, closeTo(each, 0.001));
+        expect(taxes.inssThirteenth, closeTo(each, 0.001));
+        expect(taxes.inss, closeTo(each * 2, 0.001));
       });
 
-      test('não deve tributar aviso indenizado nem multa FGTS', () {
-        final TerminationTaxResult taxesOnlySalary = taxService.calculateTerminationTaxes(
-          salaryBalance: 2000.0,
-          thirteenthSalary: 0.0,
-          vacationAmount: 0.0,
+      test('C5: duas bases acima do teto dão duas vezes o INSS do teto', () {
+        final double atCeiling = taxService.calculateInss(1000000.0, date2026);
+        final TerminationTaxResult taxes = taxService.calculateTerminationTaxes(
+          salaryBalance: 10000.0,
+          thirteenthSalary: 10000.0,
           terminationDate: date2026,
         );
-        final TerminationTaxResult taxesWithVacation = taxService.calculateTerminationTaxes(
-          salaryBalance: 2000.0,
-          thirteenthSalary: 0.0,
-          vacationAmount: 2666.67,
+        expect(taxes.inss, closeTo(atCeiling * 2, 0.001));
+      });
+
+      test('C5: tabela escolhida pela data da rescisão (2025 e 2026)', () {
+        final TerminationTaxResult t2025 = taxService.calculateTerminationTaxes(
+          salaryBalance: 3000.0,
+          thirteenthSalary: 3000.0,
+          terminationDate: DateTime(2025, 6, 10),
+        );
+        final TerminationTaxResult t2026 = taxService.calculateTerminationTaxes(
+          salaryBalance: 3000.0,
+          thirteenthSalary: 3000.0,
           terminationDate: date2026,
         );
-        expect(taxesWithVacation.inss, taxesOnlySalary.inss);
-        expect(taxesWithVacation.irrf, greaterThanOrEqualTo(taxesOnlySalary.irrf));
+        expect(t2025.inssSalary, closeTo(taxService.calculateInss(3000.0, DateTime(2025, 6, 10)), 0.001));
+        expect(t2026.inssSalary, closeTo(taxService.calculateInss(3000.0, date2026), 0.001));
+      });
+
+      test('IRRF mensal deduz o INSS do saldo e o anual o INSS do 13º', () {
+        final TerminationTaxResult taxes = taxService.calculateTerminationTaxes(
+          salaryBalance: 9000.0,
+          thirteenthSalary: 9000.0,
+          terminationDate: date2026,
+        );
+        final double expected =
+            taxService.calculateIrrf(9000.0 - taxes.inssSalary, date2026) +
+            taxService.calculateIrrfAnnual(9000.0 - taxes.inssThirteenth, date2026);
+        expect(taxes.irrf, closeTo(expected, 0.001));
       });
     });
 

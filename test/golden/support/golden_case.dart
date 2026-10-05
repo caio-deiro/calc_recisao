@@ -25,9 +25,6 @@ const goldenTotalKeys = {
   'fgtsDeposit',
 };
 
-/// Totais que o app ainda não produz (B2-10): pulados com motivo.
-const unsupportedTotalKeys = {'paidAtTermination', 'fgtsDeposit'};
-
 const goldenFonteTipos = {'trct', 'calculadora', 'exemplo_contador'};
 
 /// Campos de entrada que o app ainda não suporta (B3/B4): o caso é pulado.

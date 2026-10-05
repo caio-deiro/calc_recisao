@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:calc_recisao/domain/entities/breakdown_code.dart';
 import 'package:calc_recisao/domain/entities/termination_input.dart';
 import 'package:calc_recisao/domain/entities/termination_type.dart';
 import 'package:calc_recisao/domain/usecases/calculate_termination.dart';
@@ -29,7 +30,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final salaryBalance = result.additions.firstWhere((item) => item.description == 'Saldo de Salário');
+        final salaryBalance = result.additions.firstWhere((item) => item.code == BreakdownCode.salaryBalance);
 
         expect(salaryBalance.value, 1500.0); // 3000 / 30 * 15
         expect(salaryBalance.details, '15 dias × R\$ 100.00');
@@ -44,7 +45,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final salaryBalance = result.additions.firstWhere((item) => item.description == 'Saldo de Salário');
+        final salaryBalance = result.additions.firstWhere((item) => item.code == BreakdownCode.salaryBalance);
 
         expect(salaryBalance.value, 2000.0); // 3000 / 30 * 20
         expect(salaryBalance.details, '20 dias × R\$ 100.00');
@@ -66,7 +67,7 @@ void main() {
           );
 
           final result = useCase.execute(input, TerminationType.withoutJustCause);
-          final salaryBalance = result.additions.firstWhere((item) => item.description == 'Saldo de Salário');
+          final salaryBalance = result.additions.firstWhere((item) => item.code == BreakdownCode.salaryBalance);
 
           expect(salaryBalance.value, closeTo(testCase['expected'] as double, 0.01));
         }
@@ -84,7 +85,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final notice = result.additions.firstWhere((item) => item.description == 'Aviso Prévio Indenizado');
+        final notice = result.additions.firstWhere((item) => item.code == BreakdownCode.notice);
 
         expect(notice.value, 3500.0); // (3000 + 500) / 30 * 30
         expect(notice.details, '30 dias + adicional por tempo de serviço');
@@ -100,7 +101,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final notice = result.additions.firstWhere((item) => item.description == 'Aviso Prévio Indenizado');
+        final notice = result.additions.firstWhere((item) => item.code == BreakdownCode.notice);
 
         // 2 anos = 30 + (2 * 3) = 36 dias
         expect(notice.value, 4200.0); // (3000 + 500) / 30 * 36
@@ -116,7 +117,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final notice = result.additions.firstWhere((item) => item.description == 'Aviso Prévio Indenizado');
+        final notice = result.additions.firstWhere((item) => item.code == BreakdownCode.notice);
 
         // 34 anos = 30 + (34 * 3) = 132, limitado a 90 dias
         expect(notice.value, 10500.0); // (3000 + 500) / 30 * 90
@@ -132,7 +133,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final notice = result.additions.where((item) => item.description == 'Aviso Prévio Indenizado');
+        final notice = result.additions.where((item) => item.code == BreakdownCode.notice);
 
         expect(notice.length, 0);
       });
@@ -145,10 +146,11 @@ void main() {
           terminationDate: DateTime(2024, 6, 30),
           baseSalary: 3000.0,
           averageAdditions: 500.0,
+          noticeWorked: true, // sem projeção do aviso (C2): isola a contagem de avos
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final thirteenthSalary = result.additions.firstWhere((item) => item.description == '13º Salário Proporcional');
+        final thirteenthSalary = result.additions.firstWhere((item) => item.code == BreakdownCode.thirteenth);
 
         // 6 meses (jan-jun, junho conta porque >= 15 dias): (3000 + 500) * 6/12 = 1750.0
         expect(thirteenthSalary.value, closeTo(1750.0, 0.01));
@@ -160,10 +162,11 @@ void main() {
           terminationDate: DateTime(2024, 3, 31),
           baseSalary: 3000.0,
           averageAdditions: 500.0,
+          noticeWorked: true, // sem projeção do aviso (C2): isola a contagem de avos
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final thirteenthSalary = result.additions.firstWhere((item) => item.description == '13º Salário Proporcional');
+        final thirteenthSalary = result.additions.firstWhere((item) => item.code == BreakdownCode.thirteenth);
 
         // 3 meses (jan-mar, março conta porque >= 15 dias): (3000 + 500) * 3/12 = 875.0
         expect(thirteenthSalary.value, closeTo(875.0, 0.01));
@@ -178,7 +181,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final thirteenthSalary = result.additions.firstWhere((item) => item.description == '13º Salário Proporcional');
+        final thirteenthSalary = result.additions.firstWhere((item) => item.code == BreakdownCode.thirteenth);
 
         // 12 meses (dezembro conta porque >= 15 dias): (3000 + 500) * 12/12 = 3500.0
         expect(thirteenthSalary.value, closeTo(3500.0, 0.01));
@@ -196,7 +199,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final vacation = result.additions.firstWhere((item) => item.description == 'Férias Vencidas + 1/3');
+        final vacation = result.additions.firstWhere((item) => item.code == BreakdownCode.accruedVacation);
 
         expect(vacation.value, 4000.0); // 3000 + (3000 / 3)
         expect(vacation.details, 'Salário + 1/3 constitucional');
@@ -211,7 +214,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final vacation = result.additions.where((item) => item.description == 'Férias Vencidas + 1/3');
+        final vacation = result.additions.where((item) => item.code == BreakdownCode.accruedVacation);
 
         expect(vacation.length, 0);
       });
@@ -224,10 +227,11 @@ void main() {
           terminationDate: DateTime(2024, 6, 30),
           baseSalary: 3000.0,
           averageAdditions: 500.0,
+          noticeWorked: true, // sem projeção do aviso (C2): isola a contagem de avos
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final vacation = result.additions.firstWhere((item) => item.description == 'Férias Proporcionais + 1/3');
+        final vacation = result.additions.firstWhere((item) => item.code == BreakdownCode.proportionalVacation);
 
         // 6 meses (jan-jun, junho conta porque >= 15 dias): (3000 + 500) * 6/12 = 1750 + 1/3 = 2333.33
         expect(vacation.value, closeTo(2333.33, 0.01));
@@ -239,10 +243,11 @@ void main() {
           terminationDate: DateTime(2024, 3, 31),
           baseSalary: 3000.0,
           averageAdditions: 500.0,
+          noticeWorked: true, // sem projeção do aviso (C2): isola a contagem de avos
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final vacation = result.additions.firstWhere((item) => item.description == 'Férias Proporcionais + 1/3');
+        final vacation = result.additions.firstWhere((item) => item.code == BreakdownCode.proportionalVacation);
 
         // 3 meses (jan-mar, março conta porque >= 15 dias): (3000 + 500) * 3/12 = 875 + 1/3 = 1166.67
         expect(vacation.value, closeTo(1166.67, 0.01));
@@ -259,7 +264,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final fgts = result.additions.where((item) => item.description == 'FGTS');
+        final fgts = result.additions.where((item) => item.code == BreakdownCode.fgtsFine);
 
         // FGTS não é pago na rescisão, apenas a multa
         expect(fgts.length, 0);
@@ -274,7 +279,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final fgtsPenalty = result.additions.where((item) => item.description.contains('Multa FGTS'));
+        final fgtsPenalty = result.fgtsDeposit.items.where((item) => item.code == BreakdownCode.fgtsFine);
 
         // Deve ter apenas a multa FGTS, não o FGTS em si
         expect(fgtsPenalty.length, 1);
@@ -291,7 +296,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final fgtsPenalty = result.additions.firstWhere((item) => item.description == 'Multa FGTS (40%)');
+        final fgtsPenalty = result.fgtsDeposit.items.firstWhere((item) => item.code == BreakdownCode.fgtsFine);
 
         // FGTS: (3000 + 500) * 0.08 * 12 = 3360
         // Multa: 3360 * 0.4 = 1344
@@ -309,7 +314,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final fgtsPenalty = result.additions.firstWhere((item) => item.description == 'Multa FGTS (40%)');
+        final fgtsPenalty = result.fgtsDeposit.items.firstWhere((item) => item.code == BreakdownCode.fgtsFine);
 
         // Multa: 5000 * 0.4 = 2000
         expect(fgtsPenalty.value, 2000.0);
@@ -324,7 +329,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.resignation);
-        final fgtsPenalty = result.additions.where((item) => item.description.contains('Multa FGTS'));
+        final fgtsPenalty = result.fgtsDeposit.items.where((item) => item.code == BreakdownCode.fgtsFine);
 
         expect(fgtsPenalty.length, 0);
       });
@@ -342,8 +347,8 @@ void main() {
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-        final inss = result.deductions.where((item) => item.description == 'INSS');
-        final irrf = result.deductions.where((item) => item.description == 'IRRF');
+        final inss = result.deductions.where((item) => item.code == BreakdownCode.inss);
+        final irrf = result.deductions.where((item) => item.code == BreakdownCode.irrf);
 
         expect(inss.length, lessThanOrEqualTo(1));
         expect(irrf.length, lessThanOrEqualTo(1));
@@ -363,8 +368,8 @@ void main() {
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-        final inss = result.deductions.where((item) => item.description == 'INSS');
-        final irrf = result.deductions.where((item) => item.description == 'IRRF');
+        final inss = result.deductions.where((item) => item.code == BreakdownCode.inss);
+        final irrf = result.deductions.where((item) => item.code == BreakdownCode.irrf);
 
         expect(inss.length, 0);
         expect(irrf.length, 0);
@@ -382,7 +387,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final otherDiscounts = result.deductions.firstWhere((item) => item.description == 'Outros Descontos');
+        final otherDiscounts = result.deductions.firstWhere((item) => item.code == BreakdownCode.otherDiscounts);
 
         expect(otherDiscounts.value, 200.0);
         expect(otherDiscounts.details, 'Descontos diversos');
@@ -398,7 +403,7 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final otherDiscounts = result.deductions.where((item) => item.description == 'Outros Descontos');
+        final otherDiscounts = result.deductions.where((item) => item.code == BreakdownCode.otherDiscounts);
 
         expect(otherDiscounts.length, 0);
       });

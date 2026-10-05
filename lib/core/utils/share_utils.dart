@@ -24,7 +24,7 @@ class ShareUtils {
     buffer.writeln('');
     buffer.writeln('💰 VERBAS A RECEBER:');
 
-    for (final addition in result.additions) {
+    for (final addition in [...result.additions, ...result.fgtsDeposit.items]) {
       buffer.writeln('   ✅ ${addition.description}: ${Formatters.formatCurrency(addition.value)}');
       if (addition.details != null) {
         buffer.writeln('      📝 ${addition.details}');

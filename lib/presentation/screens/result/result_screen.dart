@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../domain/entities/breakdown_item.dart';
 import '../../../domain/entities/termination_input.dart';
 import '../../../domain/entities/termination_result.dart';
 import '../../../domain/entities/termination_type.dart';
@@ -205,6 +206,9 @@ class _ResultScreenState extends State<ResultScreen> {
     );
   }
 
+  /// Proventos pagos mais a multa do FGTS (que vem de `fgtsDeposit`), mantendo o layout atual.
+  List<BreakdownItem> get _additionsWithFgtsFine => [..._result!.additions, ..._result!.fgtsDeposit.items];
+
   Widget _buildBreakdownSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,13 +218,13 @@ class _ResultScreenState extends State<ResultScreen> {
           style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
-        if (_result!.additions.isNotEmpty) ...[
+        if (_additionsWithFgtsFine.isNotEmpty) ...[
           Text(
             'Adicionais',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.green, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          ..._result!.additions.map(
+          ..._additionsWithFgtsFine.map(
             (item) => Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: BreakdownItemCard(item: item),

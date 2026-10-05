@@ -9,9 +9,4 @@ enum TerminationType {
 
   final String label;
   final String description;
-
-  bool get hasFgtsPenalty => this == TerminationType.withoutJustCause || this == TerminationType.mutualAgreement;
-  bool get allowsFgtsWithdrawal => this == TerminationType.withoutJustCause;
-  bool get hasReducedFgtsPenalty => this == TerminationType.mutualAgreement;
-  bool get hasReducedNotice => this == TerminationType.mutualAgreement;
 }

@@ -70,4 +70,39 @@ void main() {
       expect(find.text('Upgrade'), findsNothing);
     });
   });
+
+  group('Histórico compatível (B2-11)', () {
+    testWidgets('deve marcar registro legado como calculado em versão anterior', (tester) async {
+      await tester.runAsync(() async {
+        SharedPreferences.setMockInitialValues({
+          'calculation_history': [
+            '{"id":"l1","input":{"admissionDate":"2023-01-01T00:00:00.000","terminationDate":"2024-06-30T00:00:00.000","baseSalary":3000.0},'
+                '"result":{"additions":[],"deductions":[],"totalToReceive":1000.0,"totalDeductions":0.0,"netAmount":1000.0,"calculationDate":"2024-06-30T00:00:00.000"},'
+                '"terminationType":"withoutJustCause","timestamp":"2024-06-30T00:00:00.000","note":null}',
+          ],
+        });
+      });
+      await pumpHistory(tester);
+
+      expect(find.text('Calculado em versão anterior'), findsOneWidget);
+    });
+
+    testWidgets('não deve marcar registro novo como versão anterior', (tester) async {
+      await tester.runAsync(() => seed(1));
+      await pumpHistory(tester);
+
+      expect(find.text('Calculado em versão anterior'), findsNothing);
+    });
+
+    testWidgets('deve avisar quantos registros ilegíveis foram mantidos', (tester) async {
+      await tester.runAsync(() async {
+        SharedPreferences.setMockInitialValues({
+          'calculation_history': ['{lixo'],
+        });
+      });
+      await pumpHistory(tester);
+
+      expect(find.textContaining('1 registro não pôde ser lido'), findsOneWidget);
+    });
+  });
 }

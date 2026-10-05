@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:calc_recisao/domain/entities/breakdown_code.dart';
 import 'package:calc_recisao/core/services/tax_tables_service.dart';
 import 'package:calc_recisao/domain/entities/termination_input.dart';
 import 'package:calc_recisao/domain/entities/termination_type.dart';
@@ -32,15 +33,18 @@ void main() {
 
       final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-      final salaryBalance = result.additions.firstWhere((item) => item.description == 'Saldo de Salário');
-      final notice = result.additions.firstWhere((item) => item.description == 'Aviso Prévio Indenizado');
-      final thirteenth = result.additions.firstWhere((item) => item.description == '13º Salário Proporcional');
-      final vacation = result.additions.firstWhere((item) => item.description == 'Férias Proporcionais + 1/3');
+      final salaryBalance = result.additions.firstWhere((item) => item.code == BreakdownCode.salaryBalance);
+      final notice = result.additions.firstWhere((item) => item.code == BreakdownCode.notice);
+      final thirteenth = result.additions.firstWhere((item) => item.code == BreakdownCode.thirteenth);
+      final vacation = result.additions.firstWhere((item) => item.code == BreakdownCode.proportionalVacation);
 
       expect(salaryBalance.value, 2000.0);
       expect(notice.value, closeTo(4800.0, 0.01));
-      expect(thirteenth.value, 2000.0);
-      expect(vacation.value, closeTo(2666.67, 0.01));
+      // Aviso de 36 dias (2 anos) projeta +1 avo (C2, CLT art. 487 §1º).
+      // 13º: jan a jun/2026 (junho, dia 15, conta) = 6 + 1 = 7/12 de 4000 = 2333,33.
+      expect(thirteenth.value, closeTo(2333.33, 0.01));
+      // Férias (C3): período aquisitivo desde 01/03/2026 = 3 meses + 15 dias (conta) = 4, +1 de projeção = 5/12 x 4000 x 4/3 = 2222,22.
+      expect(vacation.value, closeTo(2222.22, 0.01));
     });
 
     test('deve aplicar impostos apenas sobre verbas tributáveis em 2026', () {
@@ -54,25 +58,24 @@ void main() {
       );
 
       final result = useCase.execute(input, TerminationType.withoutJustCause);
-      final double vacationAmount = result.additions
-          .where((item) => item.description.contains('Férias'))
-          .fold(0.0, (sum, item) => sum + item.value);
-
-      final inss = result.deductions.where((item) => item.description == 'INSS');
+      final inss = result.deductions.where((item) => item.code == BreakdownCode.inss);
 
       expect(inss.length, 1);
-      expect(inss.first.value, closeTo(taxService.calculateInss(4000.0, terminationDate), 0.01));
+      // C5: INSS do saldo (2000,00) e do 13º (2333,33) apurados em separado.
+      expect(
+        inss.first.value,
+        closeTo(taxService.calculateInss(2000.0, terminationDate) + taxService.calculateInss(2333.33, terminationDate), 0.01),
+      );
       expect(
         taxService.calculateTerminationTaxes(
           salaryBalance: 2000.0,
           thirteenthSalary: 2000.0,
-          vacationAmount: vacationAmount,
           terminationDate: terminationDate,
         ).irrf,
         greaterThanOrEqualTo(0),
       );
-      expect(result.additions.any((item) => item.description == 'Aviso Prévio Indenizado'), isTrue);
-      expect(result.additions.any((item) => item.description == 'Multa FGTS (40%)'), isTrue);
+      expect(result.additions.any((item) => item.code == BreakdownCode.notice), isTrue);
+      expect(result.fgtsDeposit.items.any((item) => item.code == BreakdownCode.fgtsFine), isTrue);
     });
 
     test('pedido de demissão deve descontar aviso prévio não cumprido', () {
@@ -87,9 +90,9 @@ void main() {
 
       final result = useCase.execute(input, TerminationType.resignation);
 
-      expect(result.additions.any((item) => item.description == 'Aviso Prévio Indenizado'), isFalse);
-      expect(result.deductions.any((item) => item.description == 'Desconto Aviso Prévio'), isTrue);
-      expect(result.additions.any((item) => item.description == 'Multa FGTS (40%)'), isFalse);
+      expect(result.additions.any((item) => item.code == BreakdownCode.notice), isFalse);
+      expect(result.deductions.any((item) => item.code == BreakdownCode.noticeDiscount), isTrue);
+      expect(result.fgtsDeposit.items.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
     });
 
     test('deve permitir férias vencidas e proporcionais simultaneamente', () {
@@ -103,8 +106,8 @@ void main() {
 
       final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-      expect(result.additions.any((item) => item.description == 'Férias Vencidas + 1/3'), isTrue);
-      expect(result.additions.any((item) => item.description == 'Férias Proporcionais + 1/3'), isTrue);
+      expect(result.additions.any((item) => item.code == BreakdownCode.accruedVacation), isTrue);
+      expect(result.additions.any((item) => item.code == BreakdownCode.proportionalVacation), isTrue);
     });
   });
 }

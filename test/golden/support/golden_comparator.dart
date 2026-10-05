@@ -1,28 +1,26 @@
 import 'package:calc_recisao/domain/entities/termination_result.dart';
 
 import 'golden_case.dart';
-import 'provisional_code_map.dart';
 import 'tolerance.dart';
 
 class GoldenOutcome {
-  GoldenOutcome(this.failures, this.skips);
+  GoldenOutcome(this.failures);
   final List<String> failures;
-  final List<String> skips;
   bool get passed => failures.isEmpty;
 }
 
 bool withinTolerance(double a, double b) =>
     (a - b).abs() <= goldenTolerance + 1e-9;
 
-/// Compara [result] com o esperado do caso. Nunca ignora nada em silêncio:
-/// o que não é suportado volta em `skips` com o motivo.
+/// Compara [result] com o esperado do caso: verbas por `code` (inclui os itens de
+/// `fgtsDeposit`) e os totais `totalAdditions`, `totalDeductions`, `paidAtTermination`
+/// e `fgtsDeposit`.
 GoldenOutcome compareGolden(GoldenCase c, TerminationResult result) {
   final failures = <String>[];
-  final skips = <String>[];
 
   final produced = <String, double>{};
-  for (final item in [...result.additions, ...result.deductions]) {
-    final code = codeOf(item);
+  for (final item in [...result.additions, ...result.fgtsDeposit.items, ...result.deductions]) {
+    final code = item.code.name;
     produced[code] = (produced[code] ?? 0) + item.value;
   }
 
@@ -41,13 +39,13 @@ GoldenOutcome compareGolden(GoldenCase c, TerminationResult result) {
   final totals = {
     'totalAdditions': result.totalAdditions,
     'totalDeductions': result.totalDeductions,
+    'paidAtTermination': result.paidAtTermination,
+    'fgtsDeposit': result.fgtsDeposit.total,
   };
   for (final e in c.totais.entries) {
-    if (unsupportedTotalKeys.contains(e.key)) {
-      skips.add('total ${e.key} ainda não suportado pelo app');
-    } else if (!withinTolerance(totals[e.key]!, e.value)) {
+    if (!withinTolerance(totals[e.key]!, e.value)) {
       failures.add('${e.key}: esperado ${e.value}, obtido ${totals[e.key]}');
     }
   }
-  return GoldenOutcome(failures, skips);
+  return GoldenOutcome(failures);
 }
