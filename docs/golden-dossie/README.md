@@ -28,7 +28,7 @@
 | Fora do INSS e do IRRF (C4) | aviso indenizado e férias (vencidas e proporcionais) indenizadas | Decreto 3.048/99 art. 214 §9º; Súmulas 125 e 386 STJ |
 | Multa FGTS | saldo informado × 40% (sem justa causa) ou 20% (acordo); fora do "pago na rescisão" | Lei 8.036/90 art. 18; CLT art. 484-A |
 | Acordo mútuo | aviso × 50%; multa 20% | CLT art. 484-A |
-| Arredondamento | half-up, 2 casas, por verba; INSS e IRRF somam o saldo e o 13º já arredondados | convenção do app |
+| Arredondamento | half-up, 2 casas, por verba. O INSS do saldo e o do 13º são recolhimentos distintos (bases separadas, C5): cada um é arredondado antes de somar | convenção do dossiê; o app arredonda a soma e pode divergir em meio centavo (ex.: saldo 2.000 + 13º 2.500 → 356,38 contra 356,37). Casos golden evitam esse ponto até haver decisão. |
 
 ## Perguntas ⚖️ e como foram resolvidas (fontes da internet)
 
