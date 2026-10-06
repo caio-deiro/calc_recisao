@@ -1,11 +1,11 @@
 ## Context
 
-Esta change é B2.4 do SPECS (B2-13..15), separada de `fix-calculation-rules` por decisão do usuário em 2026-10-05. Depende dela (usa `BreakdownCode`, `fgtsDeposit`, runner por `code`) e só começa com casos golden reais (B6-06), sem os quais o critério B2-15 não é demonstrável. Hoje o domínio usa `double` e `_roundCurrency` via `toStringAsFixed`.
+Esta change é B2.4 do SPECS (B2-13..15), separada de `fix-calculation-rules` por decisão do usuário em 2026-10-05. Depende dela (usa `BreakdownCode`, `fgtsDeposit`, runner por `code`) e só começa com os casos golden `calculo_legal` (C1–C5), sem os quais o critério B2-15 não é demonstrável. Hoje o domínio usa `double` e `_roundCurrency` via `toStringAsFixed`.
 
 ## Decisions
 
 ### D1. Ordem
-1. Pré-condição: casos golden reais presentes, `flutter test test/golden` e o gate verdes com 0,01 (baseline registrado).
+1. Pré-condição: casos golden `calculo_legal` presentes e `flutter test test/golden` verde com 0,01; o gate `release-gate` é rodado só para registrar baseline (4 regras ⚖️ esperadas), sem bloquear.
 2. Teste unitário de arredondamento e de artefato de ponto flutuante antes da troca (B0-02).
 3. Migrar use case e `calculateTerminationTaxes`.
 4. Baixar `goldenTolerance` para 0,00 e rodar a suíte golden. Qualquer divergência de centavos é explicada por escrito; o documento oficial decide quem está certo.
@@ -27,4 +27,4 @@ O bloco MODIFIED de `golden-tests` assume o texto produzido por `fix-calculation
 - Sem golden real, a change não deve iniciar (risco de declarar "sem diferença" sem oráculo).
 
 ## Open Questions
-1. B6-06 (usuário): TRCTs anonimizados cobrindo cada tipo ativo e C1–C5. Recomendação: entregar já os 5 TRCTs de `fix-calculation-rules`; o mesmo conjunto serve aqui.
+1. B6-06 (usuário): TRCT real/contador (`exemplo_contador`) para as 4 regras ⚖️ pendentes. Não bloqueia esta change; bloqueia a publicação.

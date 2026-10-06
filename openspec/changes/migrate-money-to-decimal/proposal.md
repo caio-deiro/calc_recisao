@@ -5,7 +5,7 @@ Dinheiro em `double` (D1) pode mover centavos silenciosamente. O PRD (Q22, C6) d
 ## Pré-condições (bloqueiam o início, não só a publicação)
 
 - `fix-calculation-rules` implementada e arquivada (esta change usa `BreakdownCode`, `fgtsDeposit`, `TerminationRules` e o runner golden por `code`).
-- **Casos golden reais** em `test/golden/cases/` (TRCTs anonimizados, um por tipo ativo, cobrindo C1–C5; B6-06, responsabilidade do usuário) e `flutter test --tags release-gate --run-skipped` verde. Sem isso, B2-15 não pode ser provado e a change **não começa**.
+- **Casos golden `calculo_legal`** em `test/golden/cases/` (um por tipo ativo, C1–C5, sem contador) e `flutter test test/golden` verde. Sem isso, B2-15 não pode ser provado e a change **não começa**. O gate `--tags release-gate --run-skipped` só registra baseline (4 regras ⚖️ pendentes de `exemplo_contador`: art479, art480, doubleVacation, noticeProjectionMutualAgreement) e não bloqueia; essas pendências bloqueiam a publicação, não o código (B6-06).
 
 ## What Changes
 

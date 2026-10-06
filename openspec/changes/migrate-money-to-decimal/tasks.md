@@ -1,7 +1,7 @@
 ## 1. Pré-condições (B2-15, B6-06) — bloqueiam o início da change
 
-- [ ] 1.1 B2-15 Confirmar que `fix-calculation-rules` está arquivada e que existem casos golden reais (um por tipo, C1–C5) em `test/golden/cases/`; sem eles, parar e reportar B6-06 ao orquestrador.
-- [ ] 1.2 B2-15 Rodar `flutter test test/golden` e `flutter test --tags release-gate --run-skipped` com tolerância 0,01; registrar o baseline (verde obrigatório).
+- [ ] 1.1 B2-15 Confirmar que `fix-calculation-rules` está arquivada e que existem 5 casos golden `calculo_legal` (um por tipo ativo, C1–C5) em `test/golden/cases/`; sem eles, parar e reportar ao orquestrador. Os casos de hoje são `calculo_legal`, calculados sem contador; TRCT real/contador (B6-06) não é pré-condição e as pendências ⚖️ de B6-06 bloqueiam a publicação, não o código.
+- [ ] 1.2 B2-15 Rodar `flutter test test/golden` com tolerância 0,01 (verde obrigatório). Rodar `flutter test --tags release-gate --run-skipped` só para REGISTRAR o baseline: deve acusar exatamente as 4 regras ⚖️ que exigem `exemplo_contador` (art479, art480, doubleVacation, noticeProjectionMutualAgreement) e nenhuma outra; esse resultado não bloqueia a migração (B6-06).
 
 ## 2. Migração para `Decimal` (B2-13, B2-14)
 
