@@ -329,7 +329,7 @@ internacionalização para en-US (o `supportedLocales` declara, mas a tradução
 
 ## 4. Questões abertas
 
-- **Dias restantes do art. 479:** contar inclusive o dia da rescisão? (⚖️ B4-05)
+- **Dias restantes do art. 479:** resolvido em `add-fixed-term-and-indirect` (design.md): `fixedTermEndDate − terminationDate`, o dia da rescisão não conta; fonte secundária (COAD, Empresário Online), segue ⚖️ com a marca "cálculo em validação".
 - **Âncora das datas de período** em admissões em 29/02 ou fim de mês. (⚖️ B3-03)
 - **Projeção do aviso no acordo mútuo:** segue a duração do aviso de 50 % ou o aviso integral? (⚖️ B2-05)
 - **Histórico legado:** recalcular sob as regras novas ou apenas marcar como "versão anterior"? (B2-11)
