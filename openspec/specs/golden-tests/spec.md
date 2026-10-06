@@ -6,7 +6,7 @@ TBD - created by archiving change add-golden-test-infra. Update Purpose after ar
 ## Requirements
 
 ### Requirement: Golden case schema
-Cada caso golden MUST ser um arquivo `test/golden/cases/*.json` contendo `id`, `fonte` (`tipo` em `trct|calculadora|exemplo_contador`, `descricao`, `referencia`), `tipo` de rescisão, `entrada` e `esperado` com valores por `code` de verba (nomes do enum de B2-01) e `totais`. O caso MAY ter o campo opcional `cobre`, lista de strings usada pelo gate de cobertura; valores válidos: `C1` a `C5`, `art479`, `art480`, `doubleVacation`, `noticeProjectionMutualAgreement`. O loader MUST rejeitar com erro que cite o arquivo qualquer caso sem `fonte.tipo` ou `fonte.descricao`, com `tipo` desconhecido, com `code` fora da lista ou com valor não numérico.
+Cada caso golden MUST ser um arquivo `test/golden/cases/*.json` contendo `id`, `fonte` (`tipo` em `trct|calculadora|exemplo_contador|calculo_legal`, `descricao`, `referencia`), `tipo` de rescisão, `entrada` e `esperado` com valores por `code` de verba (nomes do enum de B2-01) e `totais`. O caso MAY ter o campo opcional `cobre`, lista de strings usada pelo gate de cobertura; valores válidos: `C1` a `C5`, `art479`, `art480`, `doubleVacation`, `noticeProjectionMutualAgreement`. O loader MUST rejeitar com erro que cite o arquivo qualquer caso sem `fonte.tipo` ou `fonte.descricao`, com `tipo` desconhecido, com `code` fora da lista ou com valor não numérico.
 
 #### Scenario: Valid case is loaded
 - **WHEN** o loader recebe um JSON completo e válido
@@ -66,7 +66,7 @@ O projeto MUST manter `test/golden/validation_status.dart` listando as regras �
 - **THEN** o gate MUST falhar nomeando a regra
 
 ### Requirement: Minimum coverage gate
-`test/golden/coverage_test.dart`, com tag `release-gate` marcada com `skip` em `dart_test.yaml` (`exclude_tags` venceria `--tags` e resultaria em "No tests ran"), MUST exigir um caso por tipo de rescisão ativo e um por verba corrigida C1–C5 (campo `cobre`) antes de publicar B2, e um caso `fonte.tipo = exemplo_contador` com a regra em `cobre` para cada regra de `validation_status.dart` antes de B3/B4.
+`test/golden/coverage_test.dart`, com tag `release-gate` marcada com `skip` em `dart_test.yaml` (`exclude_tags` venceria `--tags` e resultaria em "No tests ran"), MUST exigir um caso por tipo de rescisão ativo e um por verba corrigida C1–C5 (campo `cobre`) antes de publicar B2, e um caso `fonte.tipo = exemplo_contador` com a regra em `cobre` para cada regra de `validation_status.dart` antes de B3/B4. `fonte.tipo = calculo_legal` (cálculo manual a partir da lei e das tabelas oficiais, sem revisão de contador) vale como caso golden para tipos e verbas C1–C5, mas NÃO satisfaz o requisito de `exemplo_contador` das regras ⚖️ pendentes.
 
 #### Scenario: Default run ignores the gate
 - **WHEN** se executa `flutter test`
