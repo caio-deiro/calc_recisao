@@ -445,6 +445,13 @@ variáveis, dependentes, FGTS informado, períodos de férias gozados e o valor 
 3. Criar `test/unit/termination_<ano>_test.dart` com casos de borda.
 4. Citar a portaria no commit; publicar e atualizar a listagem ("Trabalhista <ano>").
 
+### Release Android (🎯 B7-08)
+1. Bump da `version:` no `pubspec.yaml` (ex.: `1.3.1+17`; o `+N` é o `versionCode` e não pode repetir) em PR próprio; merge na `main`.
+2. Criar a tag `v1.3.1` (sem o `+N`) na `main`. O workflow `release-android.yml` valida a tag, roda `analyze` e `test`, gera o AAB assinado e envia à trilha **internal**.
+3. Acompanhar a aba Actions e conferir o build na trilha internal do Play Console (falha de upload: corrigir e "Re-run jobs").
+4. Promover internal → produção **manualmente** no Play Console.
+Pré-requisito único: service account com permissão de release e os 6 secrets cadastrados no GitHub (detalhes em `ARCHITECTURE.md` §9).
+
 ### Cadência
 - Avaliações e reportes de erro: semanal. Políticas da Play e SDKs: trimestral.
 - Revisão deste PRD: a cada release com mudança de regra, anúncios ou escopo.

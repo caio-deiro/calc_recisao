@@ -295,6 +295,7 @@ Não é código de app, mas gate de publicação. Itens fora do repositório de 
 | B7-05 | Confirmar e unificar o e-mail de contato (política × app). | `README.md`, `AppConstants.supportEmail` |
 | B7-06 | **Manutenção anual** das tabelas (checklist do PRD §13): JSON, teste do ano, listagem. | `assets/config/tax_tables.json` |
 | B7-07 | Specs de compliance Android (`android-target-sdk`, 16 KB) preservadas; prazo da Play 31/08/2026 já atendido. | `openspec/` |
+| B7-08 | **Release Android automatizado**: tag `v*` valida a versão do `pubspec.yaml`, roda `analyze` e `test`, gera o AAB assinado e envia à trilha `internal` da Play. Promoção para produção segue manual. | `.github/workflows/` |
 
 **Gate:** B1 não é publicada sem B7-01, B7-02 e B7-04 concluídos.
 
