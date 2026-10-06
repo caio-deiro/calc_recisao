@@ -22,6 +22,7 @@ Elegível = não 🚀 entregue, com dependências ("Depende de") entregues, e n�
 1. **Pré-voo.** Pare e avise o usuário se algo falhar:
    - `git status --porcelain` vazio (árvore suja = alguém editou ou um worker morreu no meio: **não limpe**, o usuário decide), branch `main`, `git pull --ff-only`;
    - `gh auth status` ok;
+   - `flutter test` verde na `main` (pega teste dependente de data ou já quebrado antes de gastar um worker; falha aqui não é do alvo: avise o usuário);
    - `adb devices` lista um emulador (o reviewer roda E2E). **Não é motivo de parada:** se não listar, suba você mesmo (`flutter emulators --launch <id>`, id em `flutter emulators`; detalhes na skill `maestro-e2e`), espere `sys.boot_completed` = 1 e reconfira. Só pare se o emulador não subir após isso;
    - `.claude/loop/STOP` não existe (o usuário cria esse arquivo para pedir parada).
 2. **Escolher o alvo** pelo critério acima, lendo `docs/PROGRESS.md` (`python scripts/specs_progress.py`).
