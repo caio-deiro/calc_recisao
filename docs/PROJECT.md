@@ -282,7 +282,7 @@ Tributação: a indenização do art. 479 **não sofre IRRF nem INSS**; o descon
 não altera a base dos impostos.
 
 ### 6.7 Descontos (✅ + 🎯)
-- **INSS:** tabela progressiva por **data da rescisão**, com teto. ✅ Saldo e 13º apurados em separado, cada um com tabela e teto próprios (C5, Decreto 3.048/99 art. 214 §6º e §7º).
+- **INSS:** tabela progressiva por **data da rescisão**, com teto. ✅ Saldo e 13º apurados em separado, cada um com tabela e teto próprios (C5, Decreto 3.048/99 art. 214 §6º e §7º). Cada INSS é arredondado half-up a 2 casas **antes de somar** (recolhimentos distintos): `inss = round(inssSaldo) + round(inss13º)`; a base do IRRF de cada parcela usa o INSS já arredondado. ⚖️ sem validação de contador.
 - **IRRF:** tabela progressiva **mensal** vigente na data da rescisão, dedução por dependente, redutor 2026. ✅ Saldo e 13º
   são apurados em separado, ambos pela tabela mensal (13º tributado exclusivamente na fonte, em separado: Lei 7.713/88
   art. 26; SEFAZ-SP). O redutor (Lei 15.270/2025, art. 3º-A da Lei 9.250/95: até 5.000 reduz até 312,89; de 5.000,01 a

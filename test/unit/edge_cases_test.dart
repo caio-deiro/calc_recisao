@@ -34,8 +34,14 @@ void main() {
 
         expect(result.additions.length, greaterThan(0));
         expect(result.deductions.length, greaterThan(0));
-        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThan(0));
-        expect((result.paidAtTermination + result.fgtsDeposit.total), lessThan(10000)); // Valor razoável
+        expect(
+          (result.paidAtTermination + result.fgtsDeposit.total),
+          greaterThan(0),
+        );
+        expect(
+          (result.paidAtTermination + result.fgtsDeposit.total),
+          lessThan(10000),
+        ); // Valor razoável
       });
 
       test('deve lidar com salário alto', () {
@@ -51,8 +57,14 @@ void main() {
 
         expect(result.additions.length, greaterThan(0));
         expect(result.deductions.length, greaterThan(0));
-        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThan(0));
-        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThan(100000)); // Valor alto esperado
+        expect(
+          (result.paidAtTermination + result.fgtsDeposit.total),
+          greaterThan(0),
+        );
+        expect(
+          (result.paidAtTermination + result.fgtsDeposit.total),
+          greaterThan(100000),
+        ); // Valor alto esperado
       });
 
       test('deve lidar com salário zero', () {
@@ -84,7 +96,10 @@ void main() {
 
         expect(result.additions.length, greaterThan(0));
         expect(result.deductions.length, greaterThan(0));
-        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThan(0));
+        expect(
+          (result.paidAtTermination + result.fgtsDeposit.total),
+          greaterThan(0),
+        );
       });
     });
 
@@ -102,8 +117,14 @@ void main() {
 
         expect(result.additions.length, greaterThan(0));
         expect(result.deductions.length, greaterThan(0));
-        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThan(0));
-        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThan(0)); // Deve ser positivo
+        expect(
+          (result.paidAtTermination + result.fgtsDeposit.total),
+          greaterThan(0),
+        );
+        expect(
+          (result.paidAtTermination + result.fgtsDeposit.total),
+          greaterThan(0),
+        ); // Deve ser positivo
       });
 
       test('deve lidar com contrato de 30 anos', () {
@@ -119,7 +140,10 @@ void main() {
 
         expect(result.additions.length, greaterThan(0));
         expect(result.deductions.length, greaterThan(0));
-        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThan(0));
+        expect(
+          (result.paidAtTermination + result.fgtsDeposit.total),
+          greaterThan(0),
+        );
         // Com INSS/IRRF calculados sobre total, o valor líquido pode ser menor
         expect(
           (result.paidAtTermination + result.fgtsDeposit.total),
@@ -140,7 +164,10 @@ void main() {
 
         expect(result.additions.length, greaterThan(0));
         expect(result.deductions.length, greaterThan(0));
-        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThanOrEqualTo(0));
+        expect(
+          (result.paidAtTermination + result.fgtsDeposit.total),
+          greaterThanOrEqualTo(0),
+        );
       });
     });
 
@@ -155,7 +182,9 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final salaryBalance = result.additions.firstWhere((item) => item.code == BreakdownCode.salaryBalance);
+        final salaryBalance = result.additions.firstWhere(
+          (item) => item.code == BreakdownCode.salaryBalance,
+        );
 
         expect(salaryBalance.value, 100.0); // 3000 / 30 * 1
       });
@@ -170,7 +199,9 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final salaryBalance = result.additions.firstWhere((item) => item.code == BreakdownCode.salaryBalance);
+        final salaryBalance = result.additions.firstWhere(
+          (item) => item.code == BreakdownCode.salaryBalance,
+        );
 
         expect(salaryBalance.value, 3100.0); // 3000 / 30 * 31
       });
@@ -185,7 +216,9 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final salaryBalance = result.additions.firstWhere((item) => item.code == BreakdownCode.salaryBalance);
+        final salaryBalance = result.additions.firstWhere(
+          (item) => item.code == BreakdownCode.salaryBalance,
+        );
 
         // Deve usar o dia da rescisão (15) em vez do valor negativo
         expect(salaryBalance.value, 1500.0); // 3000 / 30 * 15
@@ -205,7 +238,12 @@ void main() {
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-        expect(result.deductions.any((item) => item.code == BreakdownCode.otherDiscounts), isTrue);
+        expect(
+          result.deductions.any(
+            (item) => item.code == BreakdownCode.otherDiscounts,
+          ),
+          isTrue,
+        );
         // Com descontos altos, o valor pode ser negativo (isso é válido)
         expect(
           (result.paidAtTermination + result.fgtsDeposit.total),
@@ -225,8 +263,16 @@ void main() {
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-        expect(result.deductions.any((item) => item.code == BreakdownCode.otherDiscounts), isTrue);
-        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThan(0)); // Ainda deve ser positivo
+        expect(
+          result.deductions.any(
+            (item) => item.code == BreakdownCode.otherDiscounts,
+          ),
+          isTrue,
+        );
+        expect(
+          (result.paidAtTermination + result.fgtsDeposit.total),
+          greaterThan(0),
+        ); // Ainda deve ser positivo
       });
     });
 
@@ -243,7 +289,9 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final fgtsPenalty = result.fgtsDeposit.items.firstWhere((item) => item.code == BreakdownCode.fgtsFine);
+        final fgtsPenalty = result.fgtsDeposit.items.firstWhere(
+          (item) => item.code == BreakdownCode.fgtsFine,
+        );
 
         expect(fgtsPenalty.value, 4000.0); // 10000 * 0.4
       });
@@ -260,9 +308,14 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final fgtsPenalty = result.fgtsDeposit.items.firstWhere((item) => item.code == BreakdownCode.fgtsFine);
+        final fgtsPenalty = result.fgtsDeposit.items.firstWhere(
+          (item) => item.code == BreakdownCode.fgtsFine,
+        );
 
-        expect(fgtsPenalty.value, greaterThan(0)); // Deve calcular baseado no tempo
+        expect(
+          fgtsPenalty.value,
+          greaterThan(0),
+        ); // Deve calcular baseado no tempo
       });
 
       test('deve usar valor existente negativo de FGTS', () {
@@ -277,9 +330,14 @@ void main() {
         );
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
-        final fgtsPenalty = result.fgtsDeposit.items.firstWhere((item) => item.code == BreakdownCode.fgtsFine);
+        final fgtsPenalty = result.fgtsDeposit.items.firstWhere(
+          (item) => item.code == BreakdownCode.fgtsFine,
+        );
 
-        expect(fgtsPenalty.value, greaterThan(0)); // Deve calcular baseado no tempo
+        expect(
+          fgtsPenalty.value,
+          greaterThan(0),
+        ); // Deve calcular baseado no tempo
       });
     });
 
@@ -296,7 +354,12 @@ void main() {
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-        expect(result.additions.any((item) => item.code == BreakdownCode.accruedVacationSimple), isTrue);
+        expect(
+          result.additions.any(
+            (item) => item.code == BreakdownCode.accruedVacationSimple,
+          ),
+          isTrue,
+        );
       });
 
       test('não deve incluir férias vencidas quando não marcado', () {
@@ -311,7 +374,12 @@ void main() {
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-        expect(result.additions.any((item) => item.code == BreakdownCode.accruedVacationSimple), isFalse);
+        expect(
+          result.additions.any(
+            (item) => item.code == BreakdownCode.accruedVacationSimple,
+          ),
+          isFalse,
+        );
       });
     });
 
@@ -327,8 +395,14 @@ void main() {
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-        expect(result.deductions.any((item) => item.code == BreakdownCode.inss), isTrue);
-        expect(result.deductions.any((item) => item.code == BreakdownCode.irrf), isTrue);
+        expect(
+          result.deductions.any((item) => item.code == BreakdownCode.inss),
+          isTrue,
+        );
+        expect(
+          result.deductions.any((item) => item.code == BreakdownCode.irrf),
+          isTrue,
+        );
       });
 
       test('não deve calcular impostos quando desabilitado', () {
@@ -342,8 +416,14 @@ void main() {
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-        expect(result.deductions.any((item) => item.code == BreakdownCode.inss), isFalse);
-        expect(result.deductions.any((item) => item.code == BreakdownCode.irrf), isFalse);
+        expect(
+          result.deductions.any((item) => item.code == BreakdownCode.inss),
+          isFalse,
+        );
+        expect(
+          result.deductions.any((item) => item.code == BreakdownCode.irrf),
+          isFalse,
+        );
       });
     });
 
@@ -359,8 +439,14 @@ void main() {
 
         final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-        final calculatedAdditions = result.additions.fold(0.0, (sum, item) => sum + item.value);
-        final calculatedDeductions = result.deductions.fold(0.0, (sum, item) => sum + item.value);
+        final calculatedAdditions = result.additions.fold(
+          0.0,
+          (sum, item) => sum + item.value,
+        );
+        final calculatedDeductions = result.deductions.fold(
+          0.0,
+          (sum, item) => sum + item.value,
+        );
         final calculatedNet = calculatedAdditions - calculatedDeductions;
 
         // A multa do FGTS está em `fgtsDeposit`, fora de `additions` e de `paidAtTermination` (B2-09).
@@ -381,8 +467,18 @@ void main() {
         final result = useCase.execute(input, TerminationType.withoutJustCause);
         final afterCalculation = DateTime.now();
 
-        expect(result.calculationDate.isAfter(beforeCalculation.subtract(const Duration(seconds: 1))), isTrue);
-        expect(result.calculationDate.isBefore(afterCalculation.add(const Duration(seconds: 1))), isTrue);
+        expect(
+          result.calculationDate.isAfter(
+            beforeCalculation.subtract(const Duration(seconds: 1)),
+          ),
+          isTrue,
+        );
+        expect(
+          result.calculationDate.isBefore(
+            afterCalculation.add(const Duration(seconds: 1)),
+          ),
+          isTrue,
+        );
       });
 
       test('deve ter valores não negativos para verbas', () {
@@ -421,7 +517,10 @@ void main() {
         // Mesmo com datas invertidas, não deve quebrar
         expect(result.additions.length, greaterThan(0));
         expect(result.deductions.length, greaterThan(0));
-        expect((result.paidAtTermination + result.fgtsDeposit.total), isA<double>());
+        expect(
+          (result.paidAtTermination + result.fgtsDeposit.total),
+          isA<double>(),
+        );
       });
 
       test('deve lidar com valores muito pequenos', () {
@@ -436,8 +535,15 @@ void main() {
         final result = useCase.execute(input, TerminationType.withoutJustCause);
 
         expect(result.additions.length, greaterThan(0));
-        expect(result.deductions.length, greaterThan(0));
-        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThanOrEqualTo(0));
+        // INSS arredondado a 2 casas vira 0,00: sem linha de desconto zerada.
+        expect(
+          result.deductions.where((item) => item.code == BreakdownCode.inss),
+          isEmpty,
+        );
+        expect(
+          (result.paidAtTermination + result.fgtsDeposit.total),
+          greaterThanOrEqualTo(0),
+        );
       });
 
       test('deve lidar com valores muito grandes', () {
@@ -453,8 +559,14 @@ void main() {
 
         expect(result.additions.length, greaterThan(0));
         expect(result.deductions.length, greaterThan(0));
-        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThan(0));
-        expect((result.paidAtTermination + result.fgtsDeposit.total).isFinite, isTrue); // Não deve ser infinito
+        expect(
+          (result.paidAtTermination + result.fgtsDeposit.total),
+          greaterThan(0),
+        );
+        expect(
+          (result.paidAtTermination + result.fgtsDeposit.total).isFinite,
+          isTrue,
+        ); // Não deve ser infinito
       });
     });
   });

@@ -2,7 +2,7 @@
 
 **Status (2026-10-05):** decisão do responsável: sem acesso a contador, os casos se apoiam em **lei e fontes oficiais**, com `fonte.tipo = "calculo_legal"` (cálculo manual, sem revisão profissional). Isso é mais fraco que `trct` ou `exemplo_contador`: se um TRCT real ou um contador aparecer, ele prevalece.
 
-- **Promovidos** para `test/golden/cases/` (batem com o app): `golden_justa_causa_c1`, `golden_pedido_demissao`, `golden_prazo_determinado_termino` e `golden_sem_justa_causa_c2_c5` (o bug do IRRF do 13º foi corrigido pela change `fix-thirteenth-irrf`).
+- **Promovidos** para `test/golden/cases/` (batem com o app): `golden_justa_causa_c1`, `golden_pedido_demissao`, `golden_prazo_determinado_termino`, `golden_sem_justa_causa_c2_c5` e `golden_inss_arredondado_por_parcela` (o bug do IRRF do 13º foi corrigido pela change `fix-thirteenth-irrf`).
 - **Pendente** em `rascunho/` porque o app diverge do cálculo legal: `golden_acordo_mutuo` (projeção do aviso).
 
 **Por que existe:** o teste golden só vale se o valor esperado vier de **fora do app** (B6-03, `docs/PROJECT.md` §11). Estes casos foram calculados por um script independente do app (sem ler `lib/`), direto da CLT e das tabelas oficiais abaixo.
@@ -28,7 +28,7 @@
 | Fora do INSS e do IRRF (C4) | aviso indenizado e férias (vencidas e proporcionais) indenizadas | Decreto 3.048/99 art. 214 §9º; Súmulas 125 e 386 STJ |
 | Multa FGTS | saldo informado × 40% (sem justa causa) ou 20% (acordo); fora do "pago na rescisão" | Lei 8.036/90 art. 18; CLT art. 484-A |
 | Acordo mútuo | aviso × 50%; multa 20% | CLT art. 484-A |
-| Arredondamento | half-up, 2 casas, por verba. O INSS do saldo e o do 13º são recolhimentos distintos (bases separadas, C5): cada um é arredondado antes de somar | convenção do dossiê; o app arredonda a soma e pode divergir em meio centavo (ex.: saldo 2.000 + 13º 2.500 → 356,38 contra 356,37). Casos golden evitam esse ponto até haver decisão. |
+| Arredondamento | half-up, 2 casas, por verba. O INSS do saldo e o do 13º são recolhimentos distintos (bases separadas, C5): cada um é arredondado antes de somar; a base do IRRF de cada parcela usa o INSS já arredondado | convenção do dossiê, adotada pelo app (change `round-inss-per-component`); saldo 2.000 + 13º 2.500 → 155,69 + 200,69 = 356,38 (caso `golden_inss_arredondado_por_parcela`). |
 
 ## Perguntas ⚖️ e como foram resolvidas (fontes da internet)
 
@@ -55,7 +55,7 @@ O gate de publicação (`coverage_matrix.dart`) exige `exemplo_contador` (não `
 
 ## Casos de B4 (contratos a prazo e rescisão indireta)
 
-Valores calculados à mão a partir da CLT e das tabelas oficiais 2026 (fonte `calculo_legal`), antes de rodar o app. Os casos de art. 479/480 usam salário e datas em que o INSS cai na 1ª faixa (7,5 %), para não depender da convenção de arredondar o INSS do saldo e do 13º juntos ou separados (achado: com 2.000 de saldo e 2.500 de 13º, a soma de INSS arredondado por parcela dá 356,38 e o app dá 356,37; convenção a decidir em B2/B3, fora de B4). Dias restantes = fim previsto − rescisão (PROJECT.md §6.6).
+Valores calculados à mão a partir da CLT e das tabelas oficiais 2026 (fonte `calculo_legal`), antes de rodar o app. Os casos de art. 479/480 usam salário e datas em que o INSS cai na 1ª faixa (7,5 %); o ponto do meio centavo (INSS arredondado por parcela) é exercitado pelo caso `golden_inss_arredondado_por_parcela`, abaixo. Dias restantes = fim previsto − rescisão (PROJECT.md §6.6).
 
 | Caso | Tipo | Resumo | Pago na rescisão |
 |---|---|---|---:|
@@ -156,6 +156,22 @@ Detalhe: aviso 48 dias; períodos vencidos 0; avos13=8 avosFerias=8 proj=1; INSS
 Total de proventos 2666.67 · descontos 75.00 · **pago na rescisão 2591.67** · FGTS depositado (multa) 0.00.
 
 Detalhe: aviso 30 dias; períodos vencidos 0; avos13=4 avosFerias=6 proj=0; INSS saldo 12.50 + 13º 62.50; IRRF saldo 0.00 + 13º 0.00.
+
+### golden_inss_arredondado_por_parcela
+**Tipo:** Pedido de demissão, aviso trabalhado (exercita o meio centavo do INSS, C5).  
+**Entrada:** admissão 10/03/2025, rescisão 20/10/2026, salário R$ 3000, dependentes 0, períodos gozados 1, dias trabalhados no mês 20.
+
+Cálculo à mão (INSS 2026: 7,5% até 1.621,00; 9% até 2.902,84): saldo 3000 ÷ 30 × 20 = 2.000,00; 13º 3000 × 10 ÷ 12 = 2.500,00 (jan a out, outubro com 20 dias conta); férias proporcionais 7 avos (desde 10/03/2026; 10 dias não contam) × 3000 × 4/3 ÷ 12 = 2.333,33. INSS saldo: 121,575 + 379 × 9% = 155,685 → 155,69; INSS 13º: 121,575 + 879 × 9% = 200,685 → 200,69; soma **356,38** (a soma crua daria 356,37). IRRF: bases 2.000 − 155,69 = 1.844,31 e 2.500 − 200,69 = 2.299,31, ambas ≤ 2.428,80 → 0,00.
+
+| Verba | Valor (R$) |
+|---|---:|
+| Saldo de salário | 2000.00 |
+| 13º proporcional (10 avos) | 2500.00 |
+| Férias proporcionais + 1/3 (7 avos) | 2333.33 |
+| INSS (saldo 155,69 + 13º 200,69) | 356.38 |
+| IRRF | 0.00 |
+
+Total de proventos 6833.33 · descontos 356.38 · **pago na rescisão 6476.95** · FGTS depositado (multa) 0.00.
 
 ### golden_acordo_mutuo_aviso_trabalhado
 **Tipo:** Acordo mútuo (art. 484-A), aviso **trabalhado** (sem aviso indenizado, logo sem projeção: evita a disputa da pergunta 1).  

@@ -56,6 +56,27 @@ void main() {
       expect(vacation.value, closeTo(2222.22, 0.01));
     });
 
+    test('deve arredondar o INSS de saldo e 13º antes de somar (356,38)', () {
+      // Saldo 3000/30 x 20 = 2.000 (155,685 -> 155,69); 13º 10/12 x 3000 = 2.500
+      // (200,685 -> 200,69). Soma 356,38; a soma crua daria 356,37.
+      final TerminationInput input = TerminationInput(
+        admissionDate: DateTime(2025, 3, 10),
+        terminationDate: DateTime(2026, 10, 20),
+        baseSalary: 3000.0,
+        workedDaysInMonth: 20,
+        noticeWorked: true,
+        vacationPeriodsTaken: 1,
+        calculateTaxes: true,
+      );
+
+      final result = useCase.execute(input, TerminationType.resignation);
+      final inss = result.deductions.firstWhere(
+        (item) => item.code == BreakdownCode.inss,
+      );
+
+      expect(inss.value, 356.38);
+    });
+
     test('deve aplicar impostos apenas sobre verbas tributáveis em 2026', () {
       final TerminationInput input = TerminationInput(
         admissionDate: DateTime(2024, 3, 1),
