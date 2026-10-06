@@ -107,8 +107,31 @@ void main() {
 
     test('deve marcar entrada não suportada', () {
       final json = fixtureJson();
-      (json['entrada'] as Map)['fimPrevisto'] = '2025-12-31';
-      expect(parseFixture(json).unsupportedInputs, ['fimPrevisto']);
+      (json['entrada'] as Map)['periodosFeriasGozados'] = 1;
+      expect(parseFixture(json).unsupportedInputs, ['periodosFeriasGozados']);
+    });
+
+    test('deve ler fimPrevisto e clausula na entrada', () {
+      final json = fixtureJson();
+      (json['entrada'] as Map)
+        ..['fimPrevisto'] = '2025-12-31'
+        ..['clausula'] = true;
+      final c = parseFixture(json);
+      expect(c.input.fixedTermEndDate, DateTime(2025, 12, 31));
+      expect(c.input.hasRecipientClause, isTrue);
+      expect(c.unsupportedInputs, isEmpty);
+    });
+
+    test('deve assumir sem fim previsto e sem cláusula quando ausentes', () {
+      final c = parseFixture(fixtureJson());
+      expect(c.input.fixedTermEndDate, isNull);
+      expect(c.input.hasRecipientClause, isFalse);
+    });
+
+    test('deve rejeitar fimPrevisto inválido', () {
+      final json = fixtureJson();
+      (json['entrada'] as Map)['fimPrevisto'] = 'amanhã';
+      expect(() => parseFixture(json), throwsA(isA<GoldenCaseException>()));
     });
 
     test(

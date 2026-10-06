@@ -41,9 +41,20 @@ void main() {
 
         // Verificações específicas para sem justa causa
         // FGTS não é pago na rescisão, apenas a multa
-        expect(result.additions.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
-        expect(result.fgtsDeposit.items.any((item) => item.code == BreakdownCode.fgtsFine), isTrue);
-        expect(result.additions.any((item) => item.code == BreakdownCode.notice), isTrue);
+        expect(
+          result.additions.any((item) => item.code == BreakdownCode.fgtsFine),
+          isFalse,
+        );
+        expect(
+          result.fgtsDeposit.items.any(
+            (item) => item.code == BreakdownCode.fgtsFine,
+          ),
+          isTrue,
+        );
+        expect(
+          result.additions.any((item) => item.code == BreakdownCode.notice),
+          isTrue,
+        );
       });
 
       test('deve calcular rescisão sem justa causa - 3 anos', () {
@@ -69,8 +80,16 @@ void main() {
 
         // Verificações específicas para sem justa causa
         // FGTS não é pago na rescisão, apenas a multa
-        expect(result.additions.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
-        expect(result.fgtsDeposit.items.any((item) => item.code == BreakdownCode.fgtsFine), isTrue);
+        expect(
+          result.additions.any((item) => item.code == BreakdownCode.fgtsFine),
+          isFalse,
+        );
+        expect(
+          result.fgtsDeposit.items.any(
+            (item) => item.code == BreakdownCode.fgtsFine,
+          ),
+          isTrue,
+        );
       });
     });
 
@@ -97,10 +116,26 @@ void main() {
         }
 
         // Verificações específicas para pedido de demissão
-        expect(result.additions.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
-        expect(result.fgtsDeposit.items.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
-        expect(result.additions.any((item) => item.code == BreakdownCode.notice), isFalse);
-        expect(result.deductions.any((item) => item.code == BreakdownCode.noticeDiscount), isTrue);
+        expect(
+          result.additions.any((item) => item.code == BreakdownCode.fgtsFine),
+          isFalse,
+        );
+        expect(
+          result.fgtsDeposit.items.any(
+            (item) => item.code == BreakdownCode.fgtsFine,
+          ),
+          isFalse,
+        );
+        expect(
+          result.additions.any((item) => item.code == BreakdownCode.notice),
+          isFalse,
+        );
+        expect(
+          result.deductions.any(
+            (item) => item.code == BreakdownCode.noticeDiscount,
+          ),
+          isTrue,
+        );
       });
     });
 
@@ -116,7 +151,7 @@ void main() {
           calculateTaxes: true,
         );
 
-        final result = useCase.execute(input, TerminationType.fixedTerm);
+        final result = useCase.execute(input, TerminationType.fixedTermEnd);
 
         for (final addition in result.additions) {
           if (addition.details != null) {}
@@ -127,13 +162,29 @@ void main() {
         }
 
         // Verificações específicas para prazo determinado
-        expect(result.additions.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
-        expect(result.fgtsDeposit.items.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
-        expect(result.additions.any((item) => item.code == BreakdownCode.notice), isFalse);
+        expect(
+          result.additions.any((item) => item.code == BreakdownCode.fgtsFine),
+          isFalse,
+        );
+        expect(
+          result.fgtsDeposit.items.any(
+            (item) => item.code == BreakdownCode.fgtsFine,
+          ),
+          isFalse,
+        );
+        expect(
+          result.additions.any((item) => item.code == BreakdownCode.notice),
+          isFalse,
+        );
         // Rescisão em 01/01/2024: o dia 1 não completa 15 dias, então 13º = 0 (Lei 4.090/62 art. 1º §2º).
-        expect(result.additions.any((item) => item.code == BreakdownCode.thirteenth), isFalse);
+        expect(
+          result.additions.any((item) => item.code == BreakdownCode.thirteenth),
+          isFalse,
+        );
         // C3: 01/07/2023 a 01/01/2024 = 6 avos de férias: 4000 x 6/12 x 4/3 = 2666,67 (CLT art. 146 parágrafo único).
-        final vacation = result.additions.firstWhere((item) => item.code == BreakdownCode.proportionalVacation);
+        final vacation = result.additions.firstWhere(
+          (item) => item.code == BreakdownCode.proportionalVacation,
+        );
         expect(vacation.value, closeTo(2666.67, 0.01));
       });
     });
@@ -161,11 +212,25 @@ void main() {
         }
 
         // Verificações específicas para com justa causa
-        expect(result.additions.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
-        expect(result.fgtsDeposit.items.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
-        expect(result.additions.any((item) => item.code == BreakdownCode.notice), isFalse);
+        expect(
+          result.additions.any((item) => item.code == BreakdownCode.fgtsFine),
+          isFalse,
+        );
+        expect(
+          result.fgtsDeposit.items.any(
+            (item) => item.code == BreakdownCode.fgtsFine,
+          ),
+          isFalse,
+        );
+        expect(
+          result.additions.any((item) => item.code == BreakdownCode.notice),
+          isFalse,
+        );
         // Com justa causa pode ter valor negativo devido aos descontos
-        expect((result.paidAtTermination + result.fgtsDeposit.total), lessThan(1000));
+        expect(
+          (result.paidAtTermination + result.fgtsDeposit.total),
+          lessThan(1000),
+        );
       });
     });
 
@@ -193,9 +258,20 @@ void main() {
 
         // Verificações específicas para acordo mútuo
         // FGTS não é pago na rescisão, apenas a multa
-        expect(result.additions.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
-        expect(result.fgtsDeposit.items.any((item) => item.code == BreakdownCode.fgtsFine), isTrue);
-        expect(result.additions.any((item) => item.code == BreakdownCode.notice), isTrue);
+        expect(
+          result.additions.any((item) => item.code == BreakdownCode.fgtsFine),
+          isFalse,
+        );
+        expect(
+          result.fgtsDeposit.items.any(
+            (item) => item.code == BreakdownCode.fgtsFine,
+          ),
+          isTrue,
+        );
+        expect(
+          result.additions.any((item) => item.code == BreakdownCode.notice),
+          isTrue,
+        );
       });
     });
 
@@ -211,7 +287,10 @@ void main() {
           calculateTaxes: true,
         );
 
-        final withoutJustCause = useCase.execute(input, TerminationType.withoutJustCause);
+        final withoutJustCause = useCase.execute(
+          input,
+          TerminationType.withoutJustCause,
+        );
         final resignationInput = TerminationInput(
           admissionDate: input.admissionDate,
           terminationDate: input.terminationDate,
@@ -221,46 +300,81 @@ void main() {
           noticeWorked: true,
           calculateTaxes: input.calculateTaxes,
         );
-        final resignation = useCase.execute(resignationInput, TerminationType.resignation);
-        final fixedTerm = useCase.execute(input, TerminationType.fixedTerm);
-        final withJustCause = useCase.execute(input, TerminationType.withJustCause);
-        final mutualAgreement = useCase.execute(input, TerminationType.mutualAgreement);
+        final resignation = useCase.execute(
+          resignationInput,
+          TerminationType.resignation,
+        );
+        final fixedTerm = useCase.execute(input, TerminationType.fixedTermEnd);
+        final withJustCause = useCase.execute(
+          input,
+          TerminationType.withJustCause,
+        );
+        final mutualAgreement = useCase.execute(
+          input,
+          TerminationType.mutualAgreement,
+        );
 
         // Verificações de hierarquia esperada
         expect(
-          (withoutJustCause.paidAtTermination + withoutJustCause.fgtsDeposit.total),
-          greaterThan((resignation.paidAtTermination + resignation.fgtsDeposit.total)),
+          (withoutJustCause.paidAtTermination +
+              withoutJustCause.fgtsDeposit.total),
+          greaterThan(
+            (resignation.paidAtTermination + resignation.fgtsDeposit.total),
+          ),
         );
         expect(
-          (withoutJustCause.paidAtTermination + withoutJustCause.fgtsDeposit.total),
-          greaterThan((fixedTerm.paidAtTermination + fixedTerm.fgtsDeposit.total)),
+          (withoutJustCause.paidAtTermination +
+              withoutJustCause.fgtsDeposit.total),
+          greaterThan(
+            (fixedTerm.paidAtTermination + fixedTerm.fgtsDeposit.total),
+          ),
         );
         expect(
-          (withoutJustCause.paidAtTermination + withoutJustCause.fgtsDeposit.total),
-          greaterThan((withJustCause.paidAtTermination + withJustCause.fgtsDeposit.total)),
+          (withoutJustCause.paidAtTermination +
+              withoutJustCause.fgtsDeposit.total),
+          greaterThan(
+            (withJustCause.paidAtTermination + withJustCause.fgtsDeposit.total),
+          ),
         );
         expect(
-          (withoutJustCause.paidAtTermination + withoutJustCause.fgtsDeposit.total),
-          greaterThan((mutualAgreement.paidAtTermination + mutualAgreement.fgtsDeposit.total)),
+          (withoutJustCause.paidAtTermination +
+              withoutJustCause.fgtsDeposit.total),
+          greaterThan(
+            (mutualAgreement.paidAtTermination +
+                mutualAgreement.fgtsDeposit.total),
+          ),
         );
 
         // Em 01/01/2024 o 13º e as férias do período novo valem zero (menos de 15 dias), então empatam.
         expect(
           (resignation.paidAtTermination + resignation.fgtsDeposit.total),
-          greaterThanOrEqualTo((withJustCause.paidAtTermination + withJustCause.fgtsDeposit.total)),
+          greaterThanOrEqualTo(
+            (withJustCause.paidAtTermination + withJustCause.fgtsDeposit.total),
+          ),
         );
         expect(
           (fixedTerm.paidAtTermination + fixedTerm.fgtsDeposit.total),
-          greaterThanOrEqualTo((withJustCause.paidAtTermination + withJustCause.fgtsDeposit.total)),
+          greaterThanOrEqualTo(
+            (withJustCause.paidAtTermination + withJustCause.fgtsDeposit.total),
+          ),
         );
         expect(
-          (mutualAgreement.paidAtTermination + mutualAgreement.fgtsDeposit.total),
-          greaterThan((withJustCause.paidAtTermination + withJustCause.fgtsDeposit.total)),
+          (mutualAgreement.paidAtTermination +
+              mutualAgreement.fgtsDeposit.total),
+          greaterThan(
+            (withJustCause.paidAtTermination + withJustCause.fgtsDeposit.total),
+          ),
         );
 
         // Verificar que com justa causa e prazo determinado têm valores baixos/negativos
-        expect((withJustCause.paidAtTermination + withJustCause.fgtsDeposit.total), lessThan(1000));
-        expect((fixedTerm.paidAtTermination + fixedTerm.fgtsDeposit.total), lessThan(1000));
+        expect(
+          (withJustCause.paidAtTermination + withJustCause.fgtsDeposit.total),
+          lessThan(1000),
+        );
+        expect(
+          (fixedTerm.paidAtTermination + fixedTerm.fgtsDeposit.total),
+          lessThan(1000),
+        );
       });
     });
 
@@ -283,8 +397,18 @@ void main() {
         }
 
         // Verificações específicas para férias vencidas e proporcionais
-        expect(result.additions.any((item) => item.code == BreakdownCode.accruedVacationSimple), isTrue);
-        expect(result.additions.any((item) => item.code == BreakdownCode.proportionalVacation), isTrue);
+        expect(
+          result.additions.any(
+            (item) => item.code == BreakdownCode.accruedVacationSimple,
+          ),
+          isTrue,
+        );
+        expect(
+          result.additions.any(
+            (item) => item.code == BreakdownCode.proportionalVacation,
+          ),
+          isTrue,
+        );
       });
 
       test('deve calcular com aviso prévio trabalhado', () {
@@ -305,7 +429,10 @@ void main() {
         }
 
         // Verificações específicas para aviso prévio trabalhado
-        expect(result.additions.any((item) => item.code == BreakdownCode.notice), isFalse);
+        expect(
+          result.additions.any((item) => item.code == BreakdownCode.notice),
+          isFalse,
+        );
       });
     });
   });

@@ -140,7 +140,9 @@ TerminationInput + TerminationType
     │
     ▼
 CalculateTermination.execute()          ← domain/usecases (função pura, síncrona)
-    ├─ regras por tipo de rescisão      ← `TerminationRules` (tabela imutável) + `avos.dart`; ver PROJECT.md §6
+    ├─ regras por tipo de rescisão      ← `TerminationRules.resolve(tipo, cláusula)` (tabela imutável; 8 tipos; cláusula
+    │                                      assecuratória e aviso da projeção do acordo como dados) + `avos.dart` + `fixed_term.dart`
+    │                                      (`remainingDays`, art. 479/480); ver PROJECT.md §6
     ├─ TaxTablesService.calculateTerminationTaxes()  ← INSS/IRRF por data da rescisão
     └─ retorna TerminationResult { additions[], deductions[], paidAtTermination, fgtsDeposit, assumptions[], totalDeductions }
     │
@@ -161,6 +163,10 @@ HistoryScreen ──► ResultScreen.fromHistory(registro)   ← resultado salvo
 - Resultado: `fgtsWithdrawalPercent` (linha informativa de saque) vem de `TerminationRules`, sem `switch` por tipo na UI.
   Widgets em `presentation/widgets/result_summary.dart`; todo elemento tocado por fluxo E2E tem `Semantics.identifier`
   (`result_*`, `history_*`, `form_*`, `home_*`). **Princípio de produto: transparência.** Não esconda itens do cálculo.
+- Entrada de contrato a prazo (B4): `TerminationInput.fixedTermEndDate` e `hasRecipientClause` (JSON tolerante à
+  ausência). `TerminationInputValidator.validate(input, type:)` valida o fim previsto só nos tipos a prazo e devolve
+  `warnings` não bloqueantes (término normal fora do fim). O use case não tem condicional por tipo: tudo vem da tabela.
+  O formulário mostra o fim previsto (`form_fixed_term_end`) e a cláusula (`form_recipient_clause_checkbox`) só nesses tipos.
 - Erros de cálculo viram `CalculationException` (mensagem amigável + `originalError`).
 
 ### 5.2 Tabelas fiscais

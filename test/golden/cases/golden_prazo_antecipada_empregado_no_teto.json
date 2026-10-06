@@ -1,0 +1,35 @@
+{
+  "id": "golden_prazo_antecipada_empregado_no_teto",
+  "fonte": {
+    "tipo": "calculo_legal",
+    "descricao": "Cálculo manual a partir da CLT (art. 480 §1º e art. 477 §5º) e das tabelas oficiais 2026, por script independente do app. 120 dias restantes: art. 479 equivalente de 4.800,00, limitado ao teto de 1 remuneração mensal (2.400,00). Sem revisão de contador.",
+    "referencia": "docs/golden-dossie/README.md#golden_prazo_antecipada_empregado_no_teto"
+  },
+  "tipo": "fixedTermEarlyByEmployee",
+  "entrada": {
+    "admissao": "2026-06-12",
+    "rescisao": "2026-10-20",
+    "fimPrevisto": "2027-02-17",
+    "salarioBase": 2400,
+    "mediaVariaveis": 0,
+    "dependentes": 0,
+    "feriasGozadas": 0,
+    "avisoTrabalhado": false
+  },
+  "esperado": {
+    "verbas": {
+      "salaryBalance": 1600.0,
+      "thirteenth": 1000.0,
+      "proportionalVacation": 1066.67,
+      "indemnity480": 2400.0,
+      "inss": 195.0,
+      "irrf": 0.0
+    },
+    "totais": {
+      "totalAdditions": 3666.67,
+      "totalDeductions": 2595.0,
+      "paidAtTermination": 1071.67,
+      "fgtsDeposit": 0.0
+    }
+  }
+}

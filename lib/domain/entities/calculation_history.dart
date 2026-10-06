@@ -9,11 +9,16 @@ import 'termination_type.dart';
 const int currentHistorySchemaVersion = 2;
 
 /// Nomes antigos de [TerminationType] já gravados em histórico, mapeados para o nome atual.
-/// `fixedTerm` -> `fixedTermEnd` entra quando B4-01/B4-02 renomear o tipo.
-const Map<String, String> terminationTypeAliases = {};
+/// `fixedTerm` (antes de B4) vira `fixedTermEnd`.
+const Map<String, String> terminationTypeAliases = {
+  'fixedTerm': 'fixedTermEnd',
+};
 
 /// Resolve o tipo gravado; `null` se o nome não existe nem tem alias.
-TerminationType? resolveTerminationType(String? name, {Map<String, String> aliases = terminationTypeAliases}) {
+TerminationType? resolveTerminationType(
+  String? name, {
+  Map<String, String> aliases = terminationTypeAliases,
+}) {
   final resolved = aliases[name] ?? name;
   for (final type in TerminationType.values) {
     if (type.name == resolved) {
@@ -58,13 +63,18 @@ class CalculationHistory {
     'details': item.details,
   };
 
-  static BreakdownItem _itemFromJson(Map<String, dynamic> item) => BreakdownItem(
-    code: BreakdownCode.values.where((e) => e.name == item['code']).firstOrNull ?? BreakdownCode.legacy,
-    description: item['description'],
-    value: item['value'].toDouble(),
-    type: BreakdownType.values.firstWhere((e) => e.name == item['type']),
-    details: item['details'],
-  );
+  static BreakdownItem _itemFromJson(Map<String, dynamic> item) =>
+      BreakdownItem(
+        code:
+            BreakdownCode.values
+                .where((e) => e.name == item['code'])
+                .firstOrNull ??
+            BreakdownCode.legacy,
+        description: item['description'],
+        value: item['value'].toDouble(),
+        type: BreakdownType.values.firstWhere((e) => e.name == item['type']),
+        details: item['details'],
+      );
 
   Map<String, dynamic> toJson() {
     return {
@@ -78,7 +88,9 @@ class CalculationHistory {
         if (legacyNetAmount != null) 'netAmount': legacyNetAmount,
         'calculationDate': result.calculationDate.toIso8601String(),
         'paidAtTermination': result.paidAtTermination,
-        'fgtsDeposit': {'items': result.fgtsDeposit.items.map(_itemToJson).toList()},
+        'fgtsDeposit': {
+          'items': result.fgtsDeposit.items.map(_itemToJson).toList(),
+        },
         'assumptions': result.assumptions.map((a) => a.toJson()).toList(),
       },
       'terminationType': terminationType.name,
@@ -97,8 +109,9 @@ class CalculationHistory {
     }
     final r = json['result'];
     final int schemaVersion = json['schemaVersion'] ?? 1;
-    List<BreakdownItem> items(Object? list) =>
-        ((list ?? const []) as List).map((e) => _itemFromJson(e as Map<String, dynamic>)).toList();
+    List<BreakdownItem> items(Object? list) => ((list ?? const []) as List)
+        .map((e) => _itemFromJson(e as Map<String, dynamic>))
+        .toList();
 
     return CalculationHistory(
       id: json['id'],
@@ -118,7 +131,9 @@ class CalculationHistory {
       timestamp: DateTime.parse(json['timestamp']),
       note: json['note'],
       schemaVersion: schemaVersion,
-      legacyNetAmount: schemaVersion < currentHistorySchemaVersion ? r['netAmount']?.toDouble() : null,
+      legacyNetAmount: schemaVersion < currentHistorySchemaVersion
+          ? r['netAmount']?.toDouble()
+          : null,
     );
   }
 }

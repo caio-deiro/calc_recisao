@@ -1,0 +1,54 @@
+appId: com.caiodeiro.calcclt
+name: Término antecipado pelo empregador mostra Art. 479 e cálculo em validação
+tags: [calculation, regression]
+env:
+  ADMISSION: "01012025"
+  TERMINATION: "15062025"
+  FIXED_TERM_END: "30062025"
+  SALARY: "300000"
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/skip_onboarding.yaml
+- tapOn:
+    id: "home_type_fixedTermEarlyByEmployer"
+    label: "Antecipada pelo empregador"
+- tapOn:
+    id: "form_admission_date"
+    label: "Data de admissão"
+- inputText: ${ADMISSION}
+- tapOn:
+    id: "form_termination_date"
+    label: "Data de desligamento"
+- inputText: ${TERMINATION}
+- tapOn:
+    id: "form_fixed_term_end"
+    label: "Fim previsto do contrato"
+- inputText: ${FIXED_TERM_END}
+- tapOn:
+    id: "form_base_salary"
+    label: "Salário base"
+- inputText: ${SALARY}
+- scrollUntilVisible:
+    element:
+      id: "form_recipient_clause_checkbox"
+    label: "Opção de cláusula recíproca existe e fica desmarcada (sem cláusula)"
+- scrollUntilVisible:
+    element:
+      id: "form_calculate_button"
+- tapOn:
+    id: "form_calculate_button"
+    label: "Calcular"
+- extendedWaitUntil:
+    visible:
+      id: "result_paid_total"
+    timeout: 15000
+- assertVisible:
+    id: "result_validation_notice"
+    label: "Aviso de validação visível"
+- assertVisible:
+    text: ".*Cálculo em validação.*"
+- scrollUntilVisible:
+    element:
+      text: ".*Indenização Art. 479.*"
+    label: "Verba do art. 479 listada"

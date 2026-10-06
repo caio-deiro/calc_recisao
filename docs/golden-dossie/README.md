@@ -51,7 +51,20 @@ Os rascunhos foram copiados temporariamente para `test/golden/cases/`, rodados e
 
 ## Fora deste dossiê (ainda sem caso)
 
-O gate de publicação (`coverage_matrix.dart`) exige `exemplo_contador` (não `calculo_legal`) para as regras ⚖️ pendentes:  **`art479`**, **`art480`** e **`doubleVacation`**. Esses exemplos dependem de entradas que o app ainda não tem (B4: data de fim previsto e tipos de contrato a prazo) ou de exemplo específico de férias em dobro. Ficam para uma segunda rodada, com o mesmo método.
+O gate de publicação (`coverage_matrix.dart`) exige `exemplo_contador` (não `calculo_legal`) para as regras ⚖️ pendentes:  **`art479`**, **`art480`** e **`doubleVacation`**. As entradas de B4 (fim previsto e cláusula) já existem, e os casos `calculo_legal` de art. 479/480 abaixo conferem o app, mas **não** retiram as regras de `pendingValidationRules`: isso exige `exemplo_contador`/fonte (B6). O de férias em dobro segue sem exemplo.
+
+## Casos de B4 (contratos a prazo e rescisão indireta)
+
+Valores calculados à mão a partir da CLT e das tabelas oficiais 2026 (fonte `calculo_legal`), antes de rodar o app. Os casos de art. 479/480 usam salário e datas em que o INSS cai na 1ª faixa (7,5 %), para não depender da convenção de arredondar o INSS do saldo e do 13º juntos ou separados (achado: com 2.000 de saldo e 2.500 de 13º, a soma de INSS arredondado por parcela dá 356,38 e o app dá 356,37; convenção a decidir em B2/B3, fora de B4). Dias restantes = fim previsto − rescisão (PROJECT.md §6.6).
+
+| Caso | Tipo | Resumo | Pago na rescisão |
+|---|---|---|---:|
+| `golden_prazo_determinado_termino` | `fixedTermEnd` | sem aviso e sem multa | 2591.67 |
+| `golden_rescisao_indireta` | `indirectTermination` | igual a `golden_sem_justa_causa_c2_c5` | 51947.14 |
+| `golden_prazo_antecipada_empregador` | `fixedTermEarlyByEmployer` | salário 2.400, 30 dias restantes: art. 479 = 1.200,00; multa 800,00 | 4671.67 |
+| `golden_prazo_antecipada_empregador_clausula` | `fixedTermEarlyByEmployer` + cláusula | regras do sem justa causa: aviso 2.400,00 (projeta 1 avo), multa 800,00, sem art. 479 | 6323.33 |
+| `golden_prazo_antecipada_empregado_abaixo_teto` | `fixedTermEarlyByEmployee` | 30 dias restantes: art. 480 = 1.200,00 (abaixo do teto de 2.400,00) | 2271.67 |
+| `golden_prazo_antecipada_empregado_no_teto` | `fixedTermEarlyByEmployee` | 120 dias restantes: art. 479 equivalente 4.800,00, limitado a 2.400,00 | 1071.67 |
 
 ## Como promover (depois do "ok" do contador)
 

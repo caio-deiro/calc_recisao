@@ -17,6 +17,8 @@ const goldenVerbaCodes = {
   'inss',
   'irrf',
   'otherDiscounts',
+  'indemnity479',
+  'indemnity480',
 };
 
 const goldenTotalKeys = {
@@ -36,12 +38,8 @@ const goldenFonteTipos = {
   'calculo_legal',
 };
 
-/// Campos de entrada que o app ainda não suporta (B3/B4): o caso é pulado.
-const unsupportedInputKeys = [
-  'periodosFeriasGozados',
-  'fimPrevisto',
-  'clausula',
-];
+/// Campos de entrada que o app ainda não suporta: o caso é pulado.
+const unsupportedInputKeys = ['periodosFeriasGozados'];
 
 /// Erro de schema; a mensagem sempre cita a origem (arquivo).
 class GoldenCaseException implements Exception {
@@ -130,6 +128,17 @@ class GoldenCase {
       return parsed;
     }
 
+    final fimPrevisto = entrada['fimPrevisto'];
+    DateTime? fixedTermEnd;
+    if (fimPrevisto != null) {
+      fixedTermEnd = fimPrevisto is String
+          ? DateTime.tryParse(fimPrevisto)
+          : null;
+      if (fixedTermEnd == null) {
+        fail('data inválida em entrada.fimPrevisto: $fimPrevisto');
+      }
+    }
+
     final fgts = entrada['fgtsInformado'];
     final input = TerminationInput(
       admissionDate: date('admissao'),
@@ -151,6 +160,8 @@ class GoldenCase {
         entrada['outrosDescontos'] ?? 0,
         'entrada.outrosDescontos',
       ),
+      fixedTermEndDate: fixedTermEnd,
+      hasRecipientClause: entrada['clausula'] == true,
     );
 
     final esperado = json['esperado'];

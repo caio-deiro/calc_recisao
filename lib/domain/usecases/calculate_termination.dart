@@ -7,6 +7,7 @@ import '../entities/termination_input.dart';
 import '../entities/termination_result.dart';
 import '../entities/termination_type.dart';
 import '../rules/avos.dart';
+import '../rules/fixed_term.dart';
 import '../rules/termination_rules.dart';
 import '../rules/vacation_periods.dart';
 import '../../core/services/tax_tables_service.dart';
@@ -49,7 +50,7 @@ class CalculateTerminationUseCase {
   TerminationResult execute(TerminationInput input, TerminationType type) {
     try {
       AppLogger.info('Iniciando cálculo de rescisão: ${type.label}');
-      final rules = TerminationRules.of(type);
+      final rules = TerminationRules.resolve(type, input.hasRecipientClause);
       final additions = <BreakdownItem>[];
       final deductions = <BreakdownItem>[];
       final fgtsItems = <BreakdownItem>[];
@@ -137,10 +138,9 @@ class CalculateTerminationUseCase {
             value: projection.toDouble(),
           ),
         );
-        if (type == TerminationType.mutualAgreement) {
-          assumptions.addAll(
-            _validationPending('noticeProjectionMutualAgreement'),
-          );
+        final pendingRule = rules.noticeProjectionPendingRule;
+        if (pendingRule != null) {
+          assumptions.addAll(_validationPending(pendingRule));
         }
       }
 
@@ -231,6 +231,52 @@ class CalculateTerminationUseCase {
           );
         }
       }
+
+      // 5.1. Art. 479 CLT: metade da remuneração até o termo, fora de INSS e IRRF ⚖️
+      final fixedTermEnd = input.fixedTermEndDate;
+      final daysLeft = fixedTermEnd == null
+          ? 0
+          : remainingDays(fixedTermEnd, input.terminationDate);
+      final indemnity = _indemnity479(monthlyBase, daysLeft);
+      if (rules.hasIndemnity479 && indemnity > _zero) {
+        additions.add(
+          BreakdownItem(
+            code: BreakdownCode.indemnity479,
+            description: 'Indenização Art. 479 (término antecipado)',
+            value: indemnity.toDouble(),
+            type: BreakdownType.addition,
+            details:
+                '50% da remuneração dos $daysLeft dias restantes do contrato',
+          ),
+        );
+        assumptions.addAll(_validationPending('art479'));
+      }
+
+      // 5.2. Art. 480 CLT: desconto limitado a 1 remuneração mensal (art. 477 §5º) ⚖️
+      if (rules.hasDiscount480 && indemnity > _zero) {
+        final discount480 = indemnity < monthlyBase ? indemnity : monthlyBase;
+        deductions.add(
+          BreakdownItem(
+            code: BreakdownCode.indemnity480,
+            description: 'Indenização Art. 480 (saída antecipada)',
+            value: discount480.toDouble(),
+            type: BreakdownType.deduction,
+            details:
+                'Limitada a 1 remuneração mensal; metade da remuneração dos dias restantes',
+          ),
+        );
+        assumptions.add(
+          Assumption(
+            code: AssumptionCode.indemnity480Cap,
+            text:
+                'Indenização do art. 480: valor máximo; depende de comprovação do prejuízo.',
+            origin: AssumptionOrigin.estimated,
+            value: discount480.toDouble(),
+          ),
+        );
+        assumptions.addAll(_validationPending('art480'));
+      }
+
       if (rules.paysThirteenth || rules.paysProportionalVacation) {
         assumptions.add(
           const Assumption(
@@ -369,8 +415,13 @@ class CalculateTerminationUseCase {
     final text = switch (ruleId) {
       'doubleVacation' =>
         'Cálculo em validação: férias em dobro quando o prazo de concessão venceu (CLT art. 137; Súmula 328 TST).',
-      _ =>
+      'art479' =>
+        'Cálculo em validação: indenização do término antecipado pelo empregador (CLT art. 479).',
+      'art480' =>
+        'Cálculo em validação: indenização do término antecipado pelo empregado (CLT art. 480).',
+      'noticeProjectionMutualAgreement' =>
         'Cálculo em validação: projeção do aviso no acordo mútuo (CLT art. 484-A).',
+      _ => 'Cálculo em validação.',
     };
     return [
       Assumption(
@@ -381,6 +432,11 @@ class CalculateTerminationUseCase {
       ),
     ];
   }
+
+  /// Art. 479 CLT: (salário + média) / 30 × dias restantes × 50 %, multiplicando
+  /// antes de dividir uma única vez (convenção B2-13).
+  Decimal _indemnity479(Decimal monthlyBase, int days) =>
+      _roundCurrency(_divide(monthlyBase * Decimal.fromInt(days), 60));
 
   /// Um item por código: simples = base × 4/3 por período; dobro = 2 × base × 4/3
   /// (1/3 sobre o total dobrado, Súmula 328 TST). Fora de INSS/IRRF (C4).
