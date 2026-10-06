@@ -33,6 +33,6 @@
 
 ## 5. Passos manuais do usuário (B7-08)
 
-- [ ] 5.1 (Manual) Criar service account no Google Cloud, gerar a chave JSON e conceder a ela permissão de release no Play Console (Usuários e permissões)
-- [ ] 5.2 (Manual) Cadastrar os 6 secrets no GitHub: `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_PASSWORD`, `KEY_ALIAS`, `GOOGLE_SERVICES_JSON_BASE64`, `PLAY_SERVICE_ACCOUNT_JSON`
-- [ ] 5.3 (Manual) Após o próximo bump (ex.: `1.3.1+17`) mergeado, criar a tag `v1.3.1`, acompanhar a aba Actions e conferir o build na trilha internal; promoção para produção segue manual
+- [x] 5.1 (Manual) Criar service account no Google Cloud, gerar a chave JSON e conceder a ela permissão de release no Play Console (Usuários e permissões) — feito pelo responsável; pipeline rodou sem problemas (confirmado em 2026-10-06)
+- [x] 5.2 (Manual) Cadastrar os 6 secrets no GitHub: `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_PASSWORD`, `KEY_ALIAS`, `GOOGLE_SERVICES_JSON_BASE64`, `PLAY_SERVICE_ACCOUNT_JSON` — feito pelo responsável; pipeline rodou sem problemas (confirmado em 2026-10-06)
+- [x] 5.3 (Manual) Após o próximo bump (ex.: `1.3.1+17`) mergeado, criar a tag `v1.3.1`, acompanhar a aba Actions e conferir o build na trilha internal; promoção para produção segue manual — feito pelo responsável; pipeline rodou sem problemas (confirmado em 2026-10-06)
