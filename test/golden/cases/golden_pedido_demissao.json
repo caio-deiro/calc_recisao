@@ -1,9 +1,8 @@
 {
   "id": "golden_pedido_demissao",
-  "validacao": "pendente: aguarda revisao de contador (ver docs/golden-dossie/README.md)",
   "fonte": {
-    "tipo": "exemplo_contador",
-    "descricao": "Calculo manual a partir da CLT e das tabelas oficiais 2026; memoria em docs/golden-dossie/README.md",
+    "tipo": "calculo_legal",
+    "descricao": "Cálculo manual a partir da CLT e das tabelas oficiais 2026 (INSS: Portaria MPS/MF 13/2026; IRRF: Receita Federal e Lei 15.270/2025), por script independente do app. Sem revisão de contador.",
     "referencia": "docs/golden-dossie/README.md#golden_pedido_demissao"
   },
   "tipo": "resignation",

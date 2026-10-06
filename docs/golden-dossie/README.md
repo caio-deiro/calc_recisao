@@ -1,14 +1,11 @@
-# Dossiê dos casos golden (para revisão de contador)
+# Dossiê dos casos golden (cálculo legal, sem contador)
 
-**Status:** rascunho calculado à mão, **não validado**. Nada aqui está em `test/golden/cases/`, então nenhum teste depende disto ainda.
+**Status (2026-10-05):** decisão do responsável: sem acesso a contador, os casos se apoiam em **lei e fontes oficiais**, com `fonte.tipo = "calculo_legal"` (cálculo manual, sem revisão profissional). Isso é mais fraco que `trct` ou `exemplo_contador`: se um TRCT real ou um contador aparecer, ele prevalece.
 
-**Por que existe:** o teste golden só vale se o valor esperado vier de **fora do app** (B6-03, `docs/PROJECT.md` §11). Estes 5 casos foram calculados por um script independente do app (sem ler `lib/`), direto da CLT e das tabelas oficiais abaixo. Um contador precisa conferir as regras e os números; só então os JSON de `rascunho/` vão para `test/golden/cases/` como `exemplo_contador`.
+- **Promovidos** para `test/golden/cases/` (batem com o app): `golden_justa_causa_c1`, `golden_pedido_demissao`, `golden_prazo_determinado_termino`.
+- **Pendentes** em `rascunho/` porque o app diverge do cálculo legal: `golden_sem_justa_causa_c2_c5` (IRRF do 13º, bug do app) e `golden_acordo_mutuo` (projeção do aviso).
 
-## O que o contador precisa fazer
-
-1. Conferir as **premissas** (seção abaixo) e responder às **perguntas ⚖️**.
-2. Conferir os **5 casos** (memória em "Casos").
-3. Devolver: "ok" ou as correções por caso/verba.
+**Por que existe:** o teste golden só vale se o valor esperado vier de **fora do app** (B6-03, `docs/PROJECT.md` §11). Estes casos foram calculados por um script independente do app (sem ler `lib/`), direto da CLT e das tabelas oficiais abaixo.
 
 ## Fontes das tabelas (consultadas em 2026-10-05)
 
@@ -33,14 +30,15 @@
 | Acordo mútuo | aviso × 50%; multa 20% | CLT art. 484-A |
 | Arredondamento | half-up, 2 casas, por verba; INSS e IRRF somam o saldo e o 13º já arredondados | convenção do app |
 
-## Perguntas ⚖️ para o contador
+## Perguntas ⚖️ e como foram resolvidas (fontes da internet)
 
-1. **Projeção do aviso no acordo mútuo:** com aviso pago pela metade, a projeção é +1 avo (adotado no caso `acordo`), proporcional à metade, ou nenhuma?
-2. **Redução da Lei 15.270 sobre o 13º:** ela se aplica ao 13º salário, que é tributado em separado? Nenhum caso depende disso: o 13º com imposto ficou acima de 7.350 (sem redução) ou com IRRF zero pelas faixas. Se for aplicável, vale criar um caso novo.
-3. **Desconto simplificado (607,20):** na rescisão, o empregador pode usá-lo no lugar das deduções legais (INSS + dependentes)? Nenhum caso depende disso (imposto zero ou deduções legais maiores).
-4. **Base do IRRF do saldo de salário:** mantida a convenção "saldo − INSS − dependentes".
-5. **Média de variáveis (caso `pedido_demissao`):** integra aviso, 13º e férias, mas não o saldo. Correto?
-6. **Contagem de avos do 13º com a rescisão no dia 15:** mês com ≥ 15 dias conta (rescisão em 20/04 conta abril; 05/09 não conta setembro).
+1. **Projeção do aviso no acordo (24 dias de aviso pago):** adotado **+1 avo**. Fontes secundárias (COAD; Bizneo; Empresário) tratam a projeção como os dias efetivamente pagos, e fração de 15 dias ou mais no mês conta 1 avo. Não há norma primária explícita: **fonte fraca**, por isso o caso fica em `rascunho/`.
+2. **Redução da Lei 15.270 no 13º:** **aplica-se.** Lei 15.270/2025, art. 3º-A §3º: a redução vale também para o imposto exclusivo na fonte do 13º.
+3. **Desconto simplificado (607,20) na rescisão:** convenção mantida (maior entre INSS + dependentes e 607,20, na base mensal). Nenhum caso promovido depende disso (imposto zero).
+4. **Base do IRRF do saldo:** saldo − INSS − dependentes (ou simplificado, o maior).
+5. **Média de variáveis:** integra aviso, 13º e férias; o saldo de salário usa só o salário base. Convenção do app, conferida pelo caso `pedido_demissao` (bate).
+6. **Contagem de avos:** mês com ≥ 15 dias conta (Lei 4.090/62 art. 1º §2º).
+7. **IRRF do 13º na rescisão:** **devido**, em separado, pela tabela **mensal** vigente, no mês da rescisão (Lei 7.713/88 art. 26; SEFAZ-SP, "Rendimentos sujeitos a tributação exclusiva na fonte"). A redução da Lei 15.270 usa o **rendimento bruto**, não a base já deduzida (exemplo oficial da Receita: 978,62 − 0,133145 × 6.000).
 
 ## Diagnóstico: onde o app diverge (rodado em 2026-10-05, só para informação)
 
@@ -48,18 +46,16 @@ Os rascunhos foram copiados temporariamente para `test/golden/cases/`, rodados e
 
 | Caso | Divergência | O que pode ser |
 |---|---|---|
-| `sem_justa_causa_c2_c5` | IRRF esperado 1.242,41 (13º de 9.000 → base 7.822,32 → 27,5%, sem redução por estar acima de 7.350), app devolve **0,00** | Possível **bug do app** (13º sem IRRF) ou regra que o dossiê desconhece. Pergunta 7 abaixo. |
+| `sem_justa_causa_c2_c5` | IRRF esperado 1.242,41 (13º de 9.000 → base 7.822,32 → 27,5%, sem redução por estar acima de 7.350), app devolve **0,00** | **Bug do app:** `calculateTerminationTaxes` usa a tabela e a redução **anuais** no 13º (`tax_tables_service.dart:253`); o correto é a tabela mensal (pergunta 7). |
 | `acordo_mutuo` | 13º esperado 2.333,33 (8 avos, com +1 de projeção), app dá 2.041,67 (7 avos); férias proporcionais idem; o INSS acompanha | É exatamente a pergunta 1: o app projeta pelo aviso pago (24 dias → 0 avo), o dossiê adotou +1. |
-
-7. **IRRF do 13º salário na rescisão:** é devido, em separado, com a tabela mensal? (Lei 7.713/88 art. 26; adotado no caso `sem_justa_causa_c2_c5`.)
 
 ## Fora deste dossiê (ainda sem caso)
 
-O gate de publicação (`coverage_matrix.dart`) exige `exemplo_contador` também para **`art479`**, **`art480`** e **`doubleVacation`**. Esses exemplos dependem de entradas que o app ainda não tem (B4: data de fim previsto e tipos de contrato a prazo) ou de exemplo específico de férias em dobro. Ficam para uma segunda rodada, com o mesmo método.
+O gate de publicação (`coverage_matrix.dart`) exige `exemplo_contador` (não `calculo_legal`) para as regras ⚖️ pendentes:  **`art479`**, **`art480`** e **`doubleVacation`**. Esses exemplos dependem de entradas que o app ainda não tem (B4: data de fim previsto e tipos de contrato a prazo) ou de exemplo específico de férias em dobro. Ficam para uma segunda rodada, com o mesmo método.
 
 ## Como promover (depois do "ok" do contador)
 
-1. Copiar `rascunho/*.json` para `test/golden/cases/`, removendo a chave `validacao`.
+1. Copiar o JSON de `rascunho/` para `test/golden/cases/` com `fonte.tipo = "calculo_legal"` e sem a chave `validacao`.
 2. `flutter test test/golden`: deve ficar verde (tolerância 0,01). Divergência = o documento prevalece e o app é corrigido (nunca o contrário).
 3. Atualizar `pendingValidationRules` em `test/golden/validation_status.dart` para as regras que ganharam caso.
 
