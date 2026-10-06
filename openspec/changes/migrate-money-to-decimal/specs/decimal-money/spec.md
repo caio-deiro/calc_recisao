@@ -27,7 +27,7 @@ As fronteiras (UI, `toJson`, PDF, compartilhamento) MUST converter para `double`
 - **THEN** o registro abre com os mesmos valores
 
 ### Requirement: Migration criterion
-Os casos golden reais MUST passar antes e depois da troca para `Decimal`, sem alterar valores esperados nem arquivos de `cases/`; antes com tolerância 0,01 e depois com 0,00. Divergência de centavos entre as duas versões MUST ser explicada por escrito e o documento oficial prevalece. A change MUST NOT iniciar sem casos golden reais e sem `fix-calculation-rules` arquivada. (B2-15)
+Os casos golden (`calculo_legal`, C1–C5) MUST passar antes e depois da troca para `Decimal`, sem alterar valores esperados nem arquivos de `cases/`; antes com tolerância 0,01 e depois com 0,00. Divergência de centavos entre as duas versões MUST ser explicada por escrito e o documento oficial prevalece. A change MUST NOT iniciar sem casos golden em `cases/` e sem `fix-calculation-rules` arquivada. (B2-15)
 
 #### Scenario: Golden suite green on both sides
 - **WHEN** `flutter test test/golden` roda antes da troca (0,01) e depois (0,00)
@@ -39,4 +39,4 @@ Os casos golden reais MUST passar antes e depois da troca para `Decimal`, sem al
 
 #### Scenario: Precondition missing
 - **WHEN** `test/golden/cases/` está vazio
-- **THEN** a implementação MUST NOT começar e a pendência B6-06 é reportada
+- **THEN** a implementação MUST NOT começar e a ausência é reportada ao orquestrador (pendências ⚖️ de B6-06 não bloqueiam)
