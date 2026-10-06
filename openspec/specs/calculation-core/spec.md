@@ -6,7 +6,7 @@ TBD - created by archiving change fix-calculation-rules. Update Purpose after ar
 ## Requirements
 
 ### Requirement: Verba identity by code
-Todo `BreakdownItem` MUST ter `code` do enum `BreakdownCode` (`salaryBalance`, `notice`, `noticeDiscount`, `thirteenth`, `accruedVacation`, `proportionalVacation`, `fgtsFine`, `inss`, `irrf`, `otherDiscounts`). Nenhuma lógica em `lib/` MUST depender do texto de `description`; o use case MUST NOT conter `removeWhere` nem `.contains` sobre `description`. (B2-01)
+Todo `BreakdownItem` MUST ter `code` do enum `BreakdownCode` (`salaryBalance`, `notice`, `noticeDiscount`, `thirteenth`, `accruedVacationSimple`, `accruedVacationDouble`, `proportionalVacation`, `fgtsFine`, `inss`, `irrf`, `otherDiscounts`). O valor `accruedVacation` MUST permanecer no enum apenas para leitura de histórico gravado antes desta mudança e MUST NOT ser gerado pelo use case. Nenhuma lógica em `lib/` MUST depender do texto de `description`; o use case MUST NOT conter `removeWhere` nem `.contains` sobre `description`. (B2-01, B3-05)
 
 #### Scenario: Every item has a code
 - **WHEN** o use case calcula um caso que gera todas as verbas
@@ -19,6 +19,10 @@ Todo `BreakdownItem` MUST ter `code` do enum `BreakdownCode` (`salaryBalance`, `
 #### Scenario: Changing the label does not change the result
 - **WHEN** o texto de `description` de uma verba é alterado
 - **THEN** os valores e totais calculados MUST permanecer iguais
+
+#### Scenario: Saved record with the old accrued vacation code still opens
+- **WHEN** `CalculationHistory.fromJson` recebe um item com `code: accruedVacation`
+- **THEN** o registro abre e exibe o valor salvo, sem recalcular
 
 ### Requirement: Rules table by termination type
 Deve existir um `TerminationRules` imutável por `TerminationType` com: percentual do aviso (100/50/0), fração da multa do FGTS sobre a alíquota de `tax_tables.json` (1,0/0,5/0), paga 13º, paga férias proporcionais, paga férias vencidas, aviso descontável, indenização art. 479 e desconto art. 480 (as duas últimas sempre falsas nesta change). Os booleanos soltos de `TerminationType` (`hasFgtsPenalty`, `hasReducedFgtsPenalty`, `hasReducedNotice`, `allowsFgtsWithdrawal`) MUST ser removidos ou derivados da tabela. O use case MUST decidir quais itens entram **antes** de adicioná-los e MUST NOT remover itens depois. (B2-02, B2-03)

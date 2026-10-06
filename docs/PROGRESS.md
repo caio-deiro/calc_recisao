@@ -7,15 +7,15 @@
 
 ## Resumo
 
-**44/76 requisitos entregues (58%)**
+**52/76 requisitos entregues (68%)**
 
 | Estado | Requisitos |
 |---|--:|
-| 🚀 Entregue | 44 |
+| 🚀 Entregue | 52 |
 | ✔ Implementado | 0 |
 | 🔨 Em andamento | 6 |
 | 📋 Planejado | 2 |
-| 🎯 Sem plano | 24 |
+| 🎯 Sem plano | 16 |
 
 ## Por bloco
 
@@ -24,7 +24,7 @@
 | B0 | Convenções e pré-requisitos transversais | 8 | 5 | 0 | 3 | 0 | 0 | 62% |
 | B1 | Remoção do PRO e monetização só com AdMob | 17 | 17 | 0 | 0 | 0 | 0 | 100% |
 | B2 | Núcleo de cálculo: modelo, correções e Decimal | 15 | 12 | 0 | 1 | 2 | 0 | 80% |
-| B3 | Períodos de férias e férias em dobro | 8 | 0 | 0 | 0 | 0 | 8 | 0% |
+| B3 | Períodos de férias e férias em dobro | 8 | 8 | 0 | 0 | 0 | 0 | 100% |
 | B4 | Contratos a prazo e rescisão indireta | 9 | 0 | 0 | 0 | 0 | 9 | 0% |
 | B5 | Resultado, compartilhamento e PDF | 6 | 6 | 0 | 0 | 0 | 0 | 100% |
 | B6 | Validação e infraestrutura de testes golden | 6 | 4 | 0 | 2 | 0 | 0 | 67% |
@@ -36,14 +36,14 @@
 
 | ID | Estado | Requisito | Changes |
 |---|---|---|---|
-| B0-01 | 🔨 Em andamento | flutter analyze sem novos avisos e flutter test verde antes de qualquer commi... | `2026-10-04-remove-pro-ads-only`, `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals`, `migrate-money-to-decimal` |
+| B0-01 | 🔨 Em andamento | flutter analyze sem novos avisos e flutter test verde antes de qualquer commi... | `2026-10-04-remove-pro-ads-only`, `2026-10-05-add-vacation-periods`, `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals`, `migrate-money-to-decimal` |
 | B0-02 | 🚀 Entregue | Teste antes da regra: mudança em cálculo só entra com teste que a cubra (gold... | `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals` |
 | B0-03 | 🚀 Entregue | Nenhum dado pessoal em log, evento de analytics ou relatório de crash: sem sa... | `2026-10-04-remove-pro-ads-only`, `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals` |
 | B0-04 | 🚀 Entregue | Base legal no commit: mudança de regra trabalhista/tributária cita artigo, sú... | `2026-10-05-fix-calculation-rules` |
-| B0-05 | 🔨 Em andamento | Mudou camada, dependência, fluxo ou regra → atualizar docs/ARCHITECTURE.md e/... | `2026-10-04-remove-pro-ads-only`, `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals`, `migrate-money-to-decimal` |
+| B0-05 | 🔨 Em andamento | Mudou camada, dependência, fluxo ou regra → atualizar docs/ARCHITECTURE.md e/... | `2026-10-04-remove-pro-ads-only`, `2026-10-05-add-vacation-periods`, `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals`, `migrate-money-to-decimal` |
 | B0-06 | 🚀 Entregue | D3 — Firebase não é inicializado (main.dart não chama Firebase.initializeApp)... | `2026-10-04-remove-pro-ads-only` |
 | B0-07 | 🚀 Entregue | Strings novas de UI vão em lib/l10n/app_localizations_pt.dart quando houver c... | `2026-10-05-result-assumptions-and-two-totals` |
-| B0-08 | 🔨 Em andamento | Cada bloco sai como versão publicável pequena; pubspec.yaml ganha bump de ver... | `2026-10-04-remove-pro-ads-only`, `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals`, `migrate-money-to-decimal` |
+| B0-08 | 🔨 Em andamento | Cada bloco sai como versão publicável pequena; pubspec.yaml ganha bump de ver... | `2026-10-04-remove-pro-ads-only`, `2026-10-05-add-vacation-periods`, `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals`, `migrate-money-to-decimal` |
 
 ### B1 — Remoção do PRO e monetização só com AdMob
 
@@ -91,14 +91,14 @@
 
 | ID | Estado | Requisito | Changes |
 |---|---|---|---|
-| B3-01 | 🎯 Sem plano | Entrada: TerminationInput.hasAccruedVacation (bool) → vacationPeriodsTaken (i... | — |
-| B3-02 | 🎯 Sem plano | Função pura VacationPeriods.derive(admission, termination, taken) em domain/,... | — |
-| B3-03 | 🎯 Sem plano | Algoritmo: com n = anos completos entre admissão e rescisão; período i (1…n) ... | — |
-| B3-04 | 🎯 Sem plano | Valores: simples = base × 4/3; dobro = 2 × base × 4/3 (1/3 sobre o total dobr... | — |
-| B3-05 | 🎯 Sem plano | Itens do resultado: BreakdownCode.accruedVacationSimple, accruedVacationDoubl... | — |
-| B3-06 | 🎯 Sem plano | Formulário: campo "Períodos de férias já gozados" com *stepper* limitado a n ... | — |
-| B3-07 | 🎯 Sem plano | Premissas: tabela de períodos derivados (B3-02) em Premissas (B2-10), conferí... | — |
-| B3-08 | 🎯 Sem plano | Validação (B2-13): tetos coerentes (taken ≤ n); datas inconsistentes seguem o... | — |
+| B3-01 | 🚀 Entregue | Entrada: TerminationInput.hasAccruedVacation (bool) → vacationPeriodsTaken (i... | `2026-10-05-add-vacation-periods` |
+| B3-02 | 🚀 Entregue | Função pura VacationPeriods.derive(admission, termination, taken) em domain/,... | `2026-10-05-add-vacation-periods` |
+| B3-03 | 🚀 Entregue | Algoritmo: com n = anos completos entre admissão e rescisão; período i (1…n) ... | `2026-10-05-add-vacation-periods` |
+| B3-04 | 🚀 Entregue | Valores: simples = base × 4/3; dobro = 2 × base × 4/3 (1/3 sobre o total dobr... | `2026-10-05-add-vacation-periods` |
+| B3-05 | 🚀 Entregue | Itens do resultado: BreakdownCode.accruedVacationSimple, accruedVacationDoubl... | `2026-10-05-add-vacation-periods` |
+| B3-06 | 🚀 Entregue | Formulário: campo "Períodos de férias já gozados" com *stepper* limitado a n ... | `2026-10-05-add-vacation-periods` |
+| B3-07 | 🚀 Entregue | Premissas: tabela de períodos derivados (B3-02) em Premissas (B2-10), conferí... | `2026-10-05-add-vacation-periods` |
+| B3-08 | 🚀 Entregue | Validação (B2-13): tetos coerentes (taken ≤ n); datas inconsistentes seguem o... | `2026-10-05-add-vacation-periods` |
 
 ### B4 — Contratos a prazo e rescisão indireta
 
@@ -134,7 +134,7 @@
 | B6-03 | 🚀 Entregue | O resultado esperado vem sempre do documento externo, nunca da saída do app. ... | `2026-10-05-add-golden-test-infra` |
 | B6-04 | 🚀 Entregue | Plano B: regras cujo caso golden ainda não existe (art. 479/480, férias em do... | `2026-10-05-add-golden-test-infra`, `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals` |
 | B6-05 | 🚀 Entregue | Cobertura mínima antes de publicar B2: um caso por tipo de rescisão ativo e p... | `2026-10-05-add-golden-test-infra`, `2026-10-05-fix-calculation-rules` |
-| B6-06 | 🔨 Em andamento | Pendências do responsável (bloqueiam a publicação, não o código): fornecer TR... | `2026-10-05-add-golden-test-infra`, `2026-10-05-fix-calculation-rules`, `migrate-money-to-decimal` |
+| B6-06 | 🔨 Em andamento | Pendências do responsável (bloqueiam a publicação, não o código): fornecer TR... | `2026-10-05-add-golden-test-infra`, `2026-10-05-add-vacation-periods`, `2026-10-05-fix-calculation-rules`, `migrate-money-to-decimal` |
 
 ### B7 — Conformidade, privacidade e operação
 

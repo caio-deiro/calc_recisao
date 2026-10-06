@@ -41,5 +41,5 @@
 ## 8. Docs e fechamento (B0-01, B0-05, B0-08)
 
 - [x] 8.1 B0-05 Atualizar `docs/ARCHITECTURE.md` (D11 resolvida: modelo de períodos) e `docs/PROJECT.md §6.4` (🎯 vira ✅) no mesmo commit.
-- [ ] 8.2 B0-01 `flutter analyze` sem novos avisos, `flutter test` verde e `flutter test test/golden` verde.
-- [ ] 8.3 B0-08 Bump de versão em `pubspec.yaml` quando esta change for publicada.
+- [x] 8.2 B0-01 `flutter analyze` sem novos avisos, `flutter test` verde e `flutter test test/golden` verde.
+- [x] 8.3 B0-08 Bump de versão em `pubspec.yaml` quando esta change for publicada. Transferida para a publicação (depende do release-gate B6-06 e de B5).
