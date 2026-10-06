@@ -1,0 +1,35 @@
+{
+  "id": "golden_pedido_demissao",
+  "validacao": "pendente: aguarda revisao de contador (ver docs/golden-dossie/README.md)",
+  "fonte": {
+    "tipo": "exemplo_contador",
+    "descricao": "Calculo manual a partir da CLT e das tabelas oficiais 2026; memoria em docs/golden-dossie/README.md",
+    "referencia": "docs/golden-dossie/README.md#golden_pedido_demissao"
+  },
+  "tipo": "resignation",
+  "entrada": {
+    "admissao": "2022-06-01",
+    "rescisao": "2026-04-20",
+    "salarioBase": 4000,
+    "mediaVariaveis": 300,
+    "dependentes": 2,
+    "feriasGozadas": 3,
+    "avisoTrabalhado": true,
+    "diasTrabalhadosNoMes": 20
+  },
+  "esperado": {
+    "verbas": {
+      "salaryBalance": 2666.67,
+      "thirteenth": 1433.33,
+      "proportionalVacation": 5255.56,
+      "inss": 323.19,
+      "irrf": 0.0
+    },
+    "totais": {
+      "totalAdditions": 9355.56,
+      "totalDeductions": 323.19,
+      "paidAtTermination": 9032.37,
+      "fgtsDeposit": 0.0
+    }
+  }
+}
