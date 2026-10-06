@@ -1,17 +1,89 @@
 {
   "version": 1,
   "skills": {
+    "ab-test-store-listing": {
+      "source": "appeeky/aso-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ab-test-store-listing/SKILL.md",
+      "computedHash": "f8cd0bae9e28ba986dee408092e3b2112d79f55aef3f40744fe3bda2e08b032e"
+    },
+    "android-aso": {
+      "source": "appeeky/aso-skills",
+      "sourceType": "github",
+      "skillPath": "skills/android-aso/SKILL.md",
+      "computedHash": "7e1854c3baa02b3761d4ab198054538f4b6ef46de98028107fe413f34a9686c7"
+    },
+    "app-icon-optimization": {
+      "source": "appeeky/aso-skills",
+      "sourceType": "github",
+      "skillPath": "skills/app-icon-optimization/SKILL.md",
+      "computedHash": "2e2a55bffb48ba928901e70778db8640779ec247ce5376745cb0c8413609e3d4"
+    },
+    "app-marketing-context": {
+      "source": "appeeky/aso-skills",
+      "sourceType": "github",
+      "skillPath": "skills/app-marketing-context/SKILL.md",
+      "computedHash": "73f02a70f4fc31c44a2474fad3a5165a7357fce44a4b9f7f35365d1c6d4c87d7"
+    },
+    "aso-audit": {
+      "source": "appeeky/aso-skills",
+      "sourceType": "github",
+      "skillPath": "skills/aso-audit/SKILL.md",
+      "computedHash": "477bacb532df2597dbc624de3598bef2414460d20d11473ab939479b15e9f576"
+    },
+    "aso-router": {
+      "source": "appeeky/aso-skills",
+      "sourceType": "github",
+      "skillPath": "skills/aso-router/SKILL.md",
+      "computedHash": "77cc3ac1627024b22192c556ae56fc0c374e0365504d36cb247d66f452116144"
+    },
     "caveman": {
       "source": "juliusbrussee/caveman",
       "sourceType": "github",
       "skillPath": "skills/caveman/SKILL.md",
       "computedHash": "eb52a145a708818af3c45ecd9658520611d615b67a8bb2064582950f3bd4b6de"
     },
+    "competitor-analysis": {
+      "source": "appeeky/aso-skills",
+      "sourceType": "github",
+      "skillPath": "skills/competitor-analysis/SKILL.md",
+      "computedHash": "251f5021fb94e15047813914de8404c211f153a4ba16cfa854eab40d99033bd6"
+    },
     "firecrawl": {
       "source": "firecrawl/skills",
       "sourceType": "github",
       "skillPath": "skills/core/firecrawl/SKILL.md",
       "computedHash": "0bb36dbf867c5394334092f53d1162dbd77d302f3dc08b01b600e41683228284"
+    },
+    "keyword-research": {
+      "source": "appeeky/aso-skills",
+      "sourceType": "github",
+      "skillPath": "skills/keyword-research/SKILL.md",
+      "computedHash": "11f29feecef42e78616ac19285cec948f733e71d1e953ef611b92d404ae127a7"
+    },
+    "metadata-optimization": {
+      "source": "appeeky/aso-skills",
+      "sourceType": "github",
+      "skillPath": "skills/metadata-optimization/SKILL.md",
+      "computedHash": "36b1542f8721aeed2ef41c31870fd6f1767a71087738ef892aad7e73c34c8cca"
+    },
+    "rating-prompt-strategy": {
+      "source": "appeeky/aso-skills",
+      "sourceType": "github",
+      "skillPath": "skills/rating-prompt-strategy/SKILL.md",
+      "computedHash": "6359d167d00e4b87515156d28e556262e5ac3cdecdb9545bd41deaac9c9c5c67"
+    },
+    "review-management": {
+      "source": "appeeky/aso-skills",
+      "sourceType": "github",
+      "skillPath": "skills/review-management/SKILL.md",
+      "computedHash": "a5c4cef8670d25769eebc9b88f1c87eb7ade286d5c205e0d0a3a8d1fc1afeedf"
+    },
+    "screenshot-optimization": {
+      "source": "appeeky/aso-skills",
+      "sourceType": "github",
+      "skillPath": "skills/screenshot-optimization/SKILL.md",
+      "computedHash": "577e57ca4268179215f4c7c9a2c9d47eed92c50920a4f5997d7a21b03176b795"
     }
   }
 }
