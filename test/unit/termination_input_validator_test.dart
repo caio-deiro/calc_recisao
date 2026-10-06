@@ -22,7 +22,7 @@ void main() {
 
     test('deve rejeitar data de admissão no futuro', () {
       final input = TerminationInput(
-        admissionDate: DateTime(2025, 12, 31),
+        admissionDate: DateTime.now().add(const Duration(days: 365)),
         terminationDate: DateTime(2024, 1, 1),
         baseSalary: 3000.0,
       );
@@ -30,7 +30,10 @@ void main() {
       final result = TerminationInputValidator.validate(input);
 
       expect(result.isValid, isFalse);
-      expect(result.errors, contains('Data de admissão não pode ser no futuro'));
+      expect(
+        result.errors,
+        contains('Data de admissão não pode ser no futuro'),
+      );
       expect(result.fieldErrors['admissionDate'], isNotNull);
     });
 
@@ -44,7 +47,10 @@ void main() {
       final result = TerminationInputValidator.validate(input);
 
       expect(result.isValid, isFalse);
-      expect(result.errors, contains('Data de rescisão deve ser posterior à data de admissão'));
+      expect(
+        result.errors,
+        contains('Data de rescisão deve ser posterior à data de admissão'),
+      );
       expect(result.fieldErrors['terminationDate'], isNotNull);
     });
 
@@ -72,7 +78,10 @@ void main() {
       final result = TerminationInputValidator.validate(input);
 
       expect(result.isValid, isFalse);
-      expect(result.errors.any((e) => e.contains('Salário base muito alto')), isTrue);
+      expect(
+        result.errors.any((e) => e.contains('Salário base muito alto')),
+        isTrue,
+      );
       expect(result.fieldErrors['baseSalary'], isNotNull);
     });
 
@@ -102,7 +111,10 @@ void main() {
       final result = TerminationInputValidator.validate(input);
 
       expect(result.isValid, isFalse);
-      expect(result.errors, contains('Número de dependentes não pode ser negativo'));
+      expect(
+        result.errors,
+        contains('Número de dependentes não pode ser negativo'),
+      );
       expect(result.fieldErrors['dependents'], isNotNull);
     });
 
@@ -117,7 +129,12 @@ void main() {
       final result = TerminationInputValidator.validate(input);
 
       expect(result.isValid, isFalse);
-      expect(result.errors.any((e) => e.contains('Número de dependentes muito alto')), isTrue);
+      expect(
+        result.errors.any(
+          (e) => e.contains('Número de dependentes muito alto'),
+        ),
+        isTrue,
+      );
       expect(result.fieldErrors['dependents'], isNotNull);
     });
 
@@ -132,31 +149,38 @@ void main() {
       final result = TerminationInputValidator.validate(input);
 
       expect(result.isValid, isFalse);
-      expect(result.errors, contains('Dias trabalhados no mês devem estar entre 0 e 31'));
+      expect(
+        result.errors,
+        contains('Dias trabalhados no mês devem estar entre 0 e 31'),
+      );
       expect(result.fieldErrors['workedDaysInMonth'], isNotNull);
     });
 
-    test('deve lançar exceção quando validateAndThrow é chamado com dados inválidos', () {
-      final input = TerminationInput(
-        admissionDate: DateTime(2024, 1, 1),
-        terminationDate: DateTime(2023, 1, 1), // Data inválida
-        baseSalary: 3000.0,
-      );
+    test(
+      'deve lançar exceção quando validateAndThrow é chamado com dados inválidos',
+      () {
+        final input = TerminationInput(
+          admissionDate: DateTime(2024, 1, 1),
+          terminationDate: DateTime(2023, 1, 1), // Data inválida
+          baseSalary: 3000.0,
+        );
 
-      expect(
-        () => TerminationInputValidator.validateAndThrow(input),
-        throwsA(isA<ValidationException>()),
-      );
-    });
+        expect(
+          () => TerminationInputValidator.validateAndThrow(input),
+          throwsA(isA<ValidationException>()),
+        );
+      },
+    );
   });
 
   group('TerminationInputValidator: períodos de férias gozados', () {
-    TerminationInput input(int taken, {DateTime? termination}) => TerminationInput(
-      admissionDate: DateTime(2022, 6, 15),
-      terminationDate: termination ?? DateTime(2024, 6, 16), // n = 2
-      baseSalary: 3000.0,
-      vacationPeriodsTaken: taken,
-    );
+    TerminationInput input(int taken, {DateTime? termination}) =>
+        TerminationInput(
+          admissionDate: DateTime(2022, 6, 15),
+          terminationDate: termination ?? DateTime(2024, 6, 16), // n = 2
+          baseSalary: 3000.0,
+          vacationPeriodsTaken: taken,
+        );
 
     test('deve rejeitar taken acima de n', () {
       final result = TerminationInputValidator.validate(input(3));
@@ -176,7 +200,9 @@ void main() {
     });
 
     test('deve reportar só erro de data com rescisão anterior à admissão', () {
-      final result = TerminationInputValidator.validate(input(3, termination: DateTime(2021, 1, 1)));
+      final result = TerminationInputValidator.validate(
+        input(3, termination: DateTime(2021, 1, 1)),
+      );
       expect(result.fieldErrors.containsKey('vacationPeriodsTaken'), isFalse);
       expect(result.fieldErrors.containsKey('terminationDate'), isTrue);
     });
