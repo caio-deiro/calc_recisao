@@ -87,7 +87,7 @@ lib/
 │   └── repositories/          # history_repository.dart
 ├── domain/
 │   ├── entities/              # TerminationInput/Result/Type, BreakdownItem/BreakdownCode, Assumption, CalculationHistory
-│   ├── rules/                 # termination_rules.dart (tabela por tipo), avos.dart (13º, férias, projeção, âncora de meses), vacation_periods.dart (períodos de férias)
+│   ├── rules/                 # termination_rules.dart (tabela por tipo), avos.dart (13º, férias, projeção por data do aviso, âncora de meses), vacation_periods.dart (períodos de férias)
 │   └── usecases/              # calculate_termination.dart
 ├── l10n/                      # AppLocalizations manual (pt)
 └── presentation/

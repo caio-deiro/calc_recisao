@@ -2,7 +2,7 @@
   "id": "golden_sem_justa_causa_c2_c5",
   "fonte": {
     "tipo": "calculo_legal",
-    "descricao": "Cálculo manual a partir da CLT e das tabelas oficiais 2026 (INSS: Portaria MPS/MF 13/2026; IRRF: Receita Federal e Lei 15.270/2025), por script independente do app. Sem revisão de contador.",
+    "descricao": "Projeção do aviso por data (45 dias de 05/09/2026 até 20/10/2026: 13º 10 avos, férias 7 avos; OJ 82 SDI-1 TST). Cálculo manual a partir da CLT e das tabelas oficiais 2026 (INSS: Portaria MPS/MF 13/2026; IRRF: Receita Federal e Lei 15.270/2025), por script independente do app. Sem revisão de contador.",
     "referencia": "docs/golden-dossie/README.md#golden_sem_justa_causa_c2_c5"
   },
   "tipo": "withoutJustCause",
@@ -21,17 +21,17 @@
     "verbas": {
       "salaryBalance": 2000.0,
       "notice": 18000.0,
-      "thirteenth": 9000.0,
+      "thirteenth": 10000.0,
       "accruedVacationSimple": 16000.0,
       "proportionalVacation": 9333.33,
       "inss": 1143.78,
-      "irrf": 1242.41,
+      "irrf": 1517.41,
       "fgtsFine": 16000.0
     },
     "totais": {
-      "totalAdditions": 54333.33,
-      "totalDeductions": 2386.19,
-      "paidAtTermination": 51947.14,
+      "totalAdditions": 55333.33,
+      "totalDeductions": 2661.19,
+      "paidAtTermination": 52672.14,
       "fgtsDeposit": 16000.0
     }
   },

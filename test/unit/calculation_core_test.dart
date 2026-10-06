@@ -36,7 +36,11 @@ void main() {
     terminationDate: termination ?? DateTime(2025, 8, 26),
     baseSalary: salary,
     vacationPeriodsTaken:
-        fullServiceYears(admission ?? DateTime(2020, 3, 10), termination ?? DateTime(2025, 8, 26)) - (accrued ? 1 : 0),
+        fullServiceYears(
+          admission ?? DateTime(2020, 3, 10),
+          termination ?? DateTime(2025, 8, 26),
+        ) -
+        (accrued ? 1 : 0),
     noticeWorked: noticeWorked,
     hasExistingFgts: fgts != null,
     existingFgtsAmount: fgts ?? 0,
@@ -52,8 +56,15 @@ void main() {
 
   group('identidade de verba (B2-01)', () {
     test('deve dar code distinto e não nulo a cada item', () {
-      final r = useCase.execute(input(accrued: true, taxes: true), TerminationType.withoutJustCause);
-      final codes = [...r.additions, ...r.fgtsDeposit.items, ...r.deductions].map((i) => i.code).toList();
+      final r = useCase.execute(
+        input(accrued: true, taxes: true),
+        TerminationType.withoutJustCause,
+      );
+      final codes = [
+        ...r.additions,
+        ...r.fgtsDeposit.items,
+        ...r.deductions,
+      ].map((i) => i.code).toList();
       expect(codes.toSet().length, codes.length);
       expect(
         codes,
@@ -69,17 +80,31 @@ void main() {
       );
     });
 
-    test('não deve haver lógica por texto de description em lib/domain/usecases', () {
-      final banned = RegExp(r'description\s*==|description\.contains|removeWhere');
-      for (final f in Directory('lib/domain/usecases').listSync().whereType<File>()) {
-        expect(banned.hasMatch(f.readAsStringSync()), isFalse, reason: f.path);
-      }
-    });
+    test(
+      'não deve haver lógica por texto de description em lib/domain/usecases',
+      () {
+        final banned = RegExp(
+          r'description\s*==|description\.contains|removeWhere',
+        );
+        for (final f in Directory(
+          'lib/domain/usecases',
+        ).listSync().whereType<File>()) {
+          expect(
+            banned.hasMatch(f.readAsStringSync()),
+            isFalse,
+            reason: f.path,
+          );
+        }
+      },
+    );
   });
 
   group('C1: férias vencidas na justa causa (CLT art. 146 caput)', () {
     test('deve pagar só férias vencidas, (3000) x 4/3 = 4000,00', () {
-      final r = useCase.execute(input(accrued: true), TerminationType.withJustCause);
+      final r = useCase.execute(
+        input(accrued: true),
+        TerminationType.withJustCause,
+      );
       expect(valueOf(r, BreakdownCode.accruedVacationSimple), 4000.00);
       expect(valueOf(r, BreakdownCode.proportionalVacation), isNull);
       expect(valueOf(r, BreakdownCode.thirteenth), isNull);
@@ -88,90 +113,223 @@ void main() {
     });
   });
 
-  group('C2: projeção do aviso (CLT art. 487 §1º)', () {
-    test('aviso de 45 dias: +1 avo em 13º (8+1=9 -> 2250,00) e férias (6+1=7 -> 2333,33)', () {
-      final r = useCase.execute(input(), TerminationType.withoutJustCause);
-      expect(valueOf(r, BreakdownCode.notice), 4500.00);
-      expect(valueOf(r, BreakdownCode.thirteenth), 2250.00);
-      expect(valueOf(r, BreakdownCode.proportionalVacation), 2333.33);
-      expect(r.assumptions.any((a) => a.code == AssumptionCode.noticeProjection && a.value == 1), isTrue);
-    });
+  group('C2: projeção do aviso por data (CLT art. 487 §1º; OJ 82 SDI-1)', () {
+    test(
+      'aviso de 45 dias: E = 10/10/2025; 13º 9 (2250,00) e férias 7 (2333,33)',
+      () {
+        // 13º: jan-set = 9 (outubro com 10 dias não conta) -> 3000 x 9/12 = 2250,00.
+        // Férias: 10/03 a 10/10 = 7 meses, resto 1 dia -> 3000 x 7/9 = 2333,33.
+        final r = useCase.execute(input(), TerminationType.withoutJustCause);
+        expect(valueOf(r, BreakdownCode.notice), 4500.00);
+        expect(valueOf(r, BreakdownCode.thirteenth), 2250.00);
+        expect(valueOf(r, BreakdownCode.proportionalVacation), 2333.33);
+        final a = r.assumptions.singleWhere(
+          (a) => a.code == AssumptionCode.noticeProjection,
+        );
+        expect(a.value, 45);
+        expect(a.text, contains('10/10/2025'));
+        expect(a.text, contains('+1 avo(s) no 13º'));
+        expect(a.text, contains('+1 avo(s) nas férias proporcionais'));
+      },
+    );
 
-    test('aviso de 60 dias: +2 avos (13º 10/12 = 2500,00)', () {
-      final r = useCase.execute(input(admission: DateTime(2015, 3, 10)), TerminationType.withoutJustCause);
+    test(
+      'aviso de 45 dias de 05/09/2026 (12.000): E = 20/10/2026, +2 no 13º e +1 nas férias',
+      () {
+        // sem projeção: 13º 8 e férias 6; com: 10 e 7.
+        final r = useCase.execute(
+          input(
+            admission: DateTime(2021, 3, 10),
+            termination: DateTime(2026, 9, 5),
+            salary: 12000,
+          ),
+          TerminationType.withoutJustCause,
+        );
+        expect(valueOf(r, BreakdownCode.thirteenth), 10000.00);
+        expect(valueOf(r, BreakdownCode.proportionalVacation), 9333.33);
+        final a = r.assumptions.singleWhere(
+          (a) => a.code == AssumptionCode.noticeProjection,
+        );
+        expect(a.text, contains('20/10/2026'));
+        expect(a.text, contains('+2 avo(s) no 13º'));
+        expect(a.text, contains('+1 avo(s) nas férias proporcionais'));
+      },
+    );
+
+    test('aviso de 60 dias: E = 25/10/2025, 13º 10/12 = 2500,00', () {
+      final r = useCase.execute(
+        input(admission: DateTime(2015, 3, 10)),
+        TerminationType.withoutJustCause,
+      );
       expect(valueOf(r, BreakdownCode.thirteenth), 2500.00);
     });
 
-    test('teto de 12 avos: 13º em novembro com projeção não passa de 3000,00', () {
-      final r = useCase.execute(
-        input(termination: DateTime(2025, 11, 20), admission: DateTime(2015, 3, 10)),
-        TerminationType.withoutJustCause,
-      );
-      expect(valueOf(r, BreakdownCode.thirteenth), 3000.00);
-    });
+    test(
+      'aviso de 60 dias, 10 anos: E = 14/10/2026; 13º 9 (2250,00) e férias 9 (3000,00)',
+      () {
+        // Prova "menos avos que +1 por 30 dias": o método antigo daria 13º 10.
+        // 13º: jan-set = 9 (outubro com 14 dias não conta) -> 3000 x 9/12 = 2250,00.
+        // Férias: 15/01 a 15/09 = 8 meses, resto 29 dias conta = 9
+        // -> 3000 x 9/12 x 4/3 = 3000,00.
+        final r = useCase.execute(
+          input(
+            admission: DateTime(2016, 1, 15),
+            termination: DateTime(2026, 8, 15),
+          ),
+          TerminationType.withoutJustCause,
+        );
+        expect(valueOf(r, BreakdownCode.thirteenth), 2250.00);
+        expect(valueOf(r, BreakdownCode.proportionalVacation), 3000.00);
+      },
+    );
+
+    test(
+      'virada de ano: rescisão 20/11/2025, 60 dias, E = 19/01/2026; 13º 12 + 1 = 13 avos (3250,00)',
+      () {
+        // 2025 completo até 31/12 = 12; janeiro/2026 com 19 dias conta = 1.
+        // 3000 x 13/12 = 3250,00 (design.md, decisão 2).
+        final r = useCase.execute(
+          input(
+            termination: DateTime(2025, 11, 20),
+            admission: DateTime(2015, 3, 10),
+          ),
+          TerminationType.withoutJustCause,
+        );
+        expect(valueOf(r, BreakdownCode.thirteenth), 3250.00);
+        final item = r.additions.singleWhere(
+          (i) => i.code == BreakdownCode.thirteenth,
+        );
+        expect(item.details, '13/12 (12 do ano 2025 + 1 do ano 2026)');
+      },
+    );
 
     test('aviso trabalhado não projeta e não gera premissa de projeção', () {
-      final r = useCase.execute(input(noticeWorked: true), TerminationType.withoutJustCause);
+      final r = useCase.execute(
+        input(noticeWorked: true),
+        TerminationType.withoutJustCause,
+      );
       expect(valueOf(r, BreakdownCode.thirteenth), 2000.00); // 8/12
       expect(valueOf(r, BreakdownCode.notice), isNull);
-      expect(r.assumptions.any((a) => a.code == AssumptionCode.noticeProjection), isFalse);
+      expect(
+        r.assumptions.any((a) => a.code == AssumptionCode.noticeProjection),
+        isFalse,
+      );
     });
 
     test('pedido de demissão não projeta', () {
       final r = useCase.execute(input(), TerminationType.resignation);
       expect(valueOf(r, BreakdownCode.thirteenth), 2000.00);
+      expect(
+        r.assumptions.any((a) => a.code == AssumptionCode.noticeProjection),
+        isFalse,
+      );
     });
 
-    test('acordo mútuo projeta pelo aviso pago (60 dias, 30 pagos): +1 avo e marca de validação', () {
-      final r = useCase.execute(input(admission: DateTime(2015, 3, 10)), TerminationType.mutualAgreement);
-      expect(valueOf(r, BreakdownCode.notice), 3000.00); // 50% de 6000
-      expect(valueOf(r, BreakdownCode.thirteenth), 2250.00); // 9/12
-      final pending = r.assumptions.where((a) => a.code == AssumptionCode.validationPending);
-      expect(pending.single.ruleId, 'noticeProjectionMutualAgreement');
-      expect(pending.single.origin, AssumptionOrigin.estimated);
-    });
+    test(
+      'acordo mútuo projeta pelo aviso pago (60 dias, 30 pagos, E = 25/09/2025): 13º 9 e marca de validação',
+      () {
+        // 13º: jan-ago = 8, setembro com 25 dias conta = 9 -> 2250,00.
+        final r = useCase.execute(
+          input(admission: DateTime(2015, 3, 10)),
+          TerminationType.mutualAgreement,
+        );
+        expect(valueOf(r, BreakdownCode.notice), 3000.00); // 50% de 6000
+        expect(valueOf(r, BreakdownCode.thirteenth), 2250.00); // 9/12
+        final proj = r.assumptions.singleWhere(
+          (a) => a.code == AssumptionCode.noticeProjection,
+        );
+        expect(proj.text, contains('25/09/2025'));
+        final pending = r.assumptions.where(
+          (a) => a.code == AssumptionCode.validationPending,
+        );
+        expect(pending.single.ruleId, 'noticeProjectionMutualAgreement');
+        expect(pending.single.origin, AssumptionOrigin.estimated);
+      },
+    );
+
+    test(
+      'acordo mútuo de 31/07/2026 (48 dias, 24 pagos): 13º 8 e férias 7',
+      () {
+        final r = useCase.execute(
+          input(
+            admission: DateTime(2020, 1, 15),
+            termination: DateTime(2026, 7, 31),
+            salary: 3500,
+          ),
+          TerminationType.mutualAgreement,
+        );
+        expect(valueOf(r, BreakdownCode.notice), 2800.00);
+        expect(valueOf(r, BreakdownCode.thirteenth), 2333.33);
+        expect(valueOf(r, BreakdownCode.proportionalVacation), 2722.22);
+        final proj = r.assumptions.singleWhere(
+          (a) => a.code == AssumptionCode.noticeProjection,
+        );
+        expect(proj.text, contains('24/08/2026'));
+      },
+    );
 
     test('sem regra pendente na lista, não há marca de validação', () {
       final r = useCase.execute(input(), TerminationType.withoutJustCause);
-      expect(r.assumptions.any((a) => a.code == AssumptionCode.validationPending), isFalse);
+      expect(
+        r.assumptions.any((a) => a.code == AssumptionCode.validationPending),
+        isFalse,
+      );
     });
   });
 
   group('mês com menos de 15 dias conta zero (Lei 4.090/62 art. 1º §2º)', () {
-    test('rescisão no dia 14: 13º de 7/12 (1750,00, sem aviso projetado); no dia 15: 8/12 (2000,00)', () {
-      final d14 = useCase.execute(
-        input(termination: DateTime(2025, 8, 14), noticeWorked: true),
-        TerminationType.withoutJustCause,
-      );
-      final d15 = useCase.execute(
-        input(termination: DateTime(2025, 8, 15), noticeWorked: true),
-        TerminationType.withoutJustCause,
-      );
-      expect(valueOf(d14, BreakdownCode.thirteenth), 1750.00);
-      expect(valueOf(d15, BreakdownCode.thirteenth), 2000.00);
-    });
+    test(
+      'rescisão no dia 14: 13º de 7/12 (1750,00, sem aviso projetado); no dia 15: 8/12 (2000,00)',
+      () {
+        final d14 = useCase.execute(
+          input(termination: DateTime(2025, 8, 14), noticeWorked: true),
+          TerminationType.withoutJustCause,
+        );
+        final d15 = useCase.execute(
+          input(termination: DateTime(2025, 8, 15), noticeWorked: true),
+          TerminationType.withoutJustCause,
+        );
+        expect(valueOf(d14, BreakdownCode.thirteenth), 1750.00);
+        expect(valueOf(d15, BreakdownCode.thirteenth), 2000.00);
+      },
+    );
 
-    test('deve registrar a regra de 15 dias e o mês de 30 dias nas premissas', () {
-      final r = useCase.execute(input(), TerminationType.withoutJustCause);
-      expect(
-        r.assumptions.map((a) => a.code),
-        containsAll([AssumptionCode.fifteenDayRule, AssumptionCode.thirtyDayMonth]),
-      );
-    });
+    test(
+      'deve registrar a regra de 15 dias e o mês de 30 dias nas premissas',
+      () {
+        final r = useCase.execute(input(), TerminationType.withoutJustCause);
+        expect(
+          r.assumptions.map((a) => a.code),
+          containsAll([
+            AssumptionCode.fifteenDayRule,
+            AssumptionCode.thirtyDayMonth,
+          ]),
+        );
+      },
+    );
   });
 
   group('regras por tipo (B2-02/03)', () {
-    test('pedido de demissão sem aviso trabalhado: desconto e sem aviso indenizado', () {
-      final r = useCase.execute(input(), TerminationType.resignation);
-      expect(valueOf(r, BreakdownCode.noticeDiscount), 4500.00);
-      expect(valueOf(r, BreakdownCode.notice), isNull);
-    });
+    test(
+      'pedido de demissão sem aviso trabalhado: desconto e sem aviso indenizado',
+      () {
+        final r = useCase.execute(input(), TerminationType.resignation);
+        expect(valueOf(r, BreakdownCode.noticeDiscount), 4500.00);
+        expect(valueOf(r, BreakdownCode.notice), isNull);
+      },
+    );
 
-    test('acordo mútuo: aviso 50% (2250,00) e multa 20% sobre o FGTS informado', () {
-      final r = useCase.execute(input(fgts: 10000), TerminationType.mutualAgreement);
-      expect(valueOf(r, BreakdownCode.notice), 2250.00);
-      expect(valueOf(r, BreakdownCode.fgtsFine), 2000.00);
-    });
+    test(
+      'acordo mútuo: aviso 50% (2250,00) e multa 20% sobre o FGTS informado',
+      () {
+        final r = useCase.execute(
+          input(fgts: 10000),
+          TerminationType.mutualAgreement,
+        );
+        expect(valueOf(r, BreakdownCode.notice), 2250.00);
+        expect(valueOf(r, BreakdownCode.fgtsFine), 2000.00);
+      },
+    );
 
     test('trocar o rótulo não muda valores (valores dependem só do code)', () {
       final r = useCase.execute(input(), TerminationType.withoutJustCause);
@@ -180,30 +338,58 @@ void main() {
   });
 
   group('C4: férias fora da base de INSS e IRRF', () {
-    test('com e sem férias vencidas: INSS e IRRF iguais; a diferença em paidAtTermination é o valor das férias', () {
-      final without = useCase.execute(input(taxes: true, salary: 9000), TerminationType.withoutJustCause);
-      final withVac = useCase.execute(
-        input(taxes: true, salary: 9000, accrued: true),
-        TerminationType.withoutJustCause,
-      );
-      expect(valueOf(withVac, BreakdownCode.inss), valueOf(without, BreakdownCode.inss));
-      expect(valueOf(withVac, BreakdownCode.irrf), valueOf(without, BreakdownCode.irrf));
-      expect(withVac.paidAtTermination - without.paidAtTermination, closeTo(12000.00, 0.01));
-    });
+    test(
+      'com e sem férias vencidas: INSS e IRRF iguais; a diferença em paidAtTermination é o valor das férias',
+      () {
+        final without = useCase.execute(
+          input(taxes: true, salary: 9000),
+          TerminationType.withoutJustCause,
+        );
+        final withVac = useCase.execute(
+          input(taxes: true, salary: 9000, accrued: true),
+          TerminationType.withoutJustCause,
+        );
+        expect(
+          valueOf(withVac, BreakdownCode.inss),
+          valueOf(without, BreakdownCode.inss),
+        );
+        expect(
+          valueOf(withVac, BreakdownCode.irrf),
+          valueOf(without, BreakdownCode.irrf),
+        );
+        expect(
+          withVac.paidAtTermination - without.paidAtTermination,
+          closeTo(12000.00, 0.01),
+        );
+      },
+    );
   });
 
   group('dois totais (B2-09)', () {
     test('multa fica em fgtsDeposit e fora de paidAtTermination', () {
-      final r = useCase.execute(input(fgts: 10000), TerminationType.withoutJustCause);
+      final r = useCase.execute(
+        input(fgts: 10000),
+        TerminationType.withoutJustCause,
+      );
       expect(r.fgtsDeposit.total, 4000.00);
       expect(r.additions.any((i) => i.code == BreakdownCode.fgtsFine), isFalse);
-      expect(r.paidAtTermination, closeTo(r.totalAdditions - r.totalDeductions, 0.001));
+      expect(
+        r.paidAtTermination,
+        closeTo(r.totalAdditions - r.totalDeductions, 0.001),
+      );
     });
 
     test('paidAtTermination é proventos menos descontos, sem a multa', () {
       for (final type in TerminationType.values) {
-        final r = useCase.execute(input(fgts: 10000, accrued: true, taxes: true), type);
-        expect(r.paidAtTermination, closeTo(r.totalAdditions - r.totalDeductions, 0.011), reason: type.name);
+        final r = useCase.execute(
+          input(fgts: 10000, accrued: true, taxes: true),
+          type,
+        );
+        expect(
+          r.paidAtTermination,
+          closeTo(r.totalAdditions - r.totalDeductions, 0.011),
+          reason: type.name,
+        );
       }
     });
 
@@ -216,26 +402,52 @@ void main() {
 
   group('premissas (B2-10)', () {
     test('FGTS informado tem origem informed; sem informar, estimated', () {
-      final informed = useCase.execute(input(fgts: 10000), TerminationType.withoutJustCause);
-      final estimated = useCase.execute(input(), TerminationType.withoutJustCause);
+      final informed = useCase.execute(
+        input(fgts: 10000),
+        TerminationType.withoutJustCause,
+      );
+      final estimated = useCase.execute(
+        input(),
+        TerminationType.withoutJustCause,
+      );
       expect(
-        informed.assumptions.firstWhere((a) => a.code == AssumptionCode.fgtsBalance).origin,
+        informed.assumptions
+            .firstWhere((a) => a.code == AssumptionCode.fgtsBalance)
+            .origin,
         AssumptionOrigin.informed,
       );
       expect(
-        estimated.assumptions.firstWhere((a) => a.code == AssumptionCode.fgtsBalance).origin,
+        estimated.assumptions
+            .firstWhere((a) => a.code == AssumptionCode.fgtsBalance)
+            .origin,
         AssumptionOrigin.estimated,
       );
     });
 
     test('deve registrar os avos de 13º e de férias', () {
-      final r = useCase.execute(input(noticeWorked: true), TerminationType.withoutJustCause);
-      expect(r.assumptions.firstWhere((a) => a.code == AssumptionCode.thirteenthMonths).value, 8);
-      expect(r.assumptions.firstWhere((a) => a.code == AssumptionCode.vacationMonths).value, 6);
+      final r = useCase.execute(
+        input(noticeWorked: true),
+        TerminationType.withoutJustCause,
+      );
+      expect(
+        r.assumptions
+            .firstWhere((a) => a.code == AssumptionCode.thirteenthMonths)
+            .value,
+        8,
+      );
+      expect(
+        r.assumptions
+            .firstWhere((a) => a.code == AssumptionCode.vacationMonths)
+            .value,
+        6,
+      );
     });
 
-    test('validationPendingRules em lib espelha test/golden/validation_status.dart', () {
-      expect(validationPendingRules, pendingValidationRules);
-    });
+    test(
+      'validationPendingRules em lib espelha test/golden/validation_status.dart',
+      () {
+        expect(validationPendingRules, pendingValidationRules);
+      },
+    );
   });
 }

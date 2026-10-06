@@ -49,7 +49,7 @@ void main() {
 
       expect(salaryBalance.value, 2000.0);
       expect(notice.value, closeTo(4800.0, 0.01));
-      // Aviso de 36 dias (2 anos) projeta +1 avo (C2, CLT art. 487 §1º).
+      // Aviso de 36 dias (2 anos): E = 21/07/2026 (C2, por data); julho com 21 dias conta.
       // 13º: jan a jun/2026 (junho, dia 15, conta) = 6 + 1 = 7/12 de 4000 = 2333,33.
       expect(thirteenth.value, closeTo(2333.33, 0.01));
       // Férias (C3): período aquisitivo desde 01/03/2026 = 3 meses + 15 dias (conta) = 4, +1 de projeção = 5/12 x 4000 x 4/3 = 2222,22.
