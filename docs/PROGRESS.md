@@ -7,13 +7,13 @@
 
 ## Resumo
 
-**69/76 requisitos entregues (91%)**
+**69/77 requisitos entregues (90%)**
 
 | Estado | Requisitos |
 |---|--:|
 | 🚀 Entregue | 69 |
 | ✔ Implementado | 0 |
-| 🔨 Em andamento | 0 |
+| 🔨 Em andamento | 1 |
 | 📋 Planejado | 0 |
 | 🎯 Sem plano | 7 |
 
@@ -28,7 +28,7 @@
 | B4 | Contratos a prazo e rescisão indireta | 9 | 9 | 0 | 0 | 0 | 0 | 100% |
 | B5 | Resultado, compartilhamento e PDF | 6 | 6 | 0 | 0 | 0 | 0 | 100% |
 | B6 | Validação e infraestrutura de testes golden | 6 | 6 | 0 | 0 | 0 | 0 | 100% |
-| B7 | Conformidade, privacidade e operação | 7 | 0 | 0 | 0 | 0 | 7 | 0% |
+| B7 | Conformidade, privacidade e operação | 8 | 0 | 0 | 1 | 0 | 7 | 0% |
 
 ## Detalhe
 
@@ -147,7 +147,9 @@
 | B7-05 | 🎯 Sem plano | Confirmar e unificar o e-mail de contato (política × app). | — |
 | B7-06 | 🎯 Sem plano | Manutenção anual das tabelas (checklist do PRD §13): JSON, teste do ano, list... | — |
 | B7-07 | 🎯 Sem plano | Specs de compliance Android (android-target-sdk, 16 KB) preservadas; prazo da... | — |
+| B7-08 | 🔨 Em andamento | Release Android automatizado: tag v* valida a versão do pubspec.yaml, roda an... | `add-play-cd-pipeline` |
 
 ## Alertas
 
-Nenhum.
+**Buracos no plano** (bloco em andamento com requisitos sem task):
+- **B7** tem requisitos planejados, mas estes não têm task: B7-01, B7-02, B7-03, B7-04, B7-05, B7-06, B7-07

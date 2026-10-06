@@ -288,6 +288,16 @@ limpo, `flutter test` verde. Mudança de regra trabalhista exige citar a base le
 - Firebase: config do projeto em `android/app` e plugin Gradle do Google Services; sem
   `firebase_options.dart` (Android usa a config nativa). ⚠️ iOS sem o arquivo plist do Firebase: o Firebase fica
   indisponível no iOS até ele ser adicionado (a inicialização falha em silêncio).
+- 🎯 **Release automatizado (B7-08, change `add-play-cd-pipeline`):** `.github/workflows/release-android.yml`
+  dispara só por tag `v*`. Passos: valida `tag == versão do pubspec` (sem `+build`), `flutter analyze`,
+  `flutter test`, monta a assinatura e o config do Firebase a partir de secrets, `flutter build appbundle --release`
+  (`versionCode`/`versionName` vêm do `pubspec.yaml`) e envia à trilha **internal** com `r0adkll/upload-google-play`.
+  Toolchain fixa: Flutter 3.47.6 (stable) e JDK 21 (Temurin); no runner o passo `sed` remove o
+  `org.gradle.java.home` local de `android/gradle.properties` (arquivo do repo inalterado).
+  Secrets (6): `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_PASSWORD`, `KEY_ALIAS`, `GOOGLE_SERVICES_JSON_BASE64`,
+  `PLAY_SERVICE_ACCOUNT_JSON`. Arquivos sensíveis temporários são removidos ao final (`if: always()`).
+  Promoção internal → produção continua manual no Play Console. Modelo das propriedades de assinatura:
+  `android/key.properties.example`.
 - Fluxo **spec-driven** com OpenSpec: mudanças de compliance entram em `openspec/changes/<nome>` e,
   ao serem arquivadas, viram `openspec/specs/<capability>/spec.md`.
 
@@ -323,6 +333,7 @@ limpo, `flutter test` verde. Mudança de regra trabalhista exige citar a base le
 | 2026-10 | ✅ Intersticial só ao sair do Resultado; anúncios não personalizados até consentimento | Respeitar o momento do usuário; privacidade por padrão |
 | 2026-10 | ✅ Dinheiro em `Decimal`, após testes golden | Evitar erro de ponto flutuante com refatoração protegida |
 | 2026-10 | ✅ Histórico limitado a 100 itens em `SharedPreferences` (FIFO) | Não degradar o armazenamento; migrar para SQLite se crescer |
+| 2026-10 | 🎯 CD por tag `v*` para a trilha internal (GitHub Actions) | Release manual era sujeito a erro; publicar segue ato humano (a tag) e produção segue manual (B7-08) |
 | 2026-10 | 🎯 Execução em 4 changes OpenSpec sequenciais | Versões pequenas isolam regressões (ver PROJECT.md §15) |
 
 > Novas decisões: acrescente uma linha (data, decisão, motivo). Se for grande, crie uma change
