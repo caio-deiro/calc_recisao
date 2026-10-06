@@ -185,7 +185,7 @@ múltiplos vínculos. Essas limitações devem constar na tela e na listagem da 
 ### 6.3 Correções decididas (✅ implementadas, ⚖️ a validar)
 
 ✅ C1 a C5 estão implementadas na change `fix-calculation-rules` (B2-04 a B2-08); seguem ⚖️ até haver
-caso golden com fonte (B6-06). `Decimal` (C6) segue 🎯 na change `migrate-money-to-decimal`.
+caso golden com fonte (B6-06). C6 (`Decimal`) ✅ implementada na change `migrate-money-to-decimal` (B2-13 a B2-15).
 
 | # | Correção | Motivo |
 |---|---|---|
@@ -194,7 +194,7 @@ caso golden com fonte (B6-06). `Decimal` (C6) segue 🎯 na change `migrate-mone
 | C3 | **Férias proporcionais pelo período aquisitivo** (aniversário da admissão), não pelo ano-calendário (Q8a) | Erro sempre que a admissão não é em janeiro. O 13º segue por ano-calendário |
 | C4 | **Férias indenizadas sem IRRF e sem INSS** (Q9a) | Hoje entram na base do IRRF |
 | C5 | **INSS do 13º calculado separado do salário**, cada um com tabela e teto próprios (Q9a) | Hoje é calculado sobre a soma |
-| C6 | **Dinheiro em `Decimal`** (Q22a) | Evita erro de ponto flutuante; introduzido só depois dos testes golden |
+| C6 ✅ | **Dinheiro em `Decimal`** (Q22a) | Evita erro de ponto flutuante; introduzido só depois dos testes golden. Domínio e `TaxTablesService` em `Decimal`; fronteiras (entrada, UI, JSON, PDF) seguem `double` |
 
 > C2 a C5 devem ser confirmados contra os casos de validação (§11) **antes** de entrar em produção.
 > Se a validação contradisser a leitura acima, a validação vence.

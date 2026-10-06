@@ -50,7 +50,7 @@ e atualize esta tabela.
 | `path_provider` | Salvar PDF em arquivo | |
 | `firebase_core` + `firebase_crashlytics` | Relato de erros não-fatais | Inicializados no `main`; coleta desligada por padrão e ligada só após o aceite (§7) |
 | `firebase_analytics` | 4 eventos mínimos | Só com consentimento, via `core/analytics/analytics_service.dart` (PROJECT.md §9) |
-| `decimal` | — | ⚠️ declarado, **não usado**. 🎯 Passa a ser o tipo do dinheiro no domínio (change `migrate-money-to-decimal`, depois dos testes golden) |
+| `decimal` | — | ✅ Tipo do dinheiro no domínio e no `TaxTablesService` (change `migrate-money-to-decimal`). Fronteiras (`TerminationInput`, `BreakdownItem`, JSON do histórico) continuam `double` |
 | `cupertino_icons` | Ícones | |
 
 
@@ -289,7 +289,7 @@ limpo, `flutter test` verde. Mudança de regra trabalhista exige citar a base le
 
 | # | Dívida | Impacto | Sugestão |
 |---|---|---|---|
-| D1 | **Dinheiro em `double`**; `decimal` está no `pubspec` mas não é usado | Erros de arredondamento acumulados | Migrar o use case para `Decimal` ou inteiros em centavos |
+| D1 ✅ | ~~Dinheiro em `double`~~ **Resolvida**: domínio em `Decimal`, half-up a 2 casas por item, divisão com escala explícita (multiplica antes, divide uma vez) | — | Conversão para `double` só nas fronteiras |
 | D2 | ~~Status PRO só local~~ | ✅ **Resolvida pela extinção do PRO** | `ProUtils`/`PurchaseService` removidos |
 | D3 | ~~`Firebase.initializeApp()` não era chamado~~ | ✅ **Resolvida** (B0-06): inicializado no `main` com coleta desligada | Falta config iOS |
 | D4 | Telas muito grandes, sem separação UI/lógica | Difícil testar e evoluir | Extrair widgets/controllers |
@@ -315,7 +315,7 @@ limpo, `flutter test` verde. Mudança de regra trabalhista exige citar a base le
 | 2026 | Target SDK 36 + 16 KB pages | Exigência da Play Console |
 | 2026-10 | ✅ **Extinguir o PRO; monetizar só com AdMob** | Simplicidade; público de uso pontual converte mal em assinatura; elimina compliance de Billing |
 | 2026-10 | ✅ Intersticial só ao sair do Resultado; anúncios não personalizados até consentimento | Respeitar o momento do usuário; privacidade por padrão |
-| 2026-10 | 🎯 Dinheiro em `Decimal`, após testes golden | Evitar erro de ponto flutuante com refatoração protegida |
+| 2026-10 | ✅ Dinheiro em `Decimal`, após testes golden | Evitar erro de ponto flutuante com refatoração protegida |
 | 2026-10 | ✅ Histórico limitado a 100 itens em `SharedPreferences` (FIFO) | Não degradar o armazenamento; migrar para SQLite se crescer |
 | 2026-10 | 🎯 Execução em 4 changes OpenSpec sequenciais | Versões pequenas isolam regressões (ver PROJECT.md §15) |
 

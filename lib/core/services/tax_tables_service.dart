@@ -1,36 +1,49 @@
 import 'dart:convert';
+import 'package:decimal/decimal.dart';
 import 'package:flutter/services.dart';
 import '../utils/logger.dart';
+
+/// Lê um número do JSON como texto (sem herdar imprecisão binária) para [Decimal].
+Decimal _decimalOf(Object? value) => Decimal.parse(value.toString());
 
 class TaxTable {
   final String description;
   final List<TaxRange> ranges;
-  final double? ceiling;
+  final Decimal? ceiling;
 
   TaxTable({required this.description, required this.ranges, this.ceiling});
 
   factory TaxTable.fromJson(Map<String, dynamic> json) {
     return TaxTable(
       description: json['description'] ?? '',
-      ranges: (json['faixas'] as List<dynamic>?)?.map((range) => TaxRange.fromJson(range)).toList() ?? [],
-      ceiling: json['teto'] != null ? (json['teto'] as num).toDouble() : null,
+      ranges:
+          (json['faixas'] as List<dynamic>?)
+              ?.map((range) => TaxRange.fromJson(range))
+              .toList() ??
+          [],
+      ceiling: json['teto'] != null ? _decimalOf(json['teto']) : null,
     );
   }
 }
 
 class TaxRange {
-  final double limite;
-  final double aliquota;
-  final double? deducao;
+  final Decimal limite;
+  final Decimal aliquota;
+  final Decimal? deducao;
   final String descricao;
 
-  TaxRange({required this.limite, required this.aliquota, this.deducao, required this.descricao});
+  TaxRange({
+    required this.limite,
+    required this.aliquota,
+    this.deducao,
+    required this.descricao,
+  });
 
   factory TaxRange.fromJson(Map<String, dynamic> json) {
     return TaxRange(
-      limite: (json['limite'] as num).toDouble(),
-      aliquota: (json['aliquota'] as num).toDouble(),
-      deducao: json['deducao'] != null ? (json['deducao'] as num).toDouble() : null,
+      limite: _decimalOf(json['limite']),
+      aliquota: _decimalOf(json['aliquota']),
+      deducao: json['deducao'] != null ? _decimalOf(json['deducao']) : null,
       descricao: json['descricao'] ?? '',
     );
   }
@@ -45,31 +58,40 @@ class IrrfReducerConfig {
     required this.formulaCoefficient,
   });
 
-  final double exemptionLimit;
-  final double maxReduction;
-  final double gradualLimit;
-  final double formulaConstant;
-  final double formulaCoefficient;
+  final Decimal exemptionLimit;
+  final Decimal maxReduction;
+  final Decimal gradualLimit;
+  final Decimal formulaConstant;
+  final Decimal formulaCoefficient;
 }
 
 class TerminationTaxResult {
-  const TerminationTaxResult({required this.inssSalary, required this.inssThirteenth, required this.irrf});
+  const TerminationTaxResult({
+    required this.inssSalary,
+    required this.inssThirteenth,
+    required this.irrf,
+  });
 
   /// INSS do saldo de salário (tabela e teto próprios).
-  final double inssSalary;
+  final Decimal inssSalary;
 
   /// INSS do 13º, apurado em separado (tabela e teto próprios).
-  final double inssThirteenth;
-  final double irrf;
+  final Decimal inssThirteenth;
+  final Decimal irrf;
 
-  double get inss => inssSalary + inssThirteenth;
+  Decimal get inss => inssSalary + inssThirteenth;
 }
 
+/// Tabelas e fórmulas fiscais. Valores monetários e alíquotas são [Decimal] exatos
+/// (só há soma, subtração e multiplicação aqui); o arredondamento a 2 casas por item
+/// é feito pelo use case.
 class TaxTablesService {
   static TaxTablesService? _instance;
   static TaxTablesService get instance => _instance ??= TaxTablesService._();
 
   TaxTablesService._();
+
+  static final Decimal _zero = Decimal.zero;
 
   Map<String, dynamic>? _taxTablesData;
   TaxTable? _inss2025;
@@ -83,15 +105,24 @@ class TaxTablesService {
 
   Future<void> loadTaxTables() async {
     try {
-      final String jsonString = await rootBundle.loadString('assets/config/tax_tables.json');
+      final String jsonString = await rootBundle.loadString(
+        'assets/config/tax_tables.json',
+      );
       _taxTablesData = json.decode(jsonString);
       if (_taxTablesData != null) {
         _inss2025 = TaxTable.fromJson(_taxTablesData!['inss_2025']);
         _inss2026 = TaxTable.fromJson(_taxTablesData!['inss_2026']);
-        _irrf2025JanAbr = TaxTable.fromJson(_taxTablesData!['irrf_2025_jan_abr']);
-        _irrf2025MaiDez = TaxTable.fromJson(_taxTablesData!['irrf_2025_mai_dez']);
-        _irrf2026Mensal = TaxTable.fromJson(_taxTablesData!['irrf_2026_mensal']);
-        _irrfRedutor2026 = _taxTablesData!['irrf_redutor_2026'] as Map<String, dynamic>?;
+        _irrf2025JanAbr = TaxTable.fromJson(
+          _taxTablesData!['irrf_2025_jan_abr'],
+        );
+        _irrf2025MaiDez = TaxTable.fromJson(
+          _taxTablesData!['irrf_2025_mai_dez'],
+        );
+        _irrf2026Mensal = TaxTable.fromJson(
+          _taxTablesData!['irrf_2026_mensal'],
+        );
+        _irrfRedutor2026 =
+            _taxTablesData!['irrf_redutor_2026'] as Map<String, dynamic>?;
         _fgts = _taxTablesData!['fgts'];
         _avisoPrevio = _taxTablesData!['aviso_previo'];
       }
@@ -103,36 +134,47 @@ class TaxTablesService {
 
   TaxTable get inss2025 {
     if (_inss2025 == null) {
-      throw Exception('Tabelas fiscais não foram carregadas. Chame loadTaxTables() primeiro.');
+      throw Exception(
+        'Tabelas fiscais não foram carregadas. Chame loadTaxTables() primeiro.',
+      );
     }
     return _inss2025!;
   }
 
   TaxTable get inss2026 {
     if (_inss2026 == null) {
-      throw Exception('Tabelas fiscais não foram carregadas. Chame loadTaxTables() primeiro.');
+      throw Exception(
+        'Tabelas fiscais não foram carregadas. Chame loadTaxTables() primeiro.',
+      );
     }
     return _inss2026!;
   }
 
   TaxTable getInssTable(DateTime referenceDate) {
     final year2026 = DateTime(2026, 1, 1);
-    if (referenceDate.isAfter(year2026) || referenceDate.isAtSameMomentAs(year2026)) {
+    if (referenceDate.isAfter(year2026) ||
+        referenceDate.isAtSameMomentAs(year2026)) {
       return inss2026;
     }
     return inss2025;
   }
 
   TaxTable getIrrfTable(DateTime terminationDate) {
-    if (_irrf2025JanAbr == null || _irrf2025MaiDez == null || _irrf2026Mensal == null) {
-      throw Exception('Tabelas fiscais não foram carregadas. Chame loadTaxTables() primeiro.');
+    if (_irrf2025JanAbr == null ||
+        _irrf2025MaiDez == null ||
+        _irrf2026Mensal == null) {
+      throw Exception(
+        'Tabelas fiscais não foram carregadas. Chame loadTaxTables() primeiro.',
+      );
     }
     final year2026 = DateTime(2026, 1, 1);
-    if (terminationDate.isAfter(year2026) || terminationDate.isAtSameMomentAs(year2026)) {
+    if (terminationDate.isAfter(year2026) ||
+        terminationDate.isAtSameMomentAs(year2026)) {
       return _irrf2026Mensal!;
     }
     final may2025 = DateTime(2025, 5, 1);
-    if (terminationDate.isAfter(may2025) || terminationDate.isAtSameMomentAs(may2025)) {
+    if (terminationDate.isAfter(may2025) ||
+        terminationDate.isAtSameMomentAs(may2025)) {
       return _irrf2025MaiDez!;
     }
     return _irrf2025JanAbr!;
@@ -140,48 +182,58 @@ class TaxTablesService {
 
   bool usesIrrfReducer(DateTime terminationDate) {
     final year2026 = DateTime(2026, 1, 1);
-    return terminationDate.isAfter(year2026) || terminationDate.isAtSameMomentAs(year2026);
+    return terminationDate.isAfter(year2026) ||
+        terminationDate.isAtSameMomentAs(year2026);
   }
 
-  double getDependentDeduction(DateTime terminationDate) {
+  Decimal getDependentDeduction(DateTime terminationDate) {
     if (!usesIrrfReducer(terminationDate) || _irrfRedutor2026 == null) {
-      return 0.0;
+      return _zero;
     }
-    return (_irrfRedutor2026!['deducao_dependente_mensal'] as num).toDouble();
+    return _decimalOf(_irrfRedutor2026!['deducao_dependente_mensal']);
   }
 
   Map<String, dynamic> get fgts {
     if (_fgts == null) {
-      throw Exception('Tabelas fiscais não foram carregadas. Chame loadTaxTables() primeiro.');
+      throw Exception(
+        'Tabelas fiscais não foram carregadas. Chame loadTaxTables() primeiro.',
+      );
     }
     return _fgts!;
   }
 
   Map<String, dynamic> get avisoPrevio {
     if (_avisoPrevio == null) {
-      throw Exception('Tabelas fiscais não foram carregadas. Chame loadTaxTables() primeiro.');
+      throw Exception(
+        'Tabelas fiscais não foram carregadas. Chame loadTaxTables() primeiro.',
+      );
     }
     return _avisoPrevio!;
   }
 
-  double calculateInss(double baseValue, [DateTime? referenceDate]) {
-    if (baseValue <= 0) {
-      return 0.0;
+  Decimal calculateInss(Decimal baseValue, [DateTime? referenceDate]) {
+    if (baseValue <= _zero) {
+      return _zero;
     }
     final DateTime date = referenceDate ?? DateTime.now();
     return _calculateInssProgressive(baseValue, getInssTable(date));
   }
 
-  double _calculateInssProgressive(double baseValue, TaxTable table) {
-    final double cappedBase = table.ceiling != null && baseValue > table.ceiling! ? table.ceiling! : baseValue;
-    double previousLimit = 0.0;
-    double total = 0.0;
+  Decimal _calculateInssProgressive(Decimal baseValue, TaxTable table) {
+    final Decimal cappedBase =
+        table.ceiling != null && baseValue > table.ceiling!
+        ? table.ceiling!
+        : baseValue;
+    Decimal previousLimit = _zero;
+    Decimal total = _zero;
     for (final TaxRange range in table.ranges) {
       if (cappedBase <= previousLimit) {
         break;
       }
-      final double bandWidth = range.limite - previousLimit;
-      final double taxableInBand = (cappedBase - previousLimit) < bandWidth ? (cappedBase - previousLimit) : bandWidth;
+      final Decimal bandWidth = range.limite - previousLimit;
+      final Decimal taxableInBand = (cappedBase - previousLimit) < bandWidth
+          ? (cappedBase - previousLimit)
+          : bandWidth;
       total += taxableInBand * range.aliquota;
       previousLimit = range.limite;
     }
@@ -191,18 +243,27 @@ class TaxTablesService {
   /// IRRF mensal. [baseValue] é o rendimento já sem INSS; o redutor da Lei
   /// 15.270/2025 usa [grossIncome] (rendimento tributável bruto, antes de INSS
   /// e dependentes) e, se omitido, [baseValue]. ⚖️
-  double calculateIrrf(double baseValue, DateTime terminationDate, {int dependents = 0, double? grossIncome}) {
-    if (baseValue <= 0) {
-      return 0.0;
+  Decimal calculateIrrf(
+    Decimal baseValue,
+    DateTime terminationDate, {
+    int dependents = 0,
+    Decimal? grossIncome,
+  }) {
+    if (baseValue <= _zero) {
+      return _zero;
     }
-    final double dependentDeduction = getDependentDeduction(terminationDate) * dependents;
-    final double taxableBase = baseValue - dependentDeduction;
-    if (taxableBase <= 0) {
-      return 0.0;
+    final Decimal dependentDeduction =
+        getDependentDeduction(terminationDate) * Decimal.fromInt(dependents);
+    final Decimal taxableBase = baseValue - dependentDeduction;
+    if (taxableBase <= _zero) {
+      return _zero;
     }
-    final double grossIrrf = _calculateIrrfFromTable(taxableBase, getIrrfTable(terminationDate));
+    final Decimal grossIrrf = _calculateIrrfFromTable(
+      taxableBase,
+      getIrrfTable(terminationDate),
+    );
     if (!usesIrrfReducer(terminationDate)) {
-      return grossIrrf < 0 ? 0.0 : grossIrrf;
+      return grossIrrf < _zero ? _zero : grossIrrf;
     }
     return _applyMonthlyReducer(grossIrrf, grossIncome ?? baseValue);
   }
@@ -217,83 +278,100 @@ class TaxTablesService {
   /// C4: férias (vencidas ou proporcionais) ficam fora das duas bases
   /// (Decreto 3.048/99 art. 214 §9º IV; Súmulas 125 e 386 STJ, AD PGFN 14/2008). ⚖️
   TerminationTaxResult calculateTerminationTaxes({
-    required double salaryBalance,
-    required double thirteenthSalary,
+    required Decimal salaryBalance,
+    required Decimal thirteenthSalary,
     required DateTime terminationDate,
     int dependents = 0,
   }) {
-    final double inssSalary = calculateInss(salaryBalance, terminationDate);
-    final double inssThirteenth = calculateInss(thirteenthSalary, terminationDate);
-    final double salaryIrrf = calculateIrrf(
+    final Decimal inssSalary = calculateInss(salaryBalance, terminationDate);
+    final Decimal inssThirteenth = calculateInss(
+      thirteenthSalary,
+      terminationDate,
+    );
+    final Decimal salaryIrrf = calculateIrrf(
       salaryBalance - inssSalary,
       terminationDate,
       dependents: dependents,
       grossIncome: salaryBalance,
     );
-    final double thirteenthIrrf = calculateIrrf(
+    final Decimal thirteenthIrrf = calculateIrrf(
       thirteenthSalary - inssThirteenth,
       terminationDate,
       dependents: dependents,
       grossIncome: thirteenthSalary,
     );
-    return TerminationTaxResult(inssSalary: inssSalary, inssThirteenth: inssThirteenth, irrf: salaryIrrf + thirteenthIrrf);
+    return TerminationTaxResult(
+      inssSalary: inssSalary,
+      inssThirteenth: inssThirteenth,
+      irrf: salaryIrrf + thirteenthIrrf,
+    );
   }
 
-  double _calculateIrrfFromTable(double baseValue, TaxTable table) {
+  Decimal _calculateIrrfFromTable(Decimal baseValue, TaxTable table) {
     for (final TaxRange range in table.ranges) {
       if (baseValue <= range.limite) {
-        if (range.deducao != null) {
-          return (baseValue * range.aliquota) - range.deducao!;
-        }
-        return baseValue * range.aliquota;
+        return _irrfInRange(baseValue, range);
       }
     }
-    final TaxRange lastRange = table.ranges.last;
-    if (lastRange.deducao != null) {
-      return (baseValue * lastRange.aliquota) - lastRange.deducao!;
-    }
-    return baseValue * lastRange.aliquota;
+    return _irrfInRange(baseValue, table.ranges.last);
   }
 
-  double _applyMonthlyReducer(double grossIrrf, double grossIncome) {
-    if (grossIrrf <= 0) {
-      return 0.0;
+  Decimal _irrfInRange(Decimal baseValue, TaxRange range) {
+    final Decimal tax = baseValue * range.aliquota;
+    return range.deducao != null ? tax - range.deducao! : tax;
+  }
+
+  Decimal _applyMonthlyReducer(Decimal grossIrrf, Decimal grossIncome) {
+    if (grossIrrf <= _zero) {
+      return _zero;
     }
     final IrrfReducerConfig config = _getMonthlyReducerConfig();
-    final double reduction = _calculateReducerAmount(grossIncome, grossIrrf, config);
-    final double netIrrf = grossIrrf - reduction;
-    return netIrrf < 0 ? 0.0 : netIrrf;
+    final Decimal reduction = _calculateReducerAmount(
+      grossIncome,
+      grossIrrf,
+      config,
+    );
+    final Decimal netIrrf = grossIrrf - reduction;
+    return netIrrf < _zero ? _zero : netIrrf;
   }
 
-  double _calculateReducerAmount(double grossIncome, double grossIrrf, IrrfReducerConfig config) {
+  Decimal _calculateReducerAmount(
+    Decimal grossIncome,
+    Decimal grossIrrf,
+    IrrfReducerConfig config,
+  ) {
     if (grossIncome <= config.exemptionLimit) {
       return grossIrrf < config.maxReduction ? grossIrrf : config.maxReduction;
     }
     if (grossIncome <= config.gradualLimit) {
-      final double formulaReduction = config.formulaConstant - (config.formulaCoefficient * grossIncome);
-      final double reduction = formulaReduction < grossIrrf ? formulaReduction : grossIrrf;
-      return reduction < 0 ? 0.0 : reduction;
+      final Decimal formulaReduction =
+          config.formulaConstant - (config.formulaCoefficient * grossIncome);
+      final Decimal reduction = formulaReduction < grossIrrf
+          ? formulaReduction
+          : grossIrrf;
+      return reduction < _zero ? _zero : reduction;
     }
-    return 0.0;
+    return _zero;
   }
 
   IrrfReducerConfig _getMonthlyReducerConfig() {
-    final Map<String, dynamic> mensal = _irrfRedutor2026!['mensal'] as Map<String, dynamic>;
+    final Map<String, dynamic> mensal =
+        _irrfRedutor2026!['mensal'] as Map<String, dynamic>;
     return IrrfReducerConfig(
-      exemptionLimit: (mensal['limite_isencao'] as num).toDouble(),
-      maxReduction: (mensal['reducao_maxima'] as num).toDouble(),
-      gradualLimit: (mensal['limite_reducao_gradual'] as num).toDouble(),
-      formulaConstant: (mensal['formula_constante'] as num).toDouble(),
-      formulaCoefficient: (mensal['formula_coeficiente'] as num).toDouble(),
+      exemptionLimit: _decimalOf(mensal['limite_isencao']),
+      maxReduction: _decimalOf(mensal['reducao_maxima']),
+      gradualLimit: _decimalOf(mensal['limite_reducao_gradual']),
+      formulaConstant: _decimalOf(mensal['formula_constante']),
+      formulaCoefficient: _decimalOf(mensal['formula_coeficiente']),
     );
   }
 
-  double getFgtsAliquota() {
-    return (fgts['aliquota'] as num).toDouble();
+  Decimal getFgtsAliquota() {
+    return _decimalOf(fgts['aliquota']);
   }
 
-  double getFgtsPenaltyAliquota() {
-    return (fgts['multa_sem_justa_causa'] as num).toDouble();
+  Decimal getFgtsPenaltyAliquota() {
+    return _decimalOf(fgts['multa_sem_justa_causa']);
   }
 
   int getAvisoPrevioBaseDays() {
