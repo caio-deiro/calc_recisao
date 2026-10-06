@@ -77,7 +77,6 @@ class TaxTablesService {
   TaxTable? _irrf2025JanAbr;
   TaxTable? _irrf2025MaiDez;
   TaxTable? _irrf2026Mensal;
-  TaxTable? _irrf2026Anual;
   Map<String, dynamic>? _irrfRedutor2026;
   Map<String, dynamic>? _fgts;
   Map<String, dynamic>? _avisoPrevio;
@@ -92,7 +91,6 @@ class TaxTablesService {
         _irrf2025JanAbr = TaxTable.fromJson(_taxTablesData!['irrf_2025_jan_abr']);
         _irrf2025MaiDez = TaxTable.fromJson(_taxTablesData!['irrf_2025_mai_dez']);
         _irrf2026Mensal = TaxTable.fromJson(_taxTablesData!['irrf_2026_mensal']);
-        _irrf2026Anual = TaxTable.fromJson(_taxTablesData!['irrf_2026_anual']);
         _irrfRedutor2026 = _taxTablesData!['irrf_redutor_2026'] as Map<String, dynamic>?;
         _fgts = _taxTablesData!['fgts'];
         _avisoPrevio = _taxTablesData!['aviso_previo'];
@@ -138,17 +136,6 @@ class TaxTablesService {
       return _irrf2025MaiDez!;
     }
     return _irrf2025JanAbr!;
-  }
-
-  TaxTable getIrrfAnnualTable(DateTime terminationDate) {
-    if (_irrf2026Anual == null) {
-      throw Exception('Tabelas fiscais não foram carregadas. Chame loadTaxTables() primeiro.');
-    }
-    final year2026 = DateTime(2026, 1, 1);
-    if (terminationDate.isAfter(year2026) || terminationDate.isAtSameMomentAs(year2026)) {
-      return _irrf2026Anual!;
-    }
-    return _irrf2026Anual!;
   }
 
   bool usesIrrfReducer(DateTime terminationDate) {
@@ -201,7 +188,10 @@ class TaxTablesService {
     return total;
   }
 
-  double calculateIrrf(double baseValue, DateTime terminationDate, {int dependents = 0}) {
+  /// IRRF mensal. [baseValue] é o rendimento já sem INSS; o redutor da Lei
+  /// 15.270/2025 usa [grossIncome] (rendimento tributável bruto, antes de INSS
+  /// e dependentes) e, se omitido, [baseValue]. ⚖️
+  double calculateIrrf(double baseValue, DateTime terminationDate, {int dependents = 0, double? grossIncome}) {
     if (baseValue <= 0) {
       return 0.0;
     }
@@ -214,30 +204,16 @@ class TaxTablesService {
     if (!usesIrrfReducer(terminationDate)) {
       return grossIrrf < 0 ? 0.0 : grossIrrf;
     }
-    return _applyMonthlyReducer(grossIrrf, taxableBase);
-  }
-
-  double calculateIrrfAnnual(double baseValue, DateTime terminationDate, {int dependents = 0}) {
-    if (baseValue <= 0) {
-      return 0.0;
-    }
-    final double dependentDeduction = getDependentDeduction(terminationDate) * dependents;
-    final double taxableBase = baseValue - dependentDeduction;
-    if (taxableBase <= 0) {
-      return 0.0;
-    }
-    final double grossIrrf = _calculateIrrfFromTable(taxableBase, getIrrfAnnualTable(terminationDate));
-    if (!usesIrrfReducer(terminationDate)) {
-      return grossIrrf < 0 ? 0.0 : grossIrrf;
-    }
-    return _applyAnnualReducer(grossIrrf, taxableBase);
+    return _applyMonthlyReducer(grossIrrf, grossIncome ?? baseValue);
   }
 
   /// Apura INSS e IRRF da rescisão.
   ///
   /// C5: INSS do saldo e do 13º em bases independentes, cada uma com a tabela
-  /// progressiva e o teto próprios (Decreto 3.048/99 art. 214 §6º e §7º). IRRF
-  /// mensal deduz o INSS do saldo; o anual deduz o INSS do 13º.
+  /// progressiva e o teto próprios (Decreto 3.048/99 art. 214 §6º e §7º). O IRRF
+  /// do saldo deduz o INSS do saldo e o do 13º deduz o INSS do 13º, ambos pela
+  /// tabela MENSAL (13º tributado em separado: Lei 7.713/88 art. 26). O redutor
+  /// usa o rendimento bruto de cada pagamento (Lei 15.270/2025).
   /// C4: férias (vencidas ou proporcionais) ficam fora das duas bases
   /// (Decreto 3.048/99 art. 214 §9º IV; Súmulas 125 e 386 STJ, AD PGFN 14/2008). ⚖️
   TerminationTaxResult calculateTerminationTaxes({
@@ -248,13 +224,19 @@ class TaxTablesService {
   }) {
     final double inssSalary = calculateInss(salaryBalance, terminationDate);
     final double inssThirteenth = calculateInss(thirteenthSalary, terminationDate);
-    final double monthlyIrrf = calculateIrrf(salaryBalance - inssSalary, terminationDate, dependents: dependents);
-    final double annualIrrf = calculateIrrfAnnual(
+    final double salaryIrrf = calculateIrrf(
+      salaryBalance - inssSalary,
+      terminationDate,
+      dependents: dependents,
+      grossIncome: salaryBalance,
+    );
+    final double thirteenthIrrf = calculateIrrf(
       thirteenthSalary - inssThirteenth,
       terminationDate,
       dependents: dependents,
+      grossIncome: thirteenthSalary,
     );
-    return TerminationTaxResult(inssSalary: inssSalary, inssThirteenth: inssThirteenth, irrf: monthlyIrrf + annualIrrf);
+    return TerminationTaxResult(inssSalary: inssSalary, inssThirteenth: inssThirteenth, irrf: salaryIrrf + thirteenthIrrf);
   }
 
   double _calculateIrrfFromTable(double baseValue, TaxTable table) {
@@ -273,32 +255,22 @@ class TaxTablesService {
     return baseValue * lastRange.aliquota;
   }
 
-  double _applyMonthlyReducer(double grossIrrf, double taxableBase) {
+  double _applyMonthlyReducer(double grossIrrf, double grossIncome) {
     if (grossIrrf <= 0) {
       return 0.0;
     }
     final IrrfReducerConfig config = _getMonthlyReducerConfig();
-    final double reduction = _calculateReducerAmount(taxableBase, grossIrrf, config);
+    final double reduction = _calculateReducerAmount(grossIncome, grossIrrf, config);
     final double netIrrf = grossIrrf - reduction;
     return netIrrf < 0 ? 0.0 : netIrrf;
   }
 
-  double _applyAnnualReducer(double grossIrrf, double taxableBase) {
-    if (grossIrrf <= 0) {
-      return 0.0;
-    }
-    final IrrfReducerConfig config = _getAnnualReducerConfig();
-    final double reduction = _calculateReducerAmount(taxableBase, grossIrrf, config);
-    final double netIrrf = grossIrrf - reduction;
-    return netIrrf < 0 ? 0.0 : netIrrf;
-  }
-
-  double _calculateReducerAmount(double taxableBase, double grossIrrf, IrrfReducerConfig config) {
-    if (taxableBase <= config.exemptionLimit) {
+  double _calculateReducerAmount(double grossIncome, double grossIrrf, IrrfReducerConfig config) {
+    if (grossIncome <= config.exemptionLimit) {
       return grossIrrf < config.maxReduction ? grossIrrf : config.maxReduction;
     }
-    if (taxableBase <= config.gradualLimit) {
-      final double formulaReduction = config.formulaConstant - (config.formulaCoefficient * taxableBase);
+    if (grossIncome <= config.gradualLimit) {
+      final double formulaReduction = config.formulaConstant - (config.formulaCoefficient * grossIncome);
       final double reduction = formulaReduction < grossIrrf ? formulaReduction : grossIrrf;
       return reduction < 0 ? 0.0 : reduction;
     }
@@ -313,17 +285,6 @@ class TaxTablesService {
       gradualLimit: (mensal['limite_reducao_gradual'] as num).toDouble(),
       formulaConstant: (mensal['formula_constante'] as num).toDouble(),
       formulaCoefficient: (mensal['formula_coeficiente'] as num).toDouble(),
-    );
-  }
-
-  IrrfReducerConfig _getAnnualReducerConfig() {
-    final Map<String, dynamic> anual = _irrfRedutor2026!['anual'] as Map<String, dynamic>;
-    return IrrfReducerConfig(
-      exemptionLimit: (anual['limite_isencao'] as num).toDouble(),
-      maxReduction: (anual['reducao_maxima'] as num).toDouble(),
-      gradualLimit: (anual['limite_reducao_gradual'] as num).toDouble(),
-      formulaConstant: (anual['formula_constante'] as num).toDouble(),
-      formulaCoefficient: (anual['formula_coeficiente'] as num).toDouble(),
     );
   }
 

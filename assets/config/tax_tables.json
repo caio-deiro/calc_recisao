@@ -156,41 +156,6 @@
       }
     ]
   },
-  "irrf_2026_anual": {
-    "description": "Tabela IRRF 2026 anual - 13º e férias na rescisão",
-    "faixas": [
-      {
-        "limite": 29145.60,
-        "aliquota": 0.0,
-        "deducao": 0.0,
-        "descricao": "Até R$ 29.145,60"
-      },
-      {
-        "limite": 33919.80,
-        "aliquota": 0.075,
-        "deducao": 2185.92,
-        "descricao": "De R$ 29.145,61 até R$ 33.919,80"
-      },
-      {
-        "limite": 45012.60,
-        "aliquota": 0.15,
-        "deducao": 4729.91,
-        "descricao": "De R$ 33.919,81 até R$ 45.012,60"
-      },
-      {
-        "limite": 55976.16,
-        "aliquota": 0.225,
-        "deducao": 8105.85,
-        "descricao": "De R$ 45.012,61 até R$ 55.976,16"
-      },
-      {
-        "limite": 999999.99,
-        "aliquota": 0.275,
-        "deducao": 10904.66,
-        "descricao": "Acima de R$ 55.976,16"
-      }
-    ]
-  },
   "irrf_redutor_2026": {
     "description": "Redutor IRRF Lei 15.270/2025",
     "deducao_dependente_mensal": 189.59,
@@ -200,13 +165,6 @@
       "limite_reducao_gradual": 7350.00,
       "formula_constante": 978.62,
       "formula_coeficiente": 0.133145
-    },
-    "anual": {
-      "limite_isencao": 60000.00,
-      "reducao_maxima": 2694.15,
-      "limite_reducao_gradual": 88200.00,
-      "formula_constante": 8429.73,
-      "formula_coeficiente": 0.095575
     }
   },
   "fgts": {

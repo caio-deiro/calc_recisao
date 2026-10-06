@@ -123,9 +123,29 @@ void main() {
         expect(withDependents, lessThan(withoutDependents));
       });
 
-      test('deve isentar base anual até R\$ 60.000,00', () {
-        final result = taxService.calculateIrrfAnnual(2000.0, date2026);
+      // Valores à mão: Lei 15.270/2025 (redução sobre o rendimento bruto) e tabela mensal 2026.
+      test('sem redução quando o bruto é 7.500 e a base deduzida é menor que 7.350', () {
+        // 7.000 x 27,5% - 908,73 = 1.016,27; bruto > 7.350 => redução 0
+        final result = taxService.calculateIrrf(7000.0, date2026, grossIncome: 7500.0);
+        expect(result, closeTo(1016.27, 0.01));
+      });
+
+      test('redução gradual usa o bruto 6.000: 978,62 - 0,133145 x 6.000 = 179,75', () {
+        // base 5.000: 5.000 x 27,5% - 908,73 = 466,27; 466,27 - 179,75 = 286,52
+        final result = taxService.calculateIrrf(5000.0, date2026, grossIncome: 6000.0);
+        expect(result, closeTo(286.52, 0.001));
+      });
+
+      test('bruto até 5.000 zera o imposto quando ele é menor que 312,89', () {
+        // base 4.000: 4.000 x 22,5% - 675,49 = 224,51 < 312,89 => IRRF 0
+        final result = taxService.calculateIrrf(4000.0, date2026, grossIncome: 5000.0);
         expect(result, 0.0);
+      });
+
+      test('bruto até 5.000 limita a redução em 312,89 e nunca fica negativo', () {
+        // base 4.500: 4.500 x 22,5% - 675,49 = 337,01; 337,01 - 312,89 = 24,12
+        final result = taxService.calculateIrrf(4500.0, date2026, grossIncome: 5000.0);
+        expect(result, closeTo(24.12, 0.01));
       });
     });
 
@@ -167,16 +187,17 @@ void main() {
         expect(t2026.inssSalary, closeTo(taxService.calculateInss(3000.0, date2026), 0.001));
       });
 
-      test('IRRF mensal deduz o INSS do saldo e o anual o INSS do 13º', () {
+      test('IRRF do 13º usa a tabela mensal (Lei 7.713/88 art. 26): 9.000, 1 dependente', () {
+        // INSS 13º 988,09; base 9.000 - 988,09 - 189,59 = 7.822,32;
+        // 7.822,32 x 27,5% - 908,73 = 1.242,41; bruto 9.000 > 7.350 => sem redução
         final TerminationTaxResult taxes = taxService.calculateTerminationTaxes(
-          salaryBalance: 9000.0,
+          salaryBalance: 0.0,
           thirteenthSalary: 9000.0,
-          terminationDate: date2026,
+          terminationDate: DateTime(2026, 9, 5),
+          dependents: 1,
         );
-        final double expected =
-            taxService.calculateIrrf(9000.0 - taxes.inssSalary, date2026) +
-            taxService.calculateIrrfAnnual(9000.0 - taxes.inssThirteenth, date2026);
-        expect(taxes.irrf, closeTo(expected, 0.001));
+        expect(taxes.inssThirteenth, closeTo(988.09, 0.01));
+        expect(taxes.irrf, closeTo(1242.41, 0.01));
       });
     });
 
