@@ -25,11 +25,11 @@ Cada caso golden MUST ser um arquivo `test/golden/cases/*.json` contendo `id`, `
 - **THEN** o loader MUST falhar com o code inválido na mensagem
 
 ### Requirement: Single golden runner
-Um único `test/golden/golden_test.dart` MUST carregar todos os casos de `test/golden/cases/` e comparar cada verba e cada total suportado, identificando a verba por `item.code.name`, usando a constante única `goldenTolerance`, igual a 0,01 até a change `migrate-money-to-decimal` (B2-13) e 0,00 depois. Verba produzida pelo app e ausente do esperado MUST falhar o caso se o valor for diferente de zero. Itens de `fgtsDeposit` MUST ser comparados como verbas e os totais `paidAtTermination` e `fgtsDeposit` MUST ser suportados. Campo de entrada ainda não suportado pelo app MUST ser pulado com motivo explícito, nunca em silêncio.
+Um único `test/golden/golden_test.dart` MUST carregar todos os casos de `test/golden/cases/` e comparar cada verba e cada total suportado, identificando a verba por `item.code.name`, usando a constante única `goldenTolerance`, igual a 0,00 (B2-13). Verba produzida pelo app e ausente do esperado MUST falhar o caso se o valor for diferente de zero. Itens de `fgtsDeposit` MUST ser comparados como verbas e os totais `paidAtTermination` e `fgtsDeposit` MUST ser suportados. Campo de entrada ainda não suportado pelo app MUST ser pulado com motivo explícito, nunca em silêncio.
 
 #### Scenario: Value within tolerance passes
-- **WHEN** o comparador recebe 100,00 e 100,01 com tolerância 0,01
-- **THEN** considera igual, e com 100,02 MUST considerar diferente
+- **WHEN** o comparador recebe 100,00 e 100,00 com tolerância 0,00
+- **THEN** considera igual, e com 100,01 MUST considerar diferente
 
 #### Scenario: Extra verba fails
 - **WHEN** o app produz uma verba de valor 50,00 que o esperado não lista
