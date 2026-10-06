@@ -7,12 +7,12 @@
 
 ## Resumo
 
-**66/76 requisitos entregues (87%)**
+**69/76 requisitos entregues (91%)**
 
 | Estado | Requisitos |
 |---|--:|
-| 🚀 Entregue | 66 |
-| ✔ Implementado | 3 |
+| 🚀 Entregue | 69 |
+| ✔ Implementado | 0 |
 | 🔨 Em andamento | 0 |
 | 📋 Planejado | 0 |
 | 🎯 Sem plano | 7 |
@@ -23,11 +23,11 @@
 |---|---|--:|--:|--:|--:|--:|--:|--:|
 | B0 | Convenções e pré-requisitos transversais | 8 | 8 | 0 | 0 | 0 | 0 | 100% |
 | B1 | Remoção do PRO e monetização só com AdMob | 17 | 17 | 0 | 0 | 0 | 0 | 100% |
-| B2 | Núcleo de cálculo: modelo, correções e Decimal | 15 | 13 | 2 | 0 | 0 | 0 | 87% |
+| B2 | Núcleo de cálculo: modelo, correções e Decimal | 15 | 15 | 0 | 0 | 0 | 0 | 100% |
 | B3 | Períodos de férias e férias em dobro | 8 | 8 | 0 | 0 | 0 | 0 | 100% |
 | B4 | Contratos a prazo e rescisão indireta | 9 | 9 | 0 | 0 | 0 | 0 | 100% |
 | B5 | Resultado, compartilhamento e PDF | 6 | 6 | 0 | 0 | 0 | 0 | 100% |
-| B6 | Validação e infraestrutura de testes golden | 6 | 5 | 1 | 0 | 0 | 0 | 83% |
+| B6 | Validação e infraestrutura de testes golden | 6 | 6 | 0 | 0 | 0 | 0 | 100% |
 | B7 | Conformidade, privacidade e operação | 7 | 0 | 0 | 0 | 0 | 7 | 0% |
 
 ## Detalhe
@@ -77,8 +77,8 @@
 | B2-04 | 🚀 Entregue | C1 Justa causa paga férias vencidas | `2026-10-05-fix-calculation-rules` |
 | B2-05 | 🚀 Entregue | C2 Aviso indenizado projeta tempo | `2026-10-05-fix-calculation-rules` |
 | B2-06 | 🚀 Entregue | C3 Férias proporcionais pelo período aquisitivo | `2026-10-05-fix-calculation-rules` |
-| B2-07 | ✔ Implementado | C4 Férias indenizadas sem IRRF e sem INSS | `2026-10-05-fix-calculation-rules`, `fix-thirteenth-irrf` |
-| B2-08 | ✔ Implementado | C5 INSS do 13º separado do salário | `2026-10-05-fix-calculation-rules`, `fix-thirteenth-irrf` |
+| B2-07 | 🚀 Entregue | C4 Férias indenizadas sem IRRF e sem INSS | `2026-10-05-fix-calculation-rules`, `2026-10-06-fix-thirteenth-irrf` |
+| B2-08 | 🚀 Entregue | C5 INSS do 13º separado do salário | `2026-10-05-fix-calculation-rules`, `2026-10-06-fix-thirteenth-irrf` |
 | B2-09 | 🚀 Entregue | TerminationResult passa a expor paidAtTermination (soma dos proventos pagos −... | `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals` |
 | B2-10 | 🚀 Entregue | Premissas: TerminationResult.assumptions: List<Assumption> com code, texto, o... | `2026-10-05-add-golden-test-infra`, `2026-10-05-fix-calculation-rules` |
 | B2-11 | 🚀 Entregue | Histórico compatível: CalculationHistory.toJson ganha schemaVersion (inteiro)... | `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals` |
@@ -131,7 +131,7 @@
 |---|---|---|---|
 | B6-01 | 🚀 Entregue | Criar test/golden/cases/*.json. Cada arquivo: fonte (TRCT anonimizado, calcul... | `2026-10-05-add-golden-test-infra` |
 | B6-02 | 🚀 Entregue | Um único *runner* (test/golden/golden_test.dart) carrega todos os casos e com... | `2026-10-05-add-golden-test-infra`, `2026-10-05-fix-calculation-rules`, `2026-10-05-migrate-money-to-decimal` |
-| B6-03 | ✔ Implementado | O resultado esperado vem sempre do documento externo, nunca da saída do app. ... | `2026-10-05-add-golden-test-infra`, `fix-thirteenth-irrf` |
+| B6-03 | 🚀 Entregue | O resultado esperado vem sempre do documento externo, nunca da saída do app. ... | `2026-10-05-add-golden-test-infra`, `2026-10-06-fix-thirteenth-irrf` |
 | B6-04 | 🚀 Entregue | Plano B: regras cujo caso golden ainda não existe (art. 479/480, férias em do... | `2026-10-05-add-golden-test-infra`, `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals` |
 | B6-05 | 🚀 Entregue | Cobertura mínima antes de publicar B2: um caso por tipo de rescisão ativo e p... | `2026-10-05-add-golden-test-infra`, `2026-10-05-fix-calculation-rules` |
 | B6-06 | 🚀 Entregue | Pendências do responsável (bloqueiam a publicação, não o código): fornecer TR... | `2026-10-05-add-golden-test-infra`, `2026-10-05-add-vacation-periods`, `2026-10-05-fix-calculation-rules`, `2026-10-05-migrate-money-to-decimal` |
