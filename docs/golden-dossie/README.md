@@ -2,8 +2,8 @@
 
 **Status (2026-10-05):** decisão do responsável: sem acesso a contador, os casos se apoiam em **lei e fontes oficiais**, com `fonte.tipo = "calculo_legal"` (cálculo manual, sem revisão profissional). Isso é mais fraco que `trct` ou `exemplo_contador`: se um TRCT real ou um contador aparecer, ele prevalece.
 
-- **Promovidos** para `test/golden/cases/` (batem com o app): `golden_justa_causa_c1`, `golden_pedido_demissao`, `golden_prazo_determinado_termino`.
-- **Pendentes** em `rascunho/` porque o app diverge do cálculo legal: `golden_sem_justa_causa_c2_c5` (IRRF do 13º, bug do app) e `golden_acordo_mutuo` (projeção do aviso).
+- **Promovidos** para `test/golden/cases/` (batem com o app): `golden_justa_causa_c1`, `golden_pedido_demissao`, `golden_prazo_determinado_termino` e `golden_sem_justa_causa_c2_c5` (o bug do IRRF do 13º foi corrigido pela change `fix-thirteenth-irrf`).
+- **Pendente** em `rascunho/` porque o app diverge do cálculo legal: `golden_acordo_mutuo` (projeção do aviso).
 
 **Por que existe:** o teste golden só vale se o valor esperado vier de **fora do app** (B6-03, `docs/PROJECT.md` §11). Estes casos foram calculados por um script independente do app (sem ler `lib/`), direto da CLT e das tabelas oficiais abaixo.
 
@@ -46,7 +46,7 @@ Os rascunhos foram copiados temporariamente para `test/golden/cases/`, rodados e
 
 | Caso | Divergência | O que pode ser |
 |---|---|---|
-| `sem_justa_causa_c2_c5` | IRRF esperado 1.242,41 (13º de 9.000 → base 7.822,32 → 27,5%, sem redução por estar acima de 7.350), app devolve **0,00** | **Bug do app:** `calculateTerminationTaxes` usa a tabela e a redução **anuais** no 13º (`tax_tables_service.dart:253`); o correto é a tabela mensal (pergunta 7). |
+| `sem_justa_causa_c2_c5` | IRRF esperado 1.242,41 (13º de 9.000 → base 7.822,32 → 27,5%, sem redução por estar acima de 7.350), app devolve **0,00** | **Resolvido** (`fix-thirteenth-irrf`): `calculateTerminationTaxes` usava a tabela e a redução **anuais** no 13º; agora usa a tabela mensal (pergunta 7). |
 | `acordo_mutuo` | 13º esperado 2.333,33 (8 avos, com +1 de projeção), app dá 2.041,67 (7 avos); férias proporcionais idem; o INSS acompanha | É exatamente a pergunta 1: o app projeta pelo aviso pago (24 dias → 0 avo), o dossiê adotou +1. |
 
 ## Fora deste dossiê (ainda sem caso)

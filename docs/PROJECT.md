@@ -268,7 +268,11 @@ não altera a base dos impostos.
 
 ### 6.7 Descontos (✅ + 🎯)
 - **INSS:** tabela progressiva por **data da rescisão**, com teto. ✅ Saldo e 13º apurados em separado, cada um com tabela e teto próprios (C5, Decreto 3.048/99 art. 214 §6º e §7º).
-- **IRRF:** tabelas mensal/anual por ano, dedução por dependente, redutor 2026. ✅ Férias (vencidas ou
+- **IRRF:** tabela progressiva **mensal** vigente na data da rescisão, dedução por dependente, redutor 2026. ✅ Saldo e 13º
+  são apurados em separado, ambos pela tabela mensal (13º tributado exclusivamente na fonte, em separado: Lei 7.713/88
+  art. 26; SEFAZ-SP). O redutor (Lei 15.270/2025, art. 3º-A da Lei 9.250/95: até 5.000 reduz até 312,89; de 5.000,01 a
+  7.350 reduz 978,62 - 0,133145 x rendimento; acima, nada) usa o rendimento tributável **bruto** (antes de INSS e
+  dependentes), não a base deduzida. ⚖️ sem validação de contador. ✅ Férias (vencidas ou
   proporcionais) fora das bases de IRRF e INSS (C4; Decreto 3.048/99 art. 214 §9º IV; Súmulas 125 e 386 STJ).
 - **Outros descontos:** valor livre. O usuário pode **desligar o cálculo de impostos**.
 - Valores arredondados a 2 casas.
