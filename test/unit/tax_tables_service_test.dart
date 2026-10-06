@@ -206,23 +206,71 @@ void main() {
           thirteenthSalary: d('2000.0'),
           terminationDate: date2026,
         );
-        final Decimal each = taxService.calculateInss(d('2000.0'), date2026);
+        // 121,575 + 379 x 9% = 155,685 -> 155,69 (half-up)
+        final Decimal each = d('155.69');
         expect(taxes.inssSalary, each);
         expect(taxes.inssThirteenth, each);
         expect(taxes.inss, each + each);
       });
 
       test('C5: duas bases acima do teto dão duas vezes o INSS do teto', () {
-        final Decimal atCeiling = taxService.calculateInss(
-          d('1000000.0'),
-          date2026,
-        );
+        final Decimal atCeiling = taxService
+            .calculateInss(d('1000000.0'), date2026)
+            .round(scale: 2);
         final TerminationTaxResult taxes = taxService.calculateTerminationTaxes(
           salaryBalance: d('10000.0'),
           thirteenthSalary: d('10000.0'),
           terminationDate: date2026,
         );
         expect(taxes.inss, atCeiling + atCeiling);
+      });
+
+      test('C5: cada INSS é arredondado half-up antes de somar (2.000 + 2.500)', () {
+        // Saldo 2.000: 121,575 + 379 x 9% = 155,685 -> 155,69.
+        // 13º 2.500: 121,575 + 879 x 9% = 200,685 -> 200,69. Soma 356,38
+        // (a soma crua 356,370 daria 356,37). IRRF: bases 1.844,31 e 2.299,31, isentas.
+        final TerminationTaxResult taxes = taxService.calculateTerminationTaxes(
+          salaryBalance: d('2000.0'),
+          thirteenthSalary: d('2500.0'),
+          terminationDate: DateTime(2026, 9, 5),
+        );
+        expect(taxes.inssSalary, d('155.69'));
+        expect(taxes.inssThirteenth, d('200.69'));
+        expect(taxes.inss, d('356.38'));
+        expect(taxes.irrf, Decimal.zero);
+      });
+
+      test('C5: ambos no teto, cada INSS com 2 casas', () {
+        final Decimal ceilingInss = taxService
+            .calculateInss(d('1000000.0'), date2026)
+            .round(scale: 2);
+        final TerminationTaxResult taxes = taxService.calculateTerminationTaxes(
+          salaryBalance: d('10000.0'),
+          thirteenthSalary: d('10000.0'),
+          terminationDate: date2026,
+        );
+        expect(taxes.inssSalary, ceilingInss);
+        expect(taxes.inssThirteenth, ceilingInss);
+        expect(taxes.inss, ceilingInss + ceilingInss);
+      });
+
+      test('IRRF: base usa o INSS arredondado da parcela', () {
+        // INSS de 2.500: 200,685 -> 200,69; a base do IRRF é 2.500 - 200,69.
+        final TerminationTaxResult taxes = taxService.calculateTerminationTaxes(
+          salaryBalance: d('2500.0'),
+          thirteenthSalary: Decimal.zero,
+          terminationDate: DateTime(2026, 9, 5),
+          dependents: 1,
+        );
+        expect(
+          taxes.irrf,
+          taxService.calculateIrrf(
+            d('2500.0') - d('200.69'),
+            DateTime(2026, 9, 5),
+            dependents: 1,
+            grossIncome: d('2500.0'),
+          ),
+        );
       });
 
       test('C5: tabela escolhida pela data da rescisão (2025 e 2026)', () {
@@ -238,11 +286,13 @@ void main() {
         );
         expect(
           t2025.inssSalary,
-          taxService.calculateInss(d('3000.0'), DateTime(2025, 6, 10)),
+          taxService
+              .calculateInss(d('3000.0'), DateTime(2025, 6, 10))
+              .round(scale: 2),
         );
         expect(
           t2026.inssSalary,
-          taxService.calculateInss(d('3000.0'), date2026),
+          taxService.calculateInss(d('3000.0'), date2026).round(scale: 2),
         );
       });
 

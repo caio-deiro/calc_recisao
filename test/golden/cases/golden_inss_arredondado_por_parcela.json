@@ -1,0 +1,34 @@
+{
+  "id": "golden_inss_arredondado_por_parcela",
+  "fonte": {
+    "tipo": "calculo_legal",
+    "descricao": "Cálculo manual a partir da CLT e das tabelas oficiais 2026 (INSS: Portaria MPS/MF 13/2026; IRRF: Receita Federal e Lei 15.270/2025), por script independente do app. INSS do saldo e do 13º são recolhimentos distintos (Decreto 3.048/99 art. 214 §6º e §7º): cada um arredondado half-up antes de somar (155,685 -> 155,69; 200,685 -> 200,69; total 356,38). Sem revisão de contador.",
+    "referencia": "docs/golden-dossie/README.md#golden_inss_arredondado_por_parcela"
+  },
+  "tipo": "resignation",
+  "entrada": {
+    "admissao": "2025-03-10",
+    "rescisao": "2026-10-20",
+    "salarioBase": 3000,
+    "mediaVariaveis": 0,
+    "dependentes": 0,
+    "feriasGozadas": 1,
+    "avisoTrabalhado": true,
+    "diasTrabalhadosNoMes": 20
+  },
+  "esperado": {
+    "verbas": {
+      "salaryBalance": 2000.0,
+      "thirteenth": 2500.0,
+      "proportionalVacation": 2333.33,
+      "inss": 356.38,
+      "irrf": 0.0
+    },
+    "totais": {
+      "totalAdditions": 6833.33,
+      "totalDeductions": 356.38,
+      "paidAtTermination": 6476.95,
+      "fgtsDeposit": 0.0
+    }
+  }
+}

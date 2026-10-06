@@ -337,7 +337,7 @@ class CalculateTerminationUseCase {
             BreakdownItem(
               code: BreakdownCode.inss,
               description: 'INSS',
-              value: _roundCurrency(taxes.inss).toDouble(),
+              value: taxes.inss.toDouble(),
               type: BreakdownType.deduction,
               details: 'Sobre saldo de salário e 13º proporcional',
             ),

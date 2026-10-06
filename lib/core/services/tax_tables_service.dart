@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:decimal/decimal.dart';
 import 'package:flutter/services.dart';
 import '../utils/logger.dart';
+import '../constants/app_constants.dart';
 
 /// Lê um número do JSON como texto (sem herdar imprecisão binária) para [Decimal].
 Decimal _decimalOf(Object? value) => Decimal.parse(value.toString());
@@ -271,7 +272,8 @@ class TaxTablesService {
   /// Apura INSS e IRRF da rescisão.
   ///
   /// C5: INSS do saldo e do 13º em bases independentes, cada uma com a tabela
-  /// progressiva e o teto próprios (Decreto 3.048/99 art. 214 §6º e §7º). O IRRF
+  /// progressiva e o teto próprios (Decreto 3.048/99 art. 214 §6º e §7º),
+  /// arredondado a 2 casas antes de somar. O IRRF
   /// do saldo deduz o INSS do saldo e o do 13º deduz o INSS do 13º, ambos pela
   /// tabela MENSAL (13º tributado em separado: Lei 7.713/88 art. 26). O redutor
   /// usa o rendimento bruto de cada pagamento (Lei 15.270/2025).
@@ -283,11 +285,16 @@ class TaxTablesService {
     required DateTime terminationDate,
     int dependents = 0,
   }) {
-    final Decimal inssSalary = calculateInss(salaryBalance, terminationDate);
+    // Recolhimentos distintos: cada INSS é arredondado (half-up) antes de somar
+    // e a base do IRRF usa o valor já arredondado.
+    final Decimal inssSalary = calculateInss(
+      salaryBalance,
+      terminationDate,
+    ).round(scale: AppConstants.decimalPlaces);
     final Decimal inssThirteenth = calculateInss(
       thirteenthSalary,
       terminationDate,
-    );
+    ).round(scale: AppConstants.decimalPlaces);
     final Decimal salaryIrrf = calculateIrrf(
       salaryBalance - inssSalary,
       terminationDate,
