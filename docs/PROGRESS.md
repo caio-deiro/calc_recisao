@@ -7,13 +7,13 @@
 
 ## Resumo
 
-**55/76 requisitos entregues (72%)**
+**57/76 requisitos entregues (75%)**
 
 | Estado | Requisitos |
 |---|--:|
-| 🚀 Entregue | 55 |
+| 🚀 Entregue | 57 |
 | ✔ Implementado | 3 |
-| 🔨 Em andamento | 2 |
+| 🔨 Em andamento | 0 |
 | 📋 Planejado | 0 |
 | 🎯 Sem plano | 16 |
 
@@ -21,7 +21,7 @@
 
 | Bloco | Título | Total | 🚀 | ✔ | 🔨 | 📋 | 🎯 | Entregue |
 |---|---|--:|--:|--:|--:|--:|--:|--:|
-| B0 | Convenções e pré-requisitos transversais | 8 | 6 | 0 | 2 | 0 | 0 | 75% |
+| B0 | Convenções e pré-requisitos transversais | 8 | 8 | 0 | 0 | 0 | 0 | 100% |
 | B1 | Remoção do PRO e monetização só com AdMob | 17 | 17 | 0 | 0 | 0 | 0 | 100% |
 | B2 | Núcleo de cálculo: modelo, correções e Decimal | 15 | 13 | 2 | 0 | 0 | 0 | 87% |
 | B3 | Períodos de férias e férias em dobro | 8 | 8 | 0 | 0 | 0 | 0 | 100% |
@@ -40,10 +40,10 @@
 | B0-02 | 🚀 Entregue | Teste antes da regra: mudança em cálculo só entra com teste que a cubra (gold... | `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals` |
 | B0-03 | 🚀 Entregue | Nenhum dado pessoal em log, evento de analytics ou relatório de crash: sem sa... | `2026-10-04-remove-pro-ads-only`, `2026-10-05-fix-calculation-rules`, `2026-10-05-result-assumptions-and-two-totals` |
 | B0-04 | 🚀 Entregue | Base legal no commit: mudança de regra trabalhista/tributária cita artigo, sú... | `2026-10-05-fix-calculation-rules` |
-| B0-05 | 🔨 Em andamento | Mudou camada, dependência, fluxo ou regra → atualizar docs/ARCHITECTURE.md e/... | `2026-10-04-remove-pro-ads-only`, `2026-10-05-add-vacation-periods`, `2026-10-05-fix-calculation-rules`, `2026-10-05-migrate-money-to-decimal`, `2026-10-05-result-assumptions-and-two-totals` |
+| B0-05 | 🚀 Entregue | Mudou camada, dependência, fluxo ou regra → atualizar docs/ARCHITECTURE.md e/... | `2026-10-04-remove-pro-ads-only`, `2026-10-05-add-vacation-periods`, `2026-10-05-fix-calculation-rules`, `2026-10-05-migrate-money-to-decimal`, `2026-10-05-result-assumptions-and-two-totals` |
 | B0-06 | 🚀 Entregue | D3 — Firebase não é inicializado (main.dart não chama Firebase.initializeApp)... | `2026-10-04-remove-pro-ads-only` |
 | B0-07 | 🚀 Entregue | Strings novas de UI vão em lib/l10n/app_localizations_pt.dart quando houver c... | `2026-10-05-result-assumptions-and-two-totals` |
-| B0-08 | 🔨 Em andamento | Cada bloco sai como versão publicável pequena; pubspec.yaml ganha bump de ver... | `2026-10-04-remove-pro-ads-only`, `2026-10-05-add-vacation-periods`, `2026-10-05-fix-calculation-rules`, `2026-10-05-migrate-money-to-decimal`, `2026-10-05-result-assumptions-and-two-totals` |
+| B0-08 | 🚀 Entregue | Cada bloco sai como versão publicável pequena; pubspec.yaml ganha bump de ver... | `2026-10-04-remove-pro-ads-only`, `2026-10-05-add-vacation-periods`, `2026-10-05-fix-calculation-rules`, `2026-10-05-migrate-money-to-decimal`, `2026-10-05-result-assumptions-and-two-totals` |
 
 ### B1 — Remoção do PRO e monetização só com AdMob
 
@@ -150,5 +150,4 @@
 
 ## Alertas
 
-**Changes arquivadas com tasks desmarcadas** (inconsistente):
-- `2026-10-05-migrate-money-to-decimal`
+Nenhum.

@@ -19,4 +19,4 @@
 ## 4. Docs e versão (B0-05, B0-08)
 
 - [x] 4.1 B0-05 Atualizar `docs/ARCHITECTURE.md` (D1 resolvida) e `docs/PROJECT.md` (C6 ✅) no mesmo commit.
-- [ ] 4.2 B0-08 Bump de versão em `pubspec.yaml` quando esta change for publicada.
+- [x] 4.2 B0-08 Bump de versão em `pubspec.yaml` quando esta change for publicada. (transferida para a publicação; decisão do responsável)
