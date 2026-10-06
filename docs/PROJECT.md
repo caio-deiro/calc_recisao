@@ -465,9 +465,8 @@ Pré-requisito único: service account com permissão de release e os 6 secrets 
 - **LGPD / Data Safety:** a política atual afirma "não coleta dados", mas o app usa **AdMob** (identificador
   de publicidade) e, quando ativo, **Crashlytics/Analytics**. A política, a Data Safety e a declaração
   "contém anúncios" precisam refletir isso **antes da próxima publicação**.
-- **Contatos divergentes:** a política usa `caioguimaraes12@outlook.com`; o app usa
-  `suporte@calcrescisao.com`. Confirmar o que existe. Com o PRO extinto, `pro@calcrescisao.com` deixa de
-  ser necessário.
+- **Contatos divergentes:** corrigido (B7-05): política e app usam
+  `caioguimaraes12@outlook.com` (`AppConstants.supportEmail`).
 
 ---
 

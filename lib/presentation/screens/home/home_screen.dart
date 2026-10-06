@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../domain/entities/termination_type.dart';
-import '../../../core/analytics/aso_analytics.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../widgets/ad_banner.dart';
 import '../../widgets/consent_prompt.dart';
@@ -19,20 +18,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  @override
-  void initState() {
-    super.initState();
-    _trackScreenView();
-  }
-
-  Future<void> _trackScreenView() async {
-    await AsoAnalytics.trackUserEngagement(action: 'screen_view', screen: 'home', timeSpent: 0);
-  }
-
   /// Abre uma tela e, ao voltar, pergunta o consentimento se ainda for a hora
   /// (após o primeiro resultado, antes de qualquer intersticial).
   Future<void> _openAndAskConsent(Widget screen) async {
-    await Navigator.of(context).push(MaterialPageRoute(builder: (context) => screen));
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => screen));
     if (!mounted) return;
     await showConsentPromptIfNeeded(context);
   }
@@ -56,12 +47,16 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             tooltip: l10n?.supportTitle ?? 'Suporte',
             icon: const Icon(Icons.help_outline),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SupportScreen())),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const SupportScreen()),
+            ),
           ),
           IconButton(
             tooltip: l10n?.aboutTitle ?? 'Sobre',
             icon: const Icon(Icons.info_outline),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AboutScreen())),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const AboutScreen()),
+            ),
           ),
         ],
       ),
@@ -74,7 +69,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n?.chooseTerminationType ?? 'Escolha o tipo de rescisão:',
+                    l10n?.chooseTerminationType ??
+                        'Escolha o tipo de rescisão:',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -85,7 +81,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   ...TerminationType.values.map(
                     (TerminationType type) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: TerminationTypeCard(type: type, onTap: () => _navigateToForm(context, type)),
+                      child: TerminationTypeCard(
+                        type: type,
+                        onTap: () => _navigateToForm(context, type),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),

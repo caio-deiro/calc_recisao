@@ -12,9 +12,12 @@ void main() {
       'offline_cache': <String>['x'],
       'pending_sync': <String>['y'],
       'pro_conversion': 2,
+      'install_source': 'organic',
+      'first_open': 1700000000000,
+      'session_count': 3,
     };
 
-    test('deve remover as 7 chaves legadas e preservar o histórico', () async {
+    test('deve remover as 10 chaves legadas e preservar o histórico', () async {
       SharedPreferences.setMockInitialValues({
         ...legacy,
         'calculation_history': <String>['{"id":"1"}'],

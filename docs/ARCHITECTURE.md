@@ -73,11 +73,9 @@ lib/
 ├── main.dart                  # bootstrap: inicializa serviços e roda App
 ├── app.dart                   # MaterialApp, tema, localização, home = SplashScreen
 ├── core/                      # infraestrutura transversal (sem regra de negócio de rescisão)
-│   ├── ab_testing/            # aso_ab_testing.dart (experimentos ASO locais)
 │   ├── ads/                   # ad_manager.dart, ad_ids.dart
-│   ├── analytics/             # analytics_service (ponto central), analytics_sink, consent_service, aso_analytics (contadores locais)
+│   ├── analytics/             # analytics_service (ponto central), analytics_sink, consent_service
 │   ├── constants/             # app_constants.dart — única fonte de "magic numbers"
-│   ├── deep_links/            # aso_deep_links.dart
 │   ├── exceptions/            # hierarquia AppException
 │   ├── services/              # tax_tables, onboarding, support, legacy_cleanup
 │   ├── theme/                 # app_theme.dart (light/dark)
@@ -206,10 +204,10 @@ da rescisão**, não pela data atual.
 | `calculation_history` | `HistoryRepository` | `List<String>` de JSON de `CalculationHistory` |
 | `last_interstitial_time` | `AdManager` | controle do cooldown de 3 min |
 | `first_result_done`, `consent_decided`, `analytics_enabled` | `ConsentService` | consentimento único (B1-11) |
-| `install_source`, `first_open`, `session_count` | `AsoAnalytics` | métricas **locais** |
 
 As chaves da antiga versão PRO (`is_pro_user`, `pro_purchase_*`, `offline_cache`, `pending_sync`, `pro_conversion`) são
-removidas no boot por `LegacyCleanup` (idempotente).
+removidas no boot por `LegacyCleanup` (idempotente), junto com `install_source`, `first_open` e `session_count`
+(do antigo `AsoAnalytics`, removido na change `fix-store-links-and-legacy-aso`).
 
 ---
 
@@ -241,7 +239,6 @@ removidas no boot por `LegacyCleanup` (idempotente).
   primeiro resultado, junto com o UMP dos anúncios. Anúncios **não personalizados** até o consentimento.
   Firebase é inicializado no `main`; coleta desligada no manifesto e no boot. ⚠️ A política de privacidade
   (`about_screen.dart`, site) foi atualizada na rodada 2 (texto a revisar pelo usuário).
-- `AsoAnalytics` e `AsoAbTesting` são **contadores locais**; nada sai do aparelho.
 
 ---
 

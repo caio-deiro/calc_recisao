@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/services/support_service.dart';
 import '../../widgets/ad_banner.dart';
 
@@ -35,7 +36,12 @@ class _SupportScreenState extends State<SupportScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Canais de Suporte', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+        Text(
+          'Canais de Suporte',
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 16),
         _buildSupportCard(
           icon: Icons.email,
@@ -49,13 +55,6 @@ class _SupportScreenState extends State<SupportScreen> {
           title: 'Sugerir Funcionalidade',
           description: 'Envie suas ideias para melhorias',
           onTap: () => SupportService.openFeatureRequest(),
-        ),
-        const SizedBox(height: 12),
-        _buildSupportCard(
-          icon: Icons.help_outline,
-          title: 'Perguntas Frequentes',
-          description: 'Encontre respostas rápidas',
-          onTap: () => SupportService.openFaq(),
         ),
       ],
     );
@@ -85,7 +84,9 @@ class _SupportScreenState extends State<SupportScreen> {
       children: [
         Text(
           'Perguntas Frequentes',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         _buildFaqItem(
@@ -102,11 +103,19 @@ class _SupportScreenState extends State<SupportScreen> {
 
   Widget _buildFaqItem(String question, String answer) {
     return ExpansionTile(
-      title: Text(question, style: const TextStyle(fontWeight: FontWeight.w600)),
+      title: Text(
+        question,
+        style: const TextStyle(fontWeight: FontWeight.w600),
+      ),
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child: Text(answer, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          child: Text(
+            answer,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
         ),
       ],
     );
@@ -121,7 +130,9 @@ class _SupportScreenState extends State<SupportScreen> {
           children: [
             Text(
               'Informações de Contato',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             Row(
@@ -129,8 +140,11 @@ class _SupportScreenState extends State<SupportScreen> {
                 Icon(Icons.email, size: 20, color: Colors.grey.shade600),
                 const SizedBox(width: 8),
                 Text(
-                  'suporte@calcrescisao.com',
-                  style: TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.w500),
+                  AppConstants.supportEmail,
+                  style: TextStyle(
+                    color: Colors.grey.shade700,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
@@ -141,7 +155,10 @@ class _SupportScreenState extends State<SupportScreen> {
                 const SizedBox(width: 8),
                 Text(
                   'Resposta em 3-5 dias úteis',
-                  style: TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                    color: Colors.grey.shade700,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
