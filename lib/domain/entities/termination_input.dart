@@ -13,12 +13,15 @@ class TerminationInput {
     this.dependents = 0,
     this.otherDiscounts = 0.0,
     this.calculateTaxes = true,
+    this.fixedTermEndDate,
+    this.hasRecipientClause = false,
   });
 
   final DateTime admissionDate;
   final DateTime terminationDate;
   final double baseSalary;
   final double averageAdditions;
+
   /// Períodos de férias já gozados (0…n); ver `VacationPeriods.derive`.
   final int vacationPeriodsTaken;
 
@@ -32,6 +35,12 @@ class TerminationInput {
   final int dependents;
   final double otherDiscounts;
   final bool calculateTaxes;
+
+  /// Fim previsto do contrato a prazo (B4); nulo nos demais tipos.
+  final DateTime? fixedTermEndDate;
+
+  /// Cláusula assecuratória do direito recíproco (CLT art. 481).
+  final bool hasRecipientClause;
 
   Map<String, dynamic> toJson() => {
     'admissionDate': admissionDate.toIso8601String(),
@@ -47,21 +56,29 @@ class TerminationInput {
     'dependents': dependents,
     'otherDiscounts': otherDiscounts,
     'calculateTaxes': calculateTaxes,
+    if (fixedTermEndDate != null)
+      'fixedTermEndDate': fixedTermEndDate!.toIso8601String(),
+    if (hasRecipientClause) 'hasRecipientClause': true,
   };
 
-  factory TerminationInput.fromJson(Map<String, dynamic> json) => TerminationInput(
-    admissionDate: DateTime.parse(json['admissionDate']),
-    terminationDate: DateTime.parse(json['terminationDate']),
-    baseSalary: json['baseSalary']?.toDouble() ?? 0.0,
-    averageAdditions: json['averageAdditions']?.toDouble() ?? 0.0,
-    vacationPeriodsTaken: json['vacationPeriodsTaken'] ?? 0,
-    legacyHasAccruedVacation: json['hasAccruedVacation'] == true,
-    workedDaysInMonth: json['workedDaysInMonth'] ?? 0,
-    noticeWorked: json['noticeWorked'] ?? false,
-    hasExistingFgts: json['hasExistingFgts'] ?? false,
-    existingFgtsAmount: json['existingFgtsAmount']?.toDouble() ?? 0.0,
-    dependents: json['dependents'] ?? 0,
-    otherDiscounts: json['otherDiscounts']?.toDouble() ?? 0.0,
-    calculateTaxes: json['calculateTaxes'] ?? true,
-  );
+  factory TerminationInput.fromJson(Map<String, dynamic> json) =>
+      TerminationInput(
+        admissionDate: DateTime.parse(json['admissionDate']),
+        terminationDate: DateTime.parse(json['terminationDate']),
+        baseSalary: json['baseSalary']?.toDouble() ?? 0.0,
+        averageAdditions: json['averageAdditions']?.toDouble() ?? 0.0,
+        vacationPeriodsTaken: json['vacationPeriodsTaken'] ?? 0,
+        legacyHasAccruedVacation: json['hasAccruedVacation'] == true,
+        workedDaysInMonth: json['workedDaysInMonth'] ?? 0,
+        noticeWorked: json['noticeWorked'] ?? false,
+        hasExistingFgts: json['hasExistingFgts'] ?? false,
+        existingFgtsAmount: json['existingFgtsAmount']?.toDouble() ?? 0.0,
+        dependents: json['dependents'] ?? 0,
+        otherDiscounts: json['otherDiscounts']?.toDouble() ?? 0.0,
+        calculateTaxes: json['calculateTaxes'] ?? true,
+        fixedTermEndDate: json['fixedTermEndDate'] == null
+            ? null
+            : DateTime.parse(json['fixedTermEndDate']),
+        hasRecipientClause: json['hasRecipientClause'] == true,
+      );
 }

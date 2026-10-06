@@ -110,7 +110,7 @@ dados informados permitem.
 
 | Área | Funcionalidade |
 |---|---|
-| Cálculo | 5 tipos: sem justa causa, pedido de demissão, prazo determinado, justa causa, acordo mútuo (art. 484-A) |
+| Cálculo | 8 tipos: sem justa causa, rescisão indireta, pedido de demissão, justa causa, acordo mútuo (art. 484-A), fim de contrato a prazo, antecipada pelo empregador (art. 479), antecipada pelo empregado (art. 480) |
 | Cálculo | Saldo de salário, aviso prévio, 13º, férias vencidas e proporcionais + 1/3, multa FGTS, INSS, IRRF, outros descontos |
 | Resultado | Breakdown de proventos e descontos, total e líquido, com aviso legal |
 | Compartilhar | Texto completo/resumido, copiar |
@@ -156,7 +156,7 @@ múltiplos vínculos. Essas limitações devem constar na tela e na listagem da 
 
 ### 6.1 Matriz de verbas por tipo de rescisão
 
-| Verba | Sem justa causa / **Indireta** 🎯 | Pedido de demissão | Justa causa | Acordo mútuo | Término normal (prazo) 🎯 | Antecipada empregador (prazo) 🎯 | Antecipada empregado (prazo) 🎯 |
+| Verba | Sem justa causa / **Indireta** ✅ | Pedido de demissão | Justa causa | Acordo mútuo | Término normal (prazo) ✅ | Antecipada empregador (prazo) ✅ | Antecipada empregado (prazo) ✅ |
 |---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | Saldo de salário | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
 | Aviso prévio indenizado | ✔ 100 % | ✖ (desconta se não cumprir) | ✖ | ✔ 50 % | ✖ | ✖¹ | ✖ |
@@ -168,7 +168,12 @@ múltiplos vínculos. Essas limitações devem constar na tela e na listagem da 
 | Desconto art. 480 | — | — | — | — | — | — | ✔ (máx. 1 remuneração) |
 
 ¹ Com **cláusula assecuratória** (art. 481), a antecipação segue as regras de prazo indeterminado
-(aviso prévio, etc.).
+(aviso prévio, etc.). ✅ Implementado (B4): `TerminationRules.resolve(tipo, cláusula)` troca a antecipada pelo
+empregador por "sem justa causa" e a pelo empregado por "pedido de demissão"; o mapeamento é um dado da tabela.
+
+✅ **Saque do FGTS (informativo, `fgtsWithdrawalPercent`):** 100 % na indireta, no término normal e na antecipada
+pelo empregador (Lei 8.036/90 art. 20, I e IX); sem linha de saque na antecipada pelo empregado (pedido de demissão).
+A rescisão indireta tem os efeitos da dispensa sem justa causa (CLT art. 483).
 
 ### 6.2 Fórmulas atuais (✅)
 
@@ -242,9 +247,11 @@ anterior", sem compartilhar nem PDF.
   férias. Um marcador "estimado" aparece ao lado do valor quando for aproximado.
 - A mesma estrutura vale para **compartilhamento e PDF**.
 
-### 6.6 Contratos por prazo determinado (🎯 ⚖️)
+### 6.6 Contratos por prazo determinado (✅ B4, ⚖️ art. 479/480 em validação)
 
-Hoje existe um único tipo "Prazo Determinado". Passa a haver:
+O antigo tipo único "Prazo Determinado" (`fixedTerm`) foi substituído por `fixedTermEnd`,
+`fixedTermEarlyByEmployer` e `fixedTermEarlyByEmployee`; registros antigos `fixedTerm` abrem como
+`fixedTermEnd`. Os itens são:
 
 1. **Término normal:** sem aviso, **sem multa de 40 %**, com saque do FGTS, 13º e férias proporcionais.
 2. **Antecipada pelo empregador (art. 479):** indenização de **metade da remuneração devida até o fim do
@@ -256,7 +263,15 @@ Hoje existe um único tipo "Prazo Determinado". Passa a haver:
 4. **Cláusula assecuratória (art. 481):** marcador que, quando ativo, faz a antecipação seguir as regras
    do contrato por prazo indeterminado.
 
-A **data de término prevista** passa a ser obrigatória nesses tipos.
+A **data de término prevista** é obrigatória nesses tipos e deve ser posterior à admissão; nas antecipadas a
+rescisão não pode passar do fim (erro), e no término normal uma rescisão diferente do fim gera só um aviso.
+
+✅ **Convenção de contagem (⚖️, fonte secundária):** `dias restantes = fim previsto − data da rescisão` (diferença
+literal de datas: o dia da rescisão não conta, o dia do fim conta; nunca negativo). Base = salário + média de
+variáveis. O ponto único é `remainingDays` (`lib/domain/rules/fixed_term.dart`). O art. 480 limita-se a 1 remuneração
+mensal (salário + média). Bases legais: CLT arts. 479, 480 (§1º), 481, 477 §5º e 457; interpretação de folha em COAD e
+Empresário Online. Sem `exemplo_contador`, as regras `art479` e `art480` seguem em "cálculo em validação" (B6-04).
+Fora de escopo: limite de 2 anos e prorrogação (CLT arts. 445 e 451).
 
 | Item | Fórmula |
 |---|---|

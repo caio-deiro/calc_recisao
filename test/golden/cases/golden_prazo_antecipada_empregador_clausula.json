@@ -1,0 +1,38 @@
+{
+  "id": "golden_prazo_antecipada_empregador_clausula",
+  "fonte": {
+    "tipo": "calculo_legal",
+    "descricao": "Cláusula assecuratória do direito recíproco (CLT art. 481): aplicam-se as regras da rescisão sem justa causa, com aviso prévio (30 dias, indenizado, projetado em 1 avo no 13º e nas férias; CLT art. 487 §1º) e multa de 40 %. Cálculo manual por script independente do app, tabelas oficiais 2026. Sem revisão de contador.",
+    "referencia": "docs/golden-dossie/README.md#golden_prazo_antecipada_empregador_clausula"
+  },
+  "tipo": "fixedTermEarlyByEmployer",
+  "entrada": {
+    "admissao": "2026-06-12",
+    "rescisao": "2026-10-20",
+    "fimPrevisto": "2026-11-19",
+    "clausula": true,
+    "salarioBase": 2400,
+    "mediaVariaveis": 0,
+    "dependentes": 0,
+    "feriasGozadas": 0,
+    "avisoTrabalhado": false,
+    "fgtsInformado": 2000
+  },
+  "esperado": {
+    "verbas": {
+      "salaryBalance": 1600.0,
+      "notice": 2400.0,
+      "thirteenth": 1200.0,
+      "proportionalVacation": 1333.33,
+      "inss": 210.0,
+      "irrf": 0.0,
+      "fgtsFine": 800.0
+    },
+    "totais": {
+      "totalAdditions": 6533.33,
+      "totalDeductions": 210.0,
+      "paidAtTermination": 6323.33,
+      "fgtsDeposit": 800.0
+    }
+  }
+}

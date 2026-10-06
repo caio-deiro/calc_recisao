@@ -9,6 +9,7 @@ import '../../../core/exceptions/app_exceptions.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../widgets/disclaimer_widget.dart';
+import '../../widgets/fixed_term_fields.dart';
 import '../../widgets/currency_text_field.dart';
 import '../../widgets/date_input_field.dart';
 import '../../widgets/vacation_taken_field.dart';
@@ -34,6 +35,16 @@ class _FormScreenState extends State<FormScreen> {
   final _existingFgtsController = TextEditingController();
   final _dependentsController = TextEditingController();
   final _otherDiscountsController = TextEditingController();
+  final _fixedTermEndController = TextEditingController();
+
+  bool _hasRecipientClause = false;
+  String? _fixedTermWarning;
+
+  bool get _isFixedTerm =>
+      TerminationInputValidator.fixedTermTypes.contains(widget.terminationType);
+  bool get _isEarlyFixedTerm =>
+      widget.terminationType == TerminationType.fixedTermEarlyByEmployer ||
+      widget.terminationType == TerminationType.fixedTermEarlyByEmployee;
 
   int _vacationTaken = 0;
   bool _vacationTouched = false;
@@ -49,13 +60,33 @@ class _FormScreenState extends State<FormScreen> {
     super.initState();
     _admissionDateController.addListener(_updateVacationLimit);
     _terminationDateController.addListener(_updateVacationLimit);
+    _terminationDateController.addListener(_updateFixedTermWarning);
+    _fixedTermEndController.addListener(_updateFixedTermWarning);
+  }
+
+  /// Aviso não bloqueante do término normal com desligamento diferente do fim previsto.
+  void _updateFixedTermWarning() {
+    String? warning;
+    if (widget.terminationType == TerminationType.fixedTermEnd) {
+      final termination = tryParseFormDate(_terminationDateController.text);
+      final end = tryParseFormDate(_fixedTermEndController.text);
+      if (termination != null && end != null) {
+        warning = TerminationInputValidator.normalEndMismatchWarning(
+          termination,
+          end,
+        );
+      }
+    }
+    if (warning == _fixedTermWarning) return;
+    setState(() => _fixedTermWarning = warning);
   }
 
   /// Recalcula `n` ao mudar as datas: o valor acompanha `n` até o toque e nunca o excede.
   void _updateVacationLimit() {
     int? limit;
     try {
-      if (_admissionDateController.text.length != 10 || _terminationDateController.text.length != 10) {
+      if (_admissionDateController.text.length != 10 ||
+          _terminationDateController.text.length != 10) {
         throw const FormatException('data incompleta');
       }
       final admission = Formatters.parseDate(_admissionDateController.text);
@@ -67,7 +98,9 @@ class _FormScreenState extends State<FormScreen> {
       limit = null;
     }
     // Data incompleta (digitando): o valor tocado é guardado e reaparece quando as datas voltam a valer.
-    final taken = _vacationTouched ? (limit == null ? _vacationTaken : _vacationTaken.clamp(0, limit)) : (limit ?? 0);
+    final taken = _vacationTouched
+        ? (limit == null ? _vacationTaken : _vacationTaken.clamp(0, limit))
+        : (limit ?? 0);
     if (limit == _vacationLimit && taken == _vacationTaken) return;
     setState(() {
       _vacationLimit = limit;
@@ -85,6 +118,7 @@ class _FormScreenState extends State<FormScreen> {
     _existingFgtsController.dispose();
     _dependentsController.dispose();
     _otherDiscountsController.dispose();
+    _fixedTermEndController.dispose();
     super.dispose();
   }
 
@@ -99,7 +133,10 @@ class _FormScreenState extends State<FormScreen> {
           identifier: 'form_back_button',
           label: 'Voltar',
           button: true,
-          child: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.of(context).pop()),
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
         ),
       ),
       body: Form(
@@ -145,7 +182,9 @@ class _FormScreenState extends State<FormScreen> {
           child: DateInputField(
             controller: _admissionDateController,
             label: l10n?.admissionDate ?? 'Data de Admissão',
-            validator: (value) => value?.isEmpty == true ? (l10n?.fieldRequired ?? 'Campo obrigatório') : null,
+            validator: (value) => value?.isEmpty == true
+                ? (l10n?.fieldRequired ?? 'Campo obrigatório')
+                : null,
           ),
         ),
         const SizedBox(height: 16),
@@ -154,9 +193,18 @@ class _FormScreenState extends State<FormScreen> {
           child: DateInputField(
             controller: _terminationDateController,
             label: l10n?.terminationDate ?? 'Data de Desligamento',
-            validator: (value) => value?.isEmpty == true ? (l10n?.fieldRequired ?? 'Campo obrigatório') : null,
+            validator: (value) => value?.isEmpty == true
+                ? (l10n?.fieldRequired ?? 'Campo obrigatório')
+                : null,
           ),
         ),
+        if (_isFixedTerm) ...[
+          const SizedBox(height: 16),
+          FixedTermEndField(
+            controller: _fixedTermEndController,
+            warning: _fixedTermWarning,
+          ),
+        ],
       ],
     );
   }
@@ -166,20 +214,26 @@ class _FormScreenState extends State<FormScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n?.remuneration ?? 'Remuneração', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(
+          l10n?.remuneration ?? 'Remuneração',
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 16),
         Semantics(
           identifier: 'form_base_salary',
           child: CurrencyTextField(
             controller: _baseSalaryController,
             label: l10n?.baseSalary ?? 'Salário Base Mensal',
-            validator: (value) => value?.isEmpty == true ? (l10n?.fieldRequired ?? 'Campo obrigatório') : null,
+            validator: (value) => value?.isEmpty == true
+                ? (l10n?.fieldRequired ?? 'Campo obrigatório')
+                : null,
           ),
         ),
         const SizedBox(height: 16),
         CurrencyTextField(
           controller: _averageAdditionsController,
-          label: l10n?.averageAdditions ?? 'Média de Adicionais Fixos (opcional)',
+          label:
+              l10n?.averageAdditions ?? 'Média de Adicionais Fixos (opcional)',
         ),
         const SizedBox(height: 16),
         Semantics(
@@ -189,7 +243,9 @@ class _FormScreenState extends State<FormScreen> {
           child: TextFormField(
             controller: _workedDaysController,
             decoration: InputDecoration(
-              labelText: l10n?.workedDaysInMonth ?? 'Dias Trabalhados no Mês (opcional)',
+              labelText:
+                  l10n?.workedDaysInMonth ??
+                  'Dias Trabalhados no Mês (opcional)',
               hintText: 'Deixe em branco para calcular automaticamente',
             ),
             keyboardType: TextInputType.number,
@@ -204,7 +260,10 @@ class _FormScreenState extends State<FormScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n?.options ?? 'Opções', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(
+          l10n?.options ?? 'Opções',
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 16),
         VacationTakenField(
           value: _vacationLimit == null ? 0 : _vacationTaken,
@@ -214,6 +273,11 @@ class _FormScreenState extends State<FormScreen> {
             _vacationTouched = true;
           }),
         ),
+        if (_isEarlyFixedTerm)
+          RecipientClauseCheckbox(
+            value: _hasRecipientClause,
+            onChanged: (value) => setState(() => _hasRecipientClause = value),
+          ),
         const SizedBox(height: 8),
         Semantics(
           identifier: 'form_notice_worked_checkbox',
@@ -223,7 +287,8 @@ class _FormScreenState extends State<FormScreen> {
             title: Text(l10n?.noticeWorked ?? 'Aviso prévio trabalhado'),
             subtitle: const Text('Cumpriu o aviso prévio'),
             value: _noticeWorked,
-            onChanged: (value) => setState(() => _noticeWorked = value ?? false),
+            onChanged: (value) =>
+                setState(() => _noticeWorked = value ?? false),
           ),
         ),
         Semantics(
@@ -231,10 +296,13 @@ class _FormScreenState extends State<FormScreen> {
           label: l10n?.hasExistingFgts ?? 'Possui depósitos FGTS existentes',
           hint: 'Para cálculo da multa de 40%',
           child: CheckboxListTile(
-            title: Text(l10n?.hasExistingFgts ?? 'Possui depósitos FGTS existentes'),
+            title: Text(
+              l10n?.hasExistingFgts ?? 'Possui depósitos FGTS existentes',
+            ),
             subtitle: const Text('Para cálculo da multa de 40%'),
             value: _hasExistingFgts,
-            onChanged: (value) => setState(() => _hasExistingFgts = value ?? false),
+            onChanged: (value) =>
+                setState(() => _hasExistingFgts = value ?? false),
           ),
         ),
         if (_hasExistingFgts) ...[
@@ -243,7 +311,8 @@ class _FormScreenState extends State<FormScreen> {
             identifier: 'form_fgts_amount',
             child: CurrencyTextField(
               controller: _existingFgtsController,
-              label: l10n?.existingFgtsAmount ?? 'Valor total do FGTS no vínculo',
+              label:
+                  l10n?.existingFgtsAmount ?? 'Valor total do FGTS no vínculo',
             ),
           ),
         ],
@@ -253,7 +322,10 @@ class _FormScreenState extends State<FormScreen> {
           textField: true,
           child: TextFormField(
             controller: _dependentsController,
-            decoration: InputDecoration(labelText: l10n?.dependents ?? 'Número de Dependentes', hintText: '0'),
+            decoration: InputDecoration(
+              labelText: l10n?.dependents ?? 'Número de Dependentes',
+              hintText: '0',
+            ),
             keyboardType: TextInputType.number,
           ),
         ),
@@ -267,10 +339,13 @@ class _FormScreenState extends State<FormScreen> {
           label: l10n?.calculateTaxes ?? 'Calcular descontos',
           hint: 'Descontos previdenciários e tributários',
           child: CheckboxListTile(
-            title: Text(l10n?.calculateTaxes ?? 'Calcular descontos (INSS/IRRF)'),
+            title: Text(
+              l10n?.calculateTaxes ?? 'Calcular descontos (INSS/IRRF)',
+            ),
             subtitle: const Text('Descontos previdenciários e tributários'),
             value: _calculateTaxes,
-            onChanged: (value) => setState(() => _calculateTaxes = value ?? true),
+            onChanged: (value) =>
+                setState(() => _calculateTaxes = value ?? true),
           ),
         ),
       ],
@@ -287,7 +362,11 @@ class _FormScreenState extends State<FormScreen> {
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4, offset: const Offset(0, -2)),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 4,
+              offset: const Offset(0, -2),
+            ),
           ],
         ),
         child: SizedBox(
@@ -297,7 +376,8 @@ class _FormScreenState extends State<FormScreen> {
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Text(
-                AppLocalizations.of(context)?.calculateTermination ?? 'Calcular Rescisão',
+                AppLocalizations.of(context)?.calculateTermination ??
+                    'Calcular Rescisão',
                 style: const TextStyle(fontSize: 16),
               ),
             ),
@@ -322,21 +402,33 @@ class _FormScreenState extends State<FormScreen> {
     if (_formKey.currentState?.validate() == true) {
       try {
         // Parse dos dados
-        final admissionDate = Formatters.parseDate(_admissionDateController.text);
-        final terminationDate = Formatters.parseDate(_terminationDateController.text);
+        final admissionDate = Formatters.parseDate(
+          _admissionDateController.text,
+        );
+        final terminationDate = Formatters.parseDate(
+          _terminationDateController.text,
+        );
 
         final baseSalary = _parseCurrencyValue(_baseSalaryController.text);
-        final averageAdditions = _parseCurrencyValue(_averageAdditionsController.text);
+        final averageAdditions = _parseCurrencyValue(
+          _averageAdditionsController.text,
+        );
 
         final workedDaysInMonth = _workedDaysController.text.isEmpty
             ? 0
             : int.tryParse(_workedDaysController.text) ?? 0;
 
-        final existingFgtsAmount = _parseCurrencyValue(_existingFgtsController.text);
+        final existingFgtsAmount = _parseCurrencyValue(
+          _existingFgtsController.text,
+        );
 
-        final dependents = _dependentsController.text.isEmpty ? 0 : int.tryParse(_dependentsController.text) ?? 0;
+        final dependents = _dependentsController.text.isEmpty
+            ? 0
+            : int.tryParse(_dependentsController.text) ?? 0;
 
-        final otherDiscounts = _parseCurrencyValue(_otherDiscountsController.text);
+        final otherDiscounts = _parseCurrencyValue(
+          _otherDiscountsController.text,
+        );
 
         final input = TerminationInput(
           admissionDate: admissionDate,
@@ -351,10 +443,17 @@ class _FormScreenState extends State<FormScreen> {
           dependents: dependents,
           otherDiscounts: otherDiscounts,
           calculateTaxes: _calculateTaxes,
+          fixedTermEndDate: _isFixedTerm
+              ? tryParseFormDate(_fixedTermEndController.text)
+              : null,
+          hasRecipientClause: _isEarlyFixedTerm && _hasRecipientClause,
         );
 
         // Validar dados
-        final validationResult = TerminationInputValidator.validate(input);
+        final validationResult = TerminationInputValidator.validate(
+          input,
+          type: widget.terminationType,
+        );
         if (!validationResult.isValid) {
           _showValidationErrors(validationResult);
           return;
@@ -363,15 +462,25 @@ class _FormScreenState extends State<FormScreen> {
         // Navegar para tela de resultado
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => ResultScreen(input: input, terminationType: widget.terminationType),
+            builder: (context) => ResultScreen(
+              input: input,
+              terminationType: widget.terminationType,
+            ),
           ),
         );
       } on ValidationException catch (e) {
         AppLogger.exception(e);
-        _showValidationErrors(ValidationResult.failure(errors: [e.message], fieldErrors: e.fieldErrors ?? {}));
+        _showValidationErrors(
+          ValidationResult.failure(
+            errors: [e.message],
+            fieldErrors: e.fieldErrors ?? {},
+          ),
+        );
       } on FormatException catch (e) {
         AppLogger.error('Erro ao fazer parse dos dados', e);
-        _showError('Formato de data inválido. Verifique se as datas estão no formato dd/mm/aaaa');
+        _showError(
+          'Formato de data inválido. Verifique se as datas estão no formato dd/mm/aaaa',
+        );
       } on AppException catch (e) {
         AppLogger.exception(e);
         _showError(e.message);
@@ -392,7 +501,11 @@ class _FormScreenState extends State<FormScreen> {
         content: Text(errorMessage),
         backgroundColor: Colors.red,
         duration: const Duration(seconds: 5),
-        action: SnackBarAction(label: 'OK', textColor: Colors.white, onPressed: () {}),
+        action: SnackBarAction(
+          label: 'OK',
+          textColor: Colors.white,
+          onPressed: () {},
+        ),
       ),
     );
   }
@@ -403,7 +516,11 @@ class _FormScreenState extends State<FormScreen> {
         content: Text(message),
         backgroundColor: Colors.red,
         duration: const Duration(seconds: 4),
-        action: SnackBarAction(label: 'OK', textColor: Colors.white, onPressed: () {}),
+        action: SnackBarAction(
+          label: 'OK',
+          textColor: Colors.white,
+          onPressed: () {},
+        ),
       ),
     );
   }

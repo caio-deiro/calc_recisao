@@ -8,6 +8,7 @@ enum AssumptionCode {
   fifteenDayRule,
   vacationPeriods,
   validationPending,
+  indemnity480Cap,
 }
 
 enum AssumptionOrigin { informed, estimated }

@@ -61,8 +61,14 @@ void main() {
         // 4. Verificar resultado
         expect(result.additions.length, greaterThan(0));
         expect(result.deductions.length, greaterThan(0));
-        expect((result.paidAtTermination + result.fgtsDeposit.total), greaterThan(0));
-        expect((result.totalAdditions + result.fgtsDeposit.total), greaterThan(result.totalDeductions));
+        expect(
+          (result.paidAtTermination + result.fgtsDeposit.total),
+          greaterThan(0),
+        );
+        expect(
+          (result.totalAdditions + result.fgtsDeposit.total),
+          greaterThan(result.totalDeductions),
+        );
 
         // 5. Salvar no histórico
         final history = await repository.getHistory();
@@ -83,7 +89,8 @@ void main() {
         expect(updatedHistory.length, initialCount + 1);
         expect(updatedHistory.first.input.baseSalary, input.baseSalary);
         expect(
-          (updatedHistory.first.result.paidAtTermination + updatedHistory.first.result.fgtsDeposit.total),
+          (updatedHistory.first.result.paidAtTermination +
+              updatedHistory.first.result.fgtsDeposit.total),
           (result.paidAtTermination + result.fgtsDeposit.total),
         );
       });
@@ -105,8 +112,16 @@ void main() {
         final result = useCase.execute(input, TerminationType.withJustCause);
 
         // Com justa causa não deve ter multa FGTS
-        expect(result.fgtsDeposit.items.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
-        expect(result.additions.any((item) => item.code == BreakdownCode.notice), isFalse);
+        expect(
+          result.fgtsDeposit.items.any(
+            (item) => item.code == BreakdownCode.fgtsFine,
+          ),
+          isFalse,
+        );
+        expect(
+          result.additions.any((item) => item.code == BreakdownCode.notice),
+          isFalse,
+        );
 
         await repository.saveCalculation(
           CalculationHistory(
@@ -133,7 +148,9 @@ void main() {
           calculateTaxes: true,
         );
 
-        final validationResult = TerminationInputValidator.validate(invalidInput);
+        final validationResult = TerminationInputValidator.validate(
+          invalidInput,
+        );
 
         expect(validationResult.isValid, isFalse);
         expect(validationResult.errors, isNotEmpty);
@@ -186,10 +203,13 @@ void main() {
           calculateTaxes: true,
         );
 
-        final result = useCase.execute(input, TerminationType.fixedTerm);
+        final result = useCase.execute(input, TerminationType.fixedTermEnd);
 
         // Prazo determinado não deve ter aviso prévio indenizado
-        expect(result.additions.any((item) => item.code == BreakdownCode.notice), isFalse);
+        expect(
+          result.additions.any((item) => item.code == BreakdownCode.notice),
+          isFalse,
+        );
       });
     });
 

@@ -1,4 +1,5 @@
 import '../../domain/entities/termination_input.dart';
+import '../../domain/entities/termination_type.dart';
 import '../../domain/rules/vacation_periods.dart';
 import '../exceptions/app_exceptions.dart';
 
@@ -8,31 +9,41 @@ class ValidationResult {
   final List<String> errors;
   final Map<String, String> fieldErrors;
 
+  /// Avisos que não bloqueiam o cálculo (ex.: término normal fora do fim previsto).
+  final List<String> warnings;
+
   const ValidationResult({
     required this.isValid,
     this.errors = const [],
     this.fieldErrors = const {},
+    this.warnings = const [],
   });
 
-  factory ValidationResult.success() => const ValidationResult(isValid: true);
+  factory ValidationResult.success({List<String> warnings = const []}) =>
+      ValidationResult(isValid: true, warnings: warnings);
 
   factory ValidationResult.failure({
     required List<String> errors,
     Map<String, String> fieldErrors = const {},
-  }) =>
-      ValidationResult(
-        isValid: false,
-        errors: errors,
-        fieldErrors: fieldErrors,
-      );
+    List<String> warnings = const [],
+  }) => ValidationResult(
+    isValid: false,
+    errors: errors,
+    fieldErrors: fieldErrors,
+    warnings: warnings,
+  );
 }
 
 /// Validador para dados de entrada de rescisão
 class TerminationInputValidator {
-  /// Valida todos os campos do input
-  static ValidationResult validate(TerminationInput input) {
+  /// Valida todos os campos do input. Com [type] a prazo, valida também o fim previsto (B4-03).
+  static ValidationResult validate(
+    TerminationInput input, {
+    TerminationType? type,
+  }) {
     final errors = <String>[];
     final fieldErrors = <String, String>{};
+    final warnings = <String>[];
 
     // Validar datas
     _validateDates(input, errors, fieldErrors);
@@ -43,14 +54,65 @@ class TerminationInputValidator {
     // Validar regras de negócio
     _validateBusinessRules(input, errors, fieldErrors);
 
+    // Validar contrato a prazo (fim previsto)
+    if (type != null && fixedTermTypes.contains(type)) {
+      _validateFixedTerm(input, type, errors, fieldErrors, warnings);
+    }
+
     if (errors.isEmpty && fieldErrors.isEmpty) {
-      return ValidationResult.success();
+      return ValidationResult.success(warnings: warnings);
     }
 
     return ValidationResult.failure(
       errors: errors,
       fieldErrors: fieldErrors,
+      warnings: warnings,
     );
+  }
+
+  /// Tipos que exigem a data de fim previsto do contrato.
+  static const Set<TerminationType> fixedTermTypes = {
+    TerminationType.fixedTermEnd,
+    TerminationType.fixedTermEarlyByEmployer,
+    TerminationType.fixedTermEarlyByEmployee,
+  };
+
+  /// Aviso (não bloqueante) do término normal com rescisão diferente do fim previsto.
+  static String? normalEndMismatchWarning(DateTime termination, DateTime end) {
+    if (termination == end) return null;
+    return 'A data de desligamento é diferente do fim previsto do contrato. '
+        'Se o contrato foi encerrado antes do fim, escolha a opção de encerramento antecipado.';
+  }
+
+  /// Fim previsto: obrigatório e posterior à admissão; nas antecipadas, a rescisão não passa
+  /// do fim; no término normal, rescisão diferente do fim só gera aviso. Sem regra de "futuro".
+  static void _validateFixedTerm(
+    TerminationInput input,
+    TerminationType type,
+    List<String> errors,
+    Map<String, String> fieldErrors,
+    List<String> warnings,
+  ) {
+    final end = input.fixedTermEndDate;
+    if (end == null) {
+      errors.add('Informe a data de fim previsto do contrato');
+      fieldErrors['fixedTermEndDate'] = 'Campo obrigatório';
+      return;
+    }
+    if (!end.isAfter(input.admissionDate)) {
+      errors.add('Data de fim previsto deve ser posterior à data de admissão');
+      fieldErrors['fixedTermEndDate'] = 'Data inválida';
+      return;
+    }
+    if (type == TerminationType.fixedTermEnd) {
+      final warning = normalEndMismatchWarning(input.terminationDate, end);
+      if (warning != null) warnings.add(warning);
+    } else if (input.terminationDate.isAfter(end)) {
+      errors.add(
+        'Data de desligamento deve ser até o fim previsto do contrato',
+      );
+      fieldErrors['terminationDate'] = 'Data de rescisão inválida';
+    }
   }
 
   /// Valida as datas
@@ -79,7 +141,9 @@ class TerminationInputValidator {
     }
 
     // Verificar se não é muito antiga (mais de 100 anos)
-    final hundredYearsAgo = DateTime.now().subtract(const Duration(days: 365 * 100));
+    final hundredYearsAgo = DateTime.now().subtract(
+      const Duration(days: 365 * 100),
+    );
     if (input.admissionDate.isBefore(hundredYearsAgo)) {
       errors.add('Data de admissão muito antiga');
       fieldErrors['admissionDate'] = 'Data muito antiga';
@@ -131,7 +195,9 @@ class TerminationInputValidator {
 
     // Dependentes não podem ser muitos (limite razoável: 20)
     if (input.dependents > 20) {
-      errors.add('Número de dependentes muito alto. Verifique o valor informado');
+      errors.add(
+        'Número de dependentes muito alto. Verifique o valor informado',
+      );
       fieldErrors['dependents'] = 'Valor muito alto';
     }
   }
@@ -185,4 +251,3 @@ class TerminationInputValidator {
     }
   }
 }
-

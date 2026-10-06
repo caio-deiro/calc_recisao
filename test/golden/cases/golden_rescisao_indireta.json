@@ -1,0 +1,38 @@
+{
+  "id": "golden_rescisao_indireta",
+  "fonte": {
+    "tipo": "calculo_legal",
+    "descricao": "Rescisão indireta tem os efeitos da dispensa sem justa causa (CLT art. 483; PRD 6.1). Entrada igual à de golden_sem_justa_causa_c2_c5 e esperado idêntico, calculado por script independente do app a partir da CLT e das tabelas oficiais 2026. Sem revisão de contador.",
+    "referencia": "docs/golden-dossie/README.md#golden_rescisao_indireta"
+  },
+  "tipo": "indirectTermination",
+  "entrada": {
+    "admissao": "2021-03-10",
+    "rescisao": "2026-09-05",
+    "salarioBase": 12000,
+    "mediaVariaveis": 0,
+    "dependentes": 1,
+    "feriasGozadas": 4,
+    "avisoTrabalhado": false,
+    "diasTrabalhadosNoMes": 5,
+    "fgtsInformado": 40000
+  },
+  "esperado": {
+    "verbas": {
+      "salaryBalance": 2000.0,
+      "notice": 18000.0,
+      "thirteenth": 9000.0,
+      "accruedVacationSimple": 16000.0,
+      "proportionalVacation": 9333.33,
+      "inss": 1143.78,
+      "irrf": 1242.41,
+      "fgtsFine": 16000.0
+    },
+    "totais": {
+      "totalAdditions": 54333.33,
+      "totalDeductions": 2386.19,
+      "paidAtTermination": 51947.14,
+      "fgtsDeposit": 16000.0
+    }
+  }
+}

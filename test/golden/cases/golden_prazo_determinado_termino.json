@@ -5,8 +5,9 @@
     "descricao": "Cálculo manual a partir da CLT e das tabelas oficiais 2026 (INSS: Portaria MPS/MF 13/2026; IRRF: Receita Federal e Lei 15.270/2025), por script independente do app. Sem revisão de contador.",
     "referencia": "docs/golden-dossie/README.md#golden_prazo_determinado_termino"
   },
-  "tipo": "fixedTerm",
+  "tipo": "fixedTermEnd",
   "entrada": {
+    "fimPrevisto": "2026-05-02",
     "admissao": "2025-11-03",
     "rescisao": "2026-05-02",
     "salarioBase": 2500,

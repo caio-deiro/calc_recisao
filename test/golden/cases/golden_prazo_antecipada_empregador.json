@@ -1,0 +1,37 @@
+{
+  "id": "golden_prazo_antecipada_empregador",
+  "fonte": {
+    "tipo": "calculo_legal",
+    "descricao": "Cálculo manual a partir da CLT (art. 479: metade da remuneração até o termo; dias restantes = fim previsto menos rescisão) e das tabelas oficiais 2026, por script independente do app. Interpretação do art. 479 é fonte secundária (prática de folha); sem revisão de contador. Valores escolhidos para o INSS cair na 1ª faixa (sem meio centavo).",
+    "referencia": "docs/golden-dossie/README.md#golden_prazo_antecipada_empregador"
+  },
+  "tipo": "fixedTermEarlyByEmployer",
+  "entrada": {
+    "admissao": "2026-06-12",
+    "rescisao": "2026-10-20",
+    "fimPrevisto": "2026-11-19",
+    "salarioBase": 2400,
+    "mediaVariaveis": 0,
+    "dependentes": 0,
+    "feriasGozadas": 0,
+    "avisoTrabalhado": false,
+    "fgtsInformado": 2000
+  },
+  "esperado": {
+    "verbas": {
+      "salaryBalance": 1600.0,
+      "thirteenth": 1000.0,
+      "proportionalVacation": 1066.67,
+      "indemnity479": 1200.0,
+      "inss": 195.0,
+      "irrf": 0.0,
+      "fgtsFine": 800.0
+    },
+    "totais": {
+      "totalAdditions": 4866.67,
+      "totalDeductions": 195.0,
+      "paidAtTermination": 4671.67,
+      "fgtsDeposit": 800.0
+    }
+  }
+}

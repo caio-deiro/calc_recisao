@@ -14,6 +14,7 @@ class TerminationRules {
     this.fgtsWithdrawalPercent,
     this.hasIndemnity479 = false,
     this.hasDiscount480 = false,
+    this.noticeProjectionPendingRule,
   });
 
   /// Percentual do aviso indenizado devido ao empregado (100/50/0).
@@ -34,14 +35,17 @@ class TerminationRules {
 
   /// Percentual do saldo do FGTS que o trabalhador pode sacar (informativo, sem valor
   /// calculado): 100 sem justa causa; 80 no acordo (CLT art. 484-A §1º). Nulo = sem
-  /// linha de saque (B4 completa a tabela). ⚖️ 80 % vem do PRD, não reverificado em fonte.
+  /// linha de saque. ⚖️ 80 % vem do PRD, não reverificado em fonte.
   final int? fgtsWithdrawalPercent;
 
-  /// Art. 479 CLT (B4): sempre falso até B4.
+  /// Art. 479 CLT: indenização na antecipada pelo empregador (sem cláusula).
   final bool hasIndemnity479;
 
-  /// Art. 480 CLT (B4): sempre falso até B4.
+  /// Art. 480 CLT: desconto na antecipada pelo empregado (sem cláusula).
   final bool hasDiscount480;
+
+  /// Regra ⚖️ de `validationPendingRules` que marca a projeção do aviso neste tipo.
+  final String? noticeProjectionPendingRule;
 
   bool get paysFgtsFine => fgtsFineShare > 0;
 
@@ -64,13 +68,46 @@ class TerminationRules {
       paysAccruedVacation: true,
       noticeDeductible: true,
     ),
-    TerminationType.fixedTerm: TerminationRules(
+    // Rescisão indireta tem os efeitos da dispensa sem justa causa (CLT art. 483).
+    TerminationType.indirectTermination: TerminationRules(
+      noticePercent: 100,
+      fgtsFineShare: 1.0,
+      paysThirteenth: true,
+      paysProportionalVacation: true,
+      paysAccruedVacation: true,
+      noticeDeductible: false,
+      fgtsWithdrawalPercent: 100,
+    ),
+    // Término normal: sem aviso e sem multa; saque de 100 % (Lei 8.036/90 art. 20 IX).
+    TerminationType.fixedTermEnd: TerminationRules(
       noticePercent: 0,
       fgtsFineShare: 0.0,
       paysThirteenth: true,
       paysProportionalVacation: true,
       paysAccruedVacation: true,
       noticeDeductible: false,
+      fgtsWithdrawalPercent: 100,
+    ),
+    // Antecipada pelo empregador: indenização do art. 479 e multa de 40 %. ⚖️
+    TerminationType.fixedTermEarlyByEmployer: TerminationRules(
+      noticePercent: 0,
+      fgtsFineShare: 1.0,
+      paysThirteenth: true,
+      paysProportionalVacation: true,
+      paysAccruedVacation: true,
+      noticeDeductible: false,
+      fgtsWithdrawalPercent: 100,
+      hasIndemnity479: true,
+    ),
+    // Antecipada pelo empregado: desconto do art. 480, sem multa e sem saque. ⚖️
+    TerminationType.fixedTermEarlyByEmployee: TerminationRules(
+      noticePercent: 0,
+      fgtsFineShare: 0.0,
+      paysThirteenth: true,
+      paysProportionalVacation: true,
+      paysAccruedVacation: true,
+      noticeDeductible: false,
+      hasDiscount480: true,
     ),
     // CLT art. 146 parágrafo único: proporcionais não são devidas; vencidas sim (C1).
     TerminationType.withJustCause: TerminationRules(
@@ -89,8 +126,25 @@ class TerminationRules {
       paysAccruedVacation: true,
       noticeDeductible: false,
       fgtsWithdrawalPercent: 80,
+      noticeProjectionPendingRule: 'noticeProjectionMutualAgreement',
     ),
   };
 
+  /// Com cláusula assecuratória (CLT art. 481), a antecipada segue as regras do
+  /// prazo indeterminado: empregador como sem justa causa, empregado como pedido de demissão.
+  static const Map<TerminationType, TerminationType>
+  _recipientClauseEquivalent = {
+    TerminationType.fixedTermEarlyByEmployer: TerminationType.withoutJustCause,
+    TerminationType.fixedTermEarlyByEmployee: TerminationType.resignation,
+  };
+
   static TerminationRules of(TerminationType type) => _byType[type]!;
+
+  /// Regras efetivas do cálculo: aplica a cláusula assecuratória quando houver.
+  static TerminationRules resolve(
+    TerminationType type,
+    bool hasRecipientClause,
+  ) => of(
+    (hasRecipientClause ? _recipientClauseEquivalent[type] : null) ?? type,
+  );
 }
