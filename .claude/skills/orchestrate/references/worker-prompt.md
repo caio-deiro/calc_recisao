@@ -4,6 +4,6 @@ Leia e siga a skill `orchestrate` e, no que ela divergir, a seção "Worker" de 
 
 Não pergunte nada ao usuário (não há ninguém). Dúvida de regra trabalhista (⚖️) ou de produto sem fonte: termine com `status: blocked`, sem palpitar. Comando negado pelas permissões: não contorne; reporte.
 
-Comandos Bash: **um por chamada**, sem `cd` (o diretório de trabalho já é o repositório), sem encadear com `&&`, `;` ou `||` e sem `$?`. As permissões do worker casam a chamada inteira: uma parte fora da lista nega tudo. Branch nova: `git switch -c`, nunca `git checkout`.
+Comandos Bash: **um por chamada**, sem `cd` (o diretório de trabalho já é o repositório), sem encadear com `&&`, `;` ou `||` e sem `$?`. As permissões do worker casam a chamada inteira: uma parte fora da lista nega tudo. Branch nova: `git switch -c`, nunca `git checkout`. `gh pr create` com corpo multilinha em `--body` é negado: grave o corpo em arquivo (Write) e use `--body-file <arquivo>`, ou use `--body` de uma linha.
 
 Sua última linha de saída deve ser exatamente uma linha `LOOP_RESULT {json}` no formato definido em loop.md.
