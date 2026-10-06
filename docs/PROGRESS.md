@@ -7,15 +7,15 @@
 
 ## Resumo
 
-**57/76 requisitos entregues (75%)**
+**66/76 requisitos entregues (87%)**
 
 | Estado | Requisitos |
 |---|--:|
-| 🚀 Entregue | 57 |
+| 🚀 Entregue | 66 |
 | ✔ Implementado | 3 |
 | 🔨 Em andamento | 0 |
 | 📋 Planejado | 0 |
-| 🎯 Sem plano | 16 |
+| 🎯 Sem plano | 7 |
 
 ## Por bloco
 
@@ -25,7 +25,7 @@
 | B1 | Remoção do PRO e monetização só com AdMob | 17 | 17 | 0 | 0 | 0 | 0 | 100% |
 | B2 | Núcleo de cálculo: modelo, correções e Decimal | 15 | 13 | 2 | 0 | 0 | 0 | 87% |
 | B3 | Períodos de férias e férias em dobro | 8 | 8 | 0 | 0 | 0 | 0 | 100% |
-| B4 | Contratos a prazo e rescisão indireta | 9 | 0 | 0 | 0 | 0 | 9 | 0% |
+| B4 | Contratos a prazo e rescisão indireta | 9 | 9 | 0 | 0 | 0 | 0 | 100% |
 | B5 | Resultado, compartilhamento e PDF | 6 | 6 | 0 | 0 | 0 | 0 | 100% |
 | B6 | Validação e infraestrutura de testes golden | 6 | 5 | 1 | 0 | 0 | 0 | 83% |
 | B7 | Conformidade, privacidade e operação | 7 | 0 | 0 | 0 | 0 | 7 | 0% |
@@ -104,15 +104,15 @@
 
 | ID | Estado | Requisito | Changes |
 |---|---|---|---|
-| B4-01 | 🎯 Sem plano | TerminationType ganha: indirectTermination, fixedTermEnd, fixedTermEarlyByEmp... | — |
-| B4-02 | 🎯 Sem plano | Compatibilidade: fixedTerm (valor antigo) permanece apenas como alias de leit... | — |
-| B4-03 | 🎯 Sem plano | Entrada nova: fixedTermEndDate (obrigatória nos três tipos a prazo) e hasReci... | — |
-| B4-04 | 🎯 Sem plano | Assecuratória ativa: na rescisão antecipada passa a valer o TerminationRules ... | — |
-| B4-05 | 🎯 Sem plano | Art. 479: indenização = (salário + média) / 30 × dias restantes × 50 %, com d... | — |
-| B4-06 | 🎯 Sem plano | Art. 480: desconto = min(valor do art. 479, 1 remuneração mensal) (art. 477 §... | — |
-| B4-07 | 🎯 Sem plano | Término normal: sem aviso e sem multa; com 13º, férias proporcionais, saque d... | — |
-| B4-08 | 🎯 Sem plano | Rescisão indireta: mesmas regras do "sem justa causa". Implementada pela tabe... | — |
-| B4-09 | 🎯 Sem plano | Formulário: campos de B4-03 aparecem somente nos tipos a prazo; TerminationTy... | — |
+| B4-01 | 🚀 Entregue | TerminationType ganha: indirectTermination, fixedTermEnd, fixedTermEarlyByEmp... | `2026-10-06-add-fixed-term-and-indirect` |
+| B4-02 | 🚀 Entregue | Compatibilidade: fixedTerm (valor antigo) permanece apenas como alias de leit... | `2026-10-06-add-fixed-term-and-indirect` |
+| B4-03 | 🚀 Entregue | Entrada nova: fixedTermEndDate (obrigatória nos três tipos a prazo) e hasReci... | `2026-10-06-add-fixed-term-and-indirect` |
+| B4-04 | 🚀 Entregue | Assecuratória ativa: na rescisão antecipada passa a valer o TerminationRules ... | `2026-10-06-add-fixed-term-and-indirect` |
+| B4-05 | 🚀 Entregue | Art. 479: indenização = (salário + média) / 30 × dias restantes × 50 %, com d... | `2026-10-06-add-fixed-term-and-indirect` |
+| B4-06 | 🚀 Entregue | Art. 480: desconto = min(valor do art. 479, 1 remuneração mensal) (art. 477 §... | `2026-10-06-add-fixed-term-and-indirect` |
+| B4-07 | 🚀 Entregue | Término normal: sem aviso e sem multa; com 13º, férias proporcionais, saque d... | `2026-10-06-add-fixed-term-and-indirect` |
+| B4-08 | 🚀 Entregue | Rescisão indireta: mesmas regras do "sem justa causa". Implementada pela tabe... | `2026-10-06-add-fixed-term-and-indirect` |
+| B4-09 | 🚀 Entregue | Formulário: campos de B4-03 aparecem somente nos tipos a prazo; TerminationTy... | `2026-10-06-add-fixed-term-and-indirect` |
 
 ### B5 — Resultado, compartilhamento e PDF
 
