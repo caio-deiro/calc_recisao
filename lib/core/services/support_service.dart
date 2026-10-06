@@ -18,20 +18,12 @@ Obrigado!
     final uri = Uri(
       scheme: 'mailto',
       path: email,
-      query: 'subject=${Uri.encodeComponent(subject)}&body=${Uri.encodeComponent(body)}',
+      query:
+          'subject=${Uri.encodeComponent(subject)}&body=${Uri.encodeComponent(body)}',
     );
 
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
-    }
-  }
-
-  static Future<void> openFaq() async {
-    // Implementar FAQ ou abrir URL da documentação
-    final faqUrl = Uri.parse('https://calcrescisao.com/faq');
-
-    if (await canLaunchUrl(faqUrl)) {
-      await launchUrl(faqUrl, mode: LaunchMode.externalApplication);
     }
   }
 
@@ -49,7 +41,8 @@ Obrigado!
     final uri = Uri(
       scheme: 'mailto',
       path: email,
-      query: 'subject=${Uri.encodeComponent(subject)}&body=${Uri.encodeComponent(body)}',
+      query:
+          'subject=${Uri.encodeComponent(subject)}&body=${Uri.encodeComponent(body)}',
     );
 
     if (await canLaunchUrl(uri)) {

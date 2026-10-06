@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'app.dart';
 import 'core/ads/ad_manager.dart';
 import 'core/analytics/analytics_service.dart';
-import 'core/analytics/aso_analytics.dart';
 import 'core/services/legacy_cleanup.dart';
 import 'core/services/tax_tables_service.dart';
 
@@ -17,7 +16,6 @@ void main() async {
       _initFirebase(),
       AdManager.initialize(),
       TaxTablesService.instance.loadTaxTables(),
-      AsoAnalytics.initialize(),
     ], eagerError: false); // Não falhar se um serviço falhar
   } catch (e) {
     // Log do erro mas continua a inicialização

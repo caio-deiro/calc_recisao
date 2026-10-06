@@ -1,5 +1,5 @@
 name: calc_recisao
-description: "Calculadora Rescisão CLT - FGTS, INSS, IRRF | Trabalhista 2025"
+description: "Calculadora de Rescisão CLT: FGTS, INSS e IRRF"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

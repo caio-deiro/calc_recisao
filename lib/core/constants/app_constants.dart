@@ -31,14 +31,17 @@ class AppConstants {
   static const String dateFormat = 'dd/MM/yyyy';
 
   // Mensagens de erro
-  static const String genericErrorMessage = 'Ocorreu um erro inesperado. Tente novamente.';
-  static const String networkErrorMessage = 'Erro de conexão. Verifique sua internet.';
-  static const String validationErrorMessage = 'Dados inválidos. Verifique os campos preenchidos.';
+  static const String genericErrorMessage =
+      'Ocorreu um erro inesperado. Tente novamente.';
+  static const String networkErrorMessage =
+      'Erro de conexão. Verifique sua internet.';
+  static const String validationErrorMessage =
+      'Dados inválidos. Verifique os campos preenchidos.';
 
   // Suporte
-  static const String supportEmail = 'suporte@calcrescisao.com';
+  static const String supportEmail = 'caioguimaraes12@outlook.com';
 
   // URLs
-  static const String privacyPolicyUrl = 'https://calcrescisao.com/privacy';
-  static const String termsOfServiceUrl = 'https://calcrescisao.com/terms';
+  static const String privacyPolicyUrl =
+      'https://caio-deiro.github.io/calc_recisao';
 }
