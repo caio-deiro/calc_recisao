@@ -7,15 +7,15 @@
 
 ## Resumo
 
-**70/77 requisitos entregues (91%)**
+**72/77 requisitos entregues (94%)**
 
 | Estado | Requisitos |
 |---|--:|
-| 🚀 Entregue | 70 |
+| 🚀 Entregue | 72 |
 | ✔ Implementado | 0 |
 | 🔨 Em andamento | 0 |
 | 📋 Planejado | 0 |
-| 🎯 Sem plano | 7 |
+| 🎯 Sem plano | 5 |
 
 ## Por bloco
 
@@ -28,7 +28,7 @@
 | B4 | Contratos a prazo e rescisão indireta | 9 | 9 | 0 | 0 | 0 | 0 | 100% |
 | B5 | Resultado, compartilhamento e PDF | 6 | 6 | 0 | 0 | 0 | 0 | 100% |
 | B6 | Validação e infraestrutura de testes golden | 6 | 6 | 0 | 0 | 0 | 0 | 100% |
-| B7 | Conformidade, privacidade e operação | 8 | 1 | 0 | 0 | 0 | 7 | 12% |
+| B7 | Conformidade, privacidade e operação | 8 | 3 | 0 | 0 | 0 | 5 | 38% |
 
 ## Detalhe
 
@@ -64,7 +64,7 @@
 | B1-10d | 🚀 Entregue | Sem anúncio recompensado; sem anúncio em Splash e Formulário (decisão Q16a). | `2026-10-04-remove-pro-ads-only` |
 | B1-11 | 🚀 Entregue | Aviso único após o primeiro resultado: formulário de consentimento do Google ... | `2026-10-04-remove-pro-ads-only` |
 | B1-12 | 🚀 Entregue | Analytics opt-in (firebase_analytics, reativar no pubspec). Coleta desligada ... | `2026-10-04-remove-pro-ads-only` |
-| B1-13 | 🚀 Entregue | Eventos permitidos (únicos): calc_completed{tipo_rescisao}, share_used, pdf_e... | `2026-10-04-remove-pro-ads-only` |
+| B1-13 | 🚀 Entregue | Eventos permitidos (únicos): calc_completed{tipo_rescisao}, share_used, pdf_e... | `2026-10-04-remove-pro-ads-only`, `2026-10-06-fix-store-links-and-legacy-aso` |
 | B1-14 | 🚀 Entregue | Anúncios não personalizados até o consentimento (AdRequest(nonPersonalizedAds... | `2026-10-04-remove-pro-ads-only` |
 
 ### B2 — Núcleo de cálculo: modelo, correções e Decimal
@@ -140,11 +140,11 @@
 
 | ID | Estado | Requisito | Changes |
 |---|---|---|---|
-| B7-01 | 🎯 Sem plano | Política de privacidade reescrita: AdMob (ID de publicidade), Analytics/Crash... | — |
+| B7-01 | 🚀 Entregue | Política de privacidade reescrita: AdMob (ID de publicidade), Analytics/Crash... | `2026-10-06-fix-store-links-and-legacy-aso` |
 | B7-02 | 🎯 Sem plano | Data Safety da Play alinhada a B7-01 e declaração "contém anúncios". | — |
 | B7-03 | 🎯 Sem plano | Desativar o produto calc_recisao_pro_monthly (sem assinantes). | — |
 | B7-04 | 🎯 Sem plano | Listagem da loja sem qualquer menção a PRO, PDF "exclusivo" ou histórico "ili... | — |
-| B7-05 | 🎯 Sem plano | Confirmar e unificar o e-mail de contato (política × app). | — |
+| B7-05 | 🚀 Entregue | Confirmar e unificar o e-mail de contato (política × app). Unificado em caiog... | `2026-10-06-fix-store-links-and-legacy-aso` |
 | B7-06 | 🎯 Sem plano | Manutenção anual das tabelas (checklist do PRD §13): JSON, teste do ano, list... | — |
 | B7-07 | 🎯 Sem plano | Specs de compliance Android (android-target-sdk, 16 KB) preservadas; prazo da... | — |
 | B7-08 | 🚀 Entregue | Release Android automatizado: tag v* valida a versão do pubspec.yaml, roda an... | `2026-10-06-add-play-cd-pipeline` |
@@ -152,4 +152,4 @@
 ## Alertas
 
 **Buracos no plano** (bloco em andamento com requisitos sem task):
-- **B7** tem requisitos planejados, mas estes não têm task: B7-01, B7-02, B7-03, B7-04, B7-05, B7-06, B7-07
+- **B7** tem requisitos planejados, mas estes não têm task: B7-02, B7-03, B7-04, B7-06, B7-07

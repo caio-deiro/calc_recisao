@@ -36,7 +36,7 @@ O app MUST inicializar o Firebase no `main` com coleta de Analytics e Crashlytic
 - **THEN** a coleta MUST permanecer desabilitada
 
 ### Requirement: Minimal event set via central emitter
-Os únicos eventos permitidos MUST ser `calc_completed{tipo_rescisao}`, `share_used`, `pdf_exported` e `consent_decision{aceitou|recusou}`, emitidos por um único ponto em `core/analytics/` que MUST descartar silenciosamente qualquer evento sem consentimento. Eventos MUST NOT conter salário, datas, valores ou resultado (B0-03). A lógica `pro_conversion` de `aso_analytics.dart` MUST ser removida.
+Os únicos eventos permitidos MUST ser `calc_completed{tipo_rescisao}`, `share_used`, `pdf_exported` e `consent_decision{aceitou|recusou}`, emitidos por um único ponto em `core/analytics/` que MUST descartar silenciosamente qualquer evento sem consentimento. Eventos MUST NOT conter salário, datas, valores ou resultado (B0-03). O app MUST NOT conter lógica de analytics local ou de conversão paralela ao ponto central (`aso_analytics.dart` removido).
 
 #### Scenario: Event dropped without consent
 - **WHEN** um evento é emitido com `analytics_enabled` falso
