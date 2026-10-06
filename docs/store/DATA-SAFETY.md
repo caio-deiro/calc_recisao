@@ -1,6 +1,6 @@
 # Ficha de Segurança dos dados (Data Safety) — respostas propostas para o Play Console
 
-**Status:** proposta para revisão do responsável (B7-02). Nada foi enviado ao Play Console.
+**Status:** decisões do responsável registradas em 2026-10-06 (exclusão: **sim, por e-mail**; contato: `caioguimaraes12@outlook.com`; bases legais aprovadas). Falta preencher o formulário no Play Console (B7-02), que é passo manual.
 **Base:** levantamento do código em 2026-10-06 (`pubspec.yaml`, `AndroidManifest.xml`, `lib/core/analytics`, `lib/core/ads`, `lib/presentation/widgets/consent_prompt.dart`) e as orientações oficiais do Google para os SDKs (AdMob: `developers.google.com/admob/android/privacy/play-data-disclosure`; Firebase: `firebase.google.com/docs/android/play-data-disclosure`). Confira o texto de cada pergunta no formulário, que o Google atualiza.
 
 ## O que o app faz de fato
@@ -39,7 +39,7 @@ A página pública da Play (2026-10-06) mostra "Informações financeiras" como 
 ### Práticas de segurança
 
 - **Dados criptografados em trânsito:** Sim (os SDKs do Google usam HTTPS).
-- **Usuário pode solicitar exclusão dos dados:** decisão do responsável (⚖️ LGPD). Opções: (a) **Sim, por e-mail**, com a política explicando que o histórico local some ao limpar os dados do app ou desinstalar, e que os dados do Google (anúncios, Firebase) se controlam pelas configurações do Google; ou (b) **Não**, como está hoje na página. Recomendação: (a), por ser mais protetora e coerente com os direitos do art. 18 da LGPD, desde que o e-mail de contato seja monitorado.
+- **Usuário pode solicitar exclusão dos dados:** **Sim, por e-mail** (decisão do responsável). A política explica que o histórico local some ao limpar os dados do app ou desinstalar, e que os dados do Google (anúncios, Firebase) também se controlam pelas configurações do Google. O e-mail de contato precisa ser monitorado.
 - **Comprometimento com as diretrizes de Famílias:** não se aplica (app não é voltado a crianças).
 - **Validação independente de segurança:** não.
 
