@@ -1,0 +1,45 @@
+{
+  "id": "golden_sem_justa_causa_c2_c5",
+  "validacao": "pendente: aguarda revisao de contador (ver docs/golden-dossie/README.md)",
+  "fonte": {
+    "tipo": "exemplo_contador",
+    "descricao": "Calculo manual a partir da CLT e das tabelas oficiais 2026; memoria em docs/golden-dossie/README.md",
+    "referencia": "docs/golden-dossie/README.md#golden_sem_justa_causa_c2_c5"
+  },
+  "tipo": "withoutJustCause",
+  "entrada": {
+    "admissao": "2021-03-10",
+    "rescisao": "2026-09-05",
+    "salarioBase": 12000,
+    "mediaVariaveis": 0,
+    "dependentes": 1,
+    "feriasGozadas": 4,
+    "avisoTrabalhado": false,
+    "diasTrabalhadosNoMes": 5,
+    "fgtsInformado": 40000
+  },
+  "esperado": {
+    "verbas": {
+      "salaryBalance": 2000.0,
+      "notice": 18000.0,
+      "thirteenth": 9000.0,
+      "accruedVacationSimple": 16000.0,
+      "proportionalVacation": 9333.33,
+      "inss": 1143.78,
+      "irrf": 1242.41,
+      "fgtsFine": 16000.0
+    },
+    "totais": {
+      "totalAdditions": 54333.33,
+      "totalDeductions": 2386.19,
+      "paidAtTermination": 51947.14,
+      "fgtsDeposit": 16000.0
+    }
+  },
+  "cobre": [
+    "C2",
+    "C3",
+    "C4",
+    "C5"
+  ]
+}

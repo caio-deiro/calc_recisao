@@ -1,0 +1,41 @@
+{
+  "id": "golden_acordo_mutuo",
+  "validacao": "pendente: aguarda revisao de contador (ver docs/golden-dossie/README.md)",
+  "fonte": {
+    "tipo": "exemplo_contador",
+    "descricao": "Calculo manual a partir da CLT e das tabelas oficiais 2026; memoria em docs/golden-dossie/README.md",
+    "referencia": "docs/golden-dossie/README.md#golden_acordo_mutuo"
+  },
+  "tipo": "mutualAgreement",
+  "entrada": {
+    "admissao": "2020-01-15",
+    "rescisao": "2026-07-31",
+    "salarioBase": 3500,
+    "mediaVariaveis": 0,
+    "dependentes": 0,
+    "feriasGozadas": 6,
+    "avisoTrabalhado": false,
+    "diasTrabalhadosNoMes": 30,
+    "fgtsInformado": 35000
+  },
+  "esperado": {
+    "verbas": {
+      "salaryBalance": 3500.0,
+      "notice": 2800.0,
+      "thirteenth": 2333.33,
+      "proportionalVacation": 3111.11,
+      "inss": 494.28,
+      "irrf": 0.0,
+      "fgtsFine": 7000.0
+    },
+    "totais": {
+      "totalAdditions": 11744.44,
+      "totalDeductions": 494.28,
+      "paidAtTermination": 11250.16,
+      "fgtsDeposit": 7000.0
+    }
+  },
+  "cobre": [
+    "noticeProjectionMutualAgreement"
+  ]
+}

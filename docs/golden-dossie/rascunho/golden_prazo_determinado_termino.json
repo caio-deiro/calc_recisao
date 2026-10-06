@@ -1,0 +1,35 @@
+{
+  "id": "golden_prazo_determinado_termino",
+  "validacao": "pendente: aguarda revisao de contador (ver docs/golden-dossie/README.md)",
+  "fonte": {
+    "tipo": "exemplo_contador",
+    "descricao": "Calculo manual a partir da CLT e das tabelas oficiais 2026; memoria em docs/golden-dossie/README.md",
+    "referencia": "docs/golden-dossie/README.md#golden_prazo_determinado_termino"
+  },
+  "tipo": "fixedTerm",
+  "entrada": {
+    "admissao": "2025-11-03",
+    "rescisao": "2026-05-02",
+    "salarioBase": 2500,
+    "mediaVariaveis": 0,
+    "dependentes": 0,
+    "feriasGozadas": 0,
+    "avisoTrabalhado": true,
+    "diasTrabalhadosNoMes": 2
+  },
+  "esperado": {
+    "verbas": {
+      "salaryBalance": 166.67,
+      "thirteenth": 833.33,
+      "proportionalVacation": 1666.67,
+      "inss": 75.0,
+      "irrf": 0.0
+    },
+    "totais": {
+      "totalAdditions": 2666.67,
+      "totalDeductions": 75.0,
+      "paidAtTermination": 2591.67,
+      "fgtsDeposit": 0.0
+    }
+  }
+}
