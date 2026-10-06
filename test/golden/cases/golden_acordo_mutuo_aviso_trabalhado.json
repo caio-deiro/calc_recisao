@@ -1,0 +1,36 @@
+{
+  "id": "golden_acordo_mutuo_aviso_trabalhado",
+  "fonte": {
+    "tipo": "calculo_legal",
+    "descricao": "Cálculo manual a partir da CLT e das tabelas oficiais 2026 (INSS: Portaria MPS/MF 13/2026; IRRF: Receita Federal e Lei 15.270/2025), por script independente do app. Sem revisão de contador.",
+    "referencia": "docs/golden-dossie/README.md#golden_acordo_mutuo_aviso_trabalhado"
+  },
+  "tipo": "mutualAgreement",
+  "entrada": {
+    "admissao": "2020-01-15",
+    "rescisao": "2026-07-31",
+    "salarioBase": 3500,
+    "mediaVariaveis": 0,
+    "dependentes": 0,
+    "feriasGozadas": 6,
+    "avisoTrabalhado": true,
+    "diasTrabalhadosNoMes": 30,
+    "fgtsInformado": 35000
+  },
+  "esperado": {
+    "verbas": {
+      "salaryBalance": 3500.0,
+      "thirteenth": 2041.67,
+      "proportionalVacation": 2722.22,
+      "inss": 468.04,
+      "irrf": 0.0,
+      "fgtsFine": 7000.0
+    },
+    "totais": {
+      "totalAdditions": 8263.89,
+      "totalDeductions": 468.04,
+      "paidAtTermination": 7795.85,
+      "fgtsDeposit": 7000.0
+    }
+  }
+}

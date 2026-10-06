@@ -143,3 +143,18 @@ Detalhe: aviso 48 dias; períodos vencidos 0; avos13=8 avosFerias=8 proj=1; INSS
 Total de proventos 2666.67 · descontos 75.00 · **pago na rescisão 2591.67** · FGTS depositado (multa) 0.00.
 
 Detalhe: aviso 30 dias; períodos vencidos 0; avos13=4 avosFerias=6 proj=0; INSS saldo 12.50 + 13º 62.50; IRRF saldo 0.00 + 13º 0.00.
+
+### golden_acordo_mutuo_aviso_trabalhado
+**Tipo:** Acordo mútuo (art. 484-A), aviso **trabalhado** (sem aviso indenizado, logo sem projeção: evita a disputa da pergunta 1).  
+**Entrada:** admissão 15/01/2020, rescisão 31/07/2026, salário R$ 3500, dependentes 0, FGTS informado R$ 35000, períodos gozados 6, dias trabalhados no mês 30.
+
+| Verba | Valor (R$) |
+|---|---:|
+| Saldo de salário | 3500.00 |
+| 13º proporcional (7 avos) | 2041.67 |
+| Férias proporcionais + 1/3 (7 avos) | 2722.22 |
+| INSS (saldo 308,60 + 13º 159,44) | 468.04 |
+| IRRF | 0.00 |
+| Multa FGTS 20% (fora do pago) | 7000.00 |
+
+Total de proventos 8263.89 · descontos 468.04 · **pago na rescisão 7795.85** · FGTS depositado (multa) 7000.00.
