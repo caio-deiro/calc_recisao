@@ -447,7 +447,7 @@ variáveis, dependentes, FGTS informado, períodos de férias gozados e o valor 
 
 ### Release Android (🎯 B7-08)
 1. Bump da `version:` no `pubspec.yaml` (ex.: `1.3.1+17`; o `+N` é o `versionCode` e não pode repetir) em PR próprio; merge na `main`.
-2. Criar a tag `v1.3.1` (sem o `+N`) na `main`. O workflow `release-android.yml` valida a tag, roda `analyze` e `test`, gera o AAB assinado e envia à trilha **internal**.
+2. Criar a tag `v1.3.1` (sem o `+N`) na `main`, com o comando `/release` (`.claude/commands/release.md`, pede confirmação antes do push). O workflow `release-android.yml` valida a tag, roda `analyze` e `test`, gera o AAB assinado e envia à trilha **internal**.
 3. Acompanhar a aba Actions e conferir o build na trilha internal do Play Console (falha de upload: corrigir e "Re-run jobs").
 4. Promover internal → produção **manualmente** no Play Console.
 Pré-requisito único: service account com permissão de release e os 6 secrets cadastrados no GitHub (detalhes em `ARCHITECTURE.md` §9).
