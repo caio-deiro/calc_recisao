@@ -26,7 +26,15 @@ const goldenTotalKeys = {
   'fgtsDeposit',
 };
 
-const goldenFonteTipos = {'trct', 'calculadora', 'exemplo_contador'};
+/// `calculo_legal`: cálculo manual a partir da lei e das tabelas oficiais, sem
+/// revisão de contador (decisão do responsável: sem acesso a contador). Não
+/// satisfaz a cobertura de regras ⚖️ pendentes, que exige `exemplo_contador`.
+const goldenFonteTipos = {
+  'trct',
+  'calculadora',
+  'exemplo_contador',
+  'calculo_legal',
+};
 
 /// Campos de entrada que o app ainda não suporta (B3/B4): o caso é pulado.
 const unsupportedInputKeys = [
