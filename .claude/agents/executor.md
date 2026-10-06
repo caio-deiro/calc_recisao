@@ -59,6 +59,7 @@ Você traduz o plano em **ações concretas**. Entende o que a spec propõe, lê
 - Adotar padrão novo (GoRouter, BLoC, Provider, novo pacote de estado ou navegação). A decisão é manter a arquitetura atual.
 - Resolver ambiguidade de spec ou regra trabalhista (⚖️) **por palpite**. Pare e reporte como `bloqueado`.
 - Alterar o valor esperado de um teste (ou caso golden) para fazê-lo passar. O esperado vem de fonte externa.
+- Relaxar uma asserção para uma condição sempre verdadeira (`>= 0`, `isNotNull`, `length > 0` que deixou de valer). Ao mudar o comportamento que um teste cobre, troque a asserção pelo novo valor exato ou por uma que falhe se o comportamento regredir.
 - Marcar uma task como feita sem a verificação correspondente.
 - Registrar salário, datas ou resultado em log/analytics, nem usar `print` com dado do usuário.
 - Executar testes E2E ou mexer no emulador (é do `reviewer`).
