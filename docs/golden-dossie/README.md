@@ -2,8 +2,8 @@
 
 **Status (2026-10-05):** decisão do responsável: sem acesso a contador, os casos se apoiam em **lei e fontes oficiais**, com `fonte.tipo = "calculo_legal"` (cálculo manual, sem revisão profissional). Isso é mais fraco que `trct` ou `exemplo_contador`: se um TRCT real ou um contador aparecer, ele prevalece.
 
-- **Promovidos** para `test/golden/cases/` (batem com o app): `golden_justa_causa_c1`, `golden_pedido_demissao`, `golden_prazo_determinado_termino`, `golden_sem_justa_causa_c2_c5` e `golden_inss_arredondado_por_parcela` (o bug do IRRF do 13º foi corrigido pela change `fix-thirteenth-irrf`).
-- **Pendente** em `rascunho/` porque o app diverge do cálculo legal: `golden_acordo_mutuo` (projeção do aviso).
+- **Promovidos** para `test/golden/cases/` (batem com o app): `golden_justa_causa_c1`, `golden_pedido_demissao`, `golden_prazo_determinado_termino`, `golden_sem_justa_causa_c2_c5`, `golden_inss_arredondado_por_parcela` (o bug do IRRF do 13º foi corrigido pela change `fix-thirteenth-irrf`) e `golden_acordo_mutuo` (change `notice-projection-by-date`, com a projeção do aviso por data; valores recalculados pela lei, não os do rascunho original).
+- **Pendente** em `rascunho/`: nenhum caso.
 
 **Por que existe:** o teste golden só vale se o valor esperado vier de **fora do app** (B6-03, `docs/PROJECT.md` §11). Estes casos foram calculados por um script independente do app (sem ler `lib/`), direto da CLT e das tabelas oficiais abaixo.
 
@@ -20,7 +20,7 @@
 | Saldo de salário | salário ÷ 30 × dias trabalhados no mês | CLT art. 457, 477 |
 | Aviso prévio indenizado | (salário + média) ÷ 30 × dias; dias = 30 + 3 por ano completo, máx. 90 | Lei 12.506/2011 |
 | 13º proporcional | (salário + média) × avos ÷ 12; avos do ano-calendário, mês com ≥ 15 dias conta | Lei 4.090/62 art. 1º §2º |
-| Projeção do aviso (C2) | aviso indenizado soma +1 avo (30–59 dias de aviso) ao 13º e às férias proporcionais; teto 12 | CLT art. 487 §1º; Súmula 371 TST |
+| Projeção do aviso (C2) | por data: o aviso indenizado (dias pagos) projeta a saída até `rescisão + dias pagos` e as avos de 13º e férias proporcionais contam até essa data (regra de 15 dias, teto 12; 13º com virada de ano soma o ano da rescisão e o novo). Revisa a Q7a a pedido do responsável em 2026-10-06 | CLT art. 487 §1º; OJ 82 SDI-1 e Súmula 371 TST |
 | Férias vencidas | (salário + média) × 4/3 por período vencido simples | CLT art. 129, 146; CF art. 7º XVII |
 | Férias proporcionais (C3) | avos desde o último aniversário da admissão (≥ 15 dias conta) × 4/3 | CLT art. 146 par. único, 147 |
 | Justa causa (C1) | paga saldo e férias vencidas; sem 13º e sem proporcionais | CLT art. 146 caput; Súmula 171 TST |
@@ -32,7 +32,7 @@
 
 ## Perguntas ⚖️ e como foram resolvidas (fontes da internet)
 
-1. **Projeção do aviso no acordo (24 dias de aviso pago):** adotado **+1 avo**. Fontes secundárias (COAD; Bizneo; Empresário) tratam a projeção como os dias efetivamente pagos, e fração de 15 dias ou mais no mês conta 1 avo. Não há norma primária explícita: **fonte fraca**, por isso o caso fica em `rascunho/`.
+1. **Projeção do aviso no acordo (24 dias de aviso pago):** projeção **por data**: `31/07/2026 + 24 dias = 24/08/2026`; 13º 8 avos (agosto com 24 dias conta) e férias proporcionais 7 avos (15/01 a 15/08 = 7 meses; sobram 10 dias, não contam). A projeção usa os dias efetivamente pagos (fontes secundárias: COAD; Bizneo; Empresário); não há norma primária explícita: **fonte fraca**, segue ⚖️ com a marca "cálculo em validação" (`noticeProjectionMutualAgreement`).
 2. **Redução da Lei 15.270 no 13º:** **aplica-se.** Lei 15.270/2025, art. 3º-A §3º: a redução vale também para o imposto exclusivo na fonte do 13º.
 3. **Desconto simplificado (607,20) na rescisão:** convenção mantida (maior entre INSS + dependentes e 607,20, na base mensal). Nenhum caso promovido depende disso (imposto zero).
 4. **Base do IRRF do saldo:** saldo − INSS − dependentes (ou simplificado, o maior).
@@ -47,7 +47,7 @@ Os rascunhos foram copiados temporariamente para `test/golden/cases/`, rodados e
 | Caso | Divergência | O que pode ser |
 |---|---|---|
 | `sem_justa_causa_c2_c5` | IRRF esperado 1.242,41 (13º de 9.000 → base 7.822,32 → 27,5%, sem redução por estar acima de 7.350), app devolve **0,00** | **Resolvido** (`fix-thirteenth-irrf`): `calculateTerminationTaxes` usava a tabela e a redução **anuais** no 13º; agora usa a tabela mensal (pergunta 7). |
-| `acordo_mutuo` | 13º esperado 2.333,33 (8 avos, com +1 de projeção), app dá 2.041,67 (7 avos); férias proporcionais idem; o INSS acompanha | É exatamente a pergunta 1: o app projeta pelo aviso pago (24 dias → 0 avo), o dossiê adotou +1. |
+| `acordo_mutuo` | 13º esperado 2.333,33 (8 avos, com +1 de projeção), app dava 2.041,67 (7 avos); férias proporcionais idem; o INSS acompanha | **Resolvido** (`notice-projection-by-date`): a projeção passou a ser por data (pergunta 1): 13º 8 avos = 2.333,33 e férias 7 avos = 2.722,22 (o rascunho trazia 8 avos e 3.111,11; a conta pela data dá 7). |
 
 ## Fora deste dossiê (ainda sem caso)
 
@@ -60,15 +60,15 @@ Valores calculados à mão a partir da CLT e das tabelas oficiais 2026 (fonte `c
 | Caso | Tipo | Resumo | Pago na rescisão |
 |---|---|---|---:|
 | `golden_prazo_determinado_termino` | `fixedTermEnd` | sem aviso e sem multa | 2591.67 |
-| `golden_rescisao_indireta` | `indirectTermination` | igual a `golden_sem_justa_causa_c2_c5` | 51947.14 |
+| `golden_rescisao_indireta` | `indirectTermination` | igual a `golden_sem_justa_causa_c2_c5` | 52672.14 |
 | `golden_prazo_antecipada_empregador` | `fixedTermEarlyByEmployer` | salário 2.400, 30 dias restantes: art. 479 = 1.200,00; multa 800,00 | 4671.67 |
-| `golden_prazo_antecipada_empregador_clausula` | `fixedTermEarlyByEmployer` + cláusula | regras do sem justa causa: aviso 2.400,00 (projeta 1 avo), multa 800,00, sem art. 479 | 6323.33 |
+| `golden_prazo_antecipada_empregador_clausula` | `fixedTermEarlyByEmployer` + cláusula | regras do sem justa causa: aviso 2.400,00 (projetado até 19/11/2026: 13º 6 avos, férias 5 avos), multa 800,00, sem art. 479 | 6323.33 |
 | `golden_prazo_antecipada_empregado_abaixo_teto` | `fixedTermEarlyByEmployee` | 30 dias restantes: art. 480 = 1.200,00 (abaixo do teto de 2.400,00) | 2271.67 |
 | `golden_prazo_antecipada_empregado_no_teto` | `fixedTermEarlyByEmployee` | 120 dias restantes: art. 479 equivalente 4.800,00, limitado a 2.400,00 | 1071.67 |
 
 ## Como promover (depois do "ok" do contador)
 
-1. Copiar o JSON de `rascunho/` para `test/golden/cases/` com `fonte.tipo = "calculo_legal"` e sem a chave `validacao`.
+1. Copiar o JSON de `rascunho/` (a pasta está vazia desde a promoção de `golden_acordo_mutuo`) para `test/golden/cases/` com `fonte.tipo = "calculo_legal"` e sem a chave `validacao`.
 2. `flutter test test/golden`: deve ficar verde (tolerância 0,01). Divergência = o documento prevalece e o app é corrigido (nunca o contrário).
 3. Atualizar `pendingValidationRules` em `test/golden/validation_status.dart` para as regras que ganharam caso.
 
@@ -85,12 +85,12 @@ Valores calculados à mão a partir da CLT e das tabelas oficiais 2026 (fonte `c
 | Férias vencidas + 1/3 | 16000.00 |
 | Férias proporcionais + 1/3 | 9333.33 |
 | INSS (saldo + 13º) | 1143.78 |
-| IRRF (saldo + 13º) | 1242.41 |
+| IRRF (saldo + 13º) | 1517.41 |
 | Multa FGTS (fora do pago) | 16000.00 |
 
-Total de proventos 54333.33 · descontos 2386.19 · **pago na rescisão 51947.14** · FGTS depositado (multa) 16000.00.
+Total de proventos 55333.33 · descontos 2661.19 · **pago na rescisão 52672.14** · FGTS depositado (multa) 16000.00.
 
-Detalhe: aviso 45 dias; períodos vencidos 1; avos13=9 avosFerias=7 proj=1; INSS saldo 155.69 + 13º 988.09; IRRF saldo 0.00 + 13º 1242.41.
+Detalhe: aviso 45 dias; data efetiva 20/10/2026 (05/09 + 45); períodos vencidos 1; avos13=10 (jan a set + outubro com 20 dias) avosFerias=7 (10/03 a 10/10 = 7 meses, 11 dias não contam); INSS saldo 155.69 + 13º 988.09; IRRF saldo 0.00 + 13º 1517.41 (10.000 − 988,09 − 189,59 = 8.822,32 × 27,5% − 908,73).
 
 ### golden_justa_causa_c1
 **Tipo:** Justa causa  
@@ -131,15 +131,15 @@ Detalhe: aviso 39 dias; períodos vencidos 0; avos13=4 avosFerias=11 proj=0; INS
 |---|---:|
 | Saldo de salário | 3500.00 |
 | Aviso prévio indenizado | 2800.00 |
-| 13º proporcional | 2333.33 |
-| Férias proporcionais + 1/3 | 3111.11 |
+| 13º proporcional (8 avos) | 2333.33 |
+| Férias proporcionais + 1/3 (7 avos) | 2722.22 |
 | INSS (saldo + 13º) | 494.28 |
 | IRRF (saldo + 13º) | 0.00 |
 | Multa FGTS (fora do pago) | 7000.00 |
 
-Total de proventos 11744.44 · descontos 494.28 · **pago na rescisão 11250.16** · FGTS depositado (multa) 7000.00.
+Total de proventos 11355.55 · descontos 494.28 · **pago na rescisão 10861.27** · FGTS depositado (multa) 7000.00.
 
-Detalhe: aviso 48 dias; períodos vencidos 0; avos13=8 avosFerias=8 proj=1; INSS saldo 308.60 + 13º 185.68; IRRF saldo 0.00 + 13º 0.00.
+Detalhe: aviso 48 dias (24 pagos); data efetiva 24/08/2026; períodos vencidos 0; avos13=8 avosFerias=7; INSS saldo 308.60 + 13º 185.68; IRRF saldo 0.00 + 13º 0.00.
 
 ### golden_prazo_determinado_termino
 **Tipo:** Prazo determinado (término normal)  

@@ -69,8 +69,14 @@ class CalculateTerminationUseCase {
       final paidNoticeDays = noticeIndemnified
           ? noticeDays * rules.noticePercent ~/ 100
           : 0;
-      // C2: projeção do aviso indenizado nas avos (CLT art. 487 §1º; OJ 82 SDI-1 TST). ⚖️
-      final projection = noticeProjectionMonths(paidNoticeDays);
+      // C2: projeção por data do aviso indenizado nas avos (CLT art. 487 §1º;
+      // OJ 82 SDI-1 TST). Data de calendário, sem horário. ⚖️
+      final term = input.terminationDate;
+      final noticeEnd = DateTime(
+        term.year,
+        term.month,
+        term.day + paidNoticeDays,
+      );
 
       // 1. Saldo de salário
       final daysWorked = input.workedDaysInMonth > 0
@@ -128,30 +134,19 @@ class CalculateTerminationUseCase {
         );
       }
 
-      if (projection > 0) {
-        assumptions.add(
-          Assumption(
-            code: AssumptionCode.noticeProjection,
-            text:
-                'Aviso indenizado projetado em 13º e férias proporcionais: +$projection mês(es).',
-            origin: AssumptionOrigin.estimated,
-            value: projection.toDouble(),
-          ),
-        );
-        final pendingRule = rules.noticeProjectionPendingRule;
-        if (pendingRule != null) {
-          assumptions.addAll(_validationPending(pendingRule));
-        }
-      }
-
       // 3. 13º salário proporcional (Lei 4.090/62)
       var thirteenthSalary = _zero;
+      var extraThirteenth = 0;
+      var extraVacation = 0;
+      var thirteenthDecomposition = '';
       if (rules.paysThirteenth) {
         final avos = thirteenthMonths(
           input.admissionDate,
           input.terminationDate,
-          projection: projection,
+          noticeEnd: noticeEnd,
         );
+        extraThirteenth =
+            avos - thirteenthMonths(input.admissionDate, input.terminationDate);
         assumptions.add(
           _monthsAssumption(
             AssumptionCode.thirteenthMonths,
@@ -159,6 +154,15 @@ class CalculateTerminationUseCase {
             avos,
           ),
         );
+        if (noticeEnd.year > term.year) {
+          final a = thirteenthMonths(
+            input.admissionDate,
+            input.terminationDate,
+            noticeEnd: DateTime(term.year, 12, 31),
+          );
+          thirteenthDecomposition =
+              ' ($a do ano ${term.year} + ${avos - a} do ano ${noticeEnd.year})';
+        }
         thirteenthSalary = _roundCurrency(
           _divide(monthlyBase * Decimal.fromInt(avos), 12),
         );
@@ -169,7 +173,7 @@ class CalculateTerminationUseCase {
               description: '13º Salário Proporcional',
               value: thirteenthSalary.toDouble(),
               type: BreakdownType.addition,
-              details: '$avos/12 do ano da rescisão',
+              details: '$avos/12$thirteenthDecomposition',
             ),
           );
         }
@@ -206,8 +210,14 @@ class CalculateTerminationUseCase {
         final avos = proportionalVacationMonths(
           input.admissionDate,
           input.terminationDate,
-          projection: projection,
+          noticeEnd: noticeEnd,
         );
+        extraVacation =
+            avos -
+            proportionalVacationMonths(
+              input.admissionDate,
+              input.terminationDate,
+            );
         assumptions.add(
           _monthsAssumption(
             AssumptionCode.vacationMonths,
@@ -229,6 +239,28 @@ class CalculateTerminationUseCase {
               details: '$avos/12 do período aquisitivo',
             ),
           );
+        }
+      }
+
+      // Premissa da projeção (B2-10): data de fim do aviso e avos extras reais.
+      if (paidNoticeDays > 0) {
+        final clauses = [
+          if (rules.paysThirteenth) '+$extraThirteenth avo(s) no 13º',
+          if (rules.paysProportionalVacation)
+            '+$extraVacation avo(s) nas férias proporcionais',
+        ];
+        assumptions.add(
+          Assumption(
+            code: AssumptionCode.noticeProjection,
+            text:
+                'Aviso indenizado projetado até ${Formatters.formatDate(noticeEnd)}: ${clauses.join(' e ')}.',
+            origin: AssumptionOrigin.estimated,
+            value: paidNoticeDays.toDouble(),
+          ),
+        );
+        final pendingRule = rules.noticeProjectionPendingRule;
+        if (pendingRule != null) {
+          assumptions.addAll(_validationPending(pendingRule));
         }
       }
 

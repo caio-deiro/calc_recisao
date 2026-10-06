@@ -1,9 +1,8 @@
 {
   "id": "golden_acordo_mutuo",
-  "validacao": "pendente: aguarda revisao de contador (ver docs/golden-dossie/README.md)",
   "fonte": {
-    "tipo": "exemplo_contador",
-    "descricao": "Calculo manual a partir da CLT e das tabelas oficiais 2026; memoria em docs/golden-dossie/README.md",
+    "tipo": "calculo_legal",
+    "descricao": "Projeção do aviso por data (24 dias pagos de 31/07/2026 até 24/08/2026: 13º 8 avos, férias 7 avos). Cálculo manual a partir da CLT e das tabelas oficiais 2026 (INSS: Portaria MPS/MF 13/2026; IRRF: Receita Federal e Lei 15.270/2025), por script independente do app. Sem revisão de contador.",
     "referencia": "docs/golden-dossie/README.md#golden_acordo_mutuo"
   },
   "tipo": "mutualAgreement",
@@ -23,15 +22,15 @@
       "salaryBalance": 3500.0,
       "notice": 2800.0,
       "thirteenth": 2333.33,
-      "proportionalVacation": 3111.11,
+      "proportionalVacation": 2722.22,
       "inss": 494.28,
       "irrf": 0.0,
       "fgtsFine": 7000.0
     },
     "totais": {
-      "totalAdditions": 11744.44,
+      "totalAdditions": 11355.55,
       "totalDeductions": 494.28,
-      "paidAtTermination": 11250.16,
+      "paidAtTermination": 10861.27,
       "fgtsDeposit": 7000.0
     }
   },

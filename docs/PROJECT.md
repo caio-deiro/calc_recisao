@@ -181,11 +181,11 @@ A rescisão indireta tem os efeitos da dispensa sem justa causa (CLT art. 483).
 |---|---|
 | Saldo de salário | `salário / 30 × dias trabalhados` |
 | Aviso prévio | `(salário + média) / 30 × dias`, `dias = 30 + 3 × anos completos`, máx. **90** |
-| 13º proporcional | `(salário + média) × avos / 12`, avos do **ano-calendário** + projeção do aviso (C2), teto 12; mês com **menos de 15 dias conta zero** (Lei 4.090/62 art. 1º §2º, ⚖️) |
+| 13º proporcional | `(salário + média) × avos / 12`, avos do **ano-calendário** até a data efetiva do aviso (C2: rescisão + dias de aviso pagos; se cruza 31/12, soma o ano da rescisão e o novo), teto 12 por ano; mês com **menos de 15 dias conta zero** (Lei 4.090/62 art. 1º §2º, ⚖️) |
 | Férias vencidas | `(salário + média) × 4/3` (um período, sim/não); **devidas também na justa causa** (C1, CLT art. 146 caput) |
-| Férias proporcionais | `(salário + média) × avos / 12 × 4/3`, avos **desde o último aniversário da admissão** (C3, CLT art. 146 par. único) + projeção (C2), teto 12 |
+| Férias proporcionais | `(salário + média) × avos / 12 × 4/3`, avos **desde o último aniversário da admissão** (C3, CLT art. 146 par. único) até a data efetiva do aviso (C2), teto 12 |
 | Multa FGTS | `FGTS informado × 40 %`; senão estima `(salário + média) × 8 % × meses × 40 %`. Vai para "Depositado no FGTS", fora do pago na rescisão |
-| Acordo mútuo | Aviso × 50 %; multa × 50 % (20 %); projeção pelo aviso pago (50 %), marcada "cálculo em validação" (CLT art. 484-A, ⚖️) |
+| Acordo mútuo | Aviso × 50 %; multa × 50 % (20 %); projeção por data pelo aviso pago (50 %: data efetiva = rescisão + dias pagos), marcada "cálculo em validação" (CLT art. 484-A, ⚖️) |
 
 ### 6.3 Correções decididas (✅ implementadas, ⚖️ a validar)
 
@@ -195,7 +195,7 @@ caso golden com fonte (B6-06). C6 (`Decimal`) ✅ implementada na change `migrat
 | # | Correção | Motivo |
 |---|---|---|
 | C1 | **Justa causa paga férias vencidas** (Q2a) | A regra geral garante férias vencidas; o código hoje as bloqueia |
-| C2 | **Aviso prévio indenizado projeta tempo** nos avos de 13º e férias proporcionais (Q7a) | O aviso indenizado conta como tempo de serviço; o app subestima |
+| C2 | **Aviso prévio indenizado projeta tempo, por data**, nos avos de 13º e férias proporcionais: data efetiva = `rescisão + dias de aviso pagos`; avos contados até ela (regra de 15 dias, teto 12). Com virada de ano, o 13º soma o ano da rescisão (até 31/12) e o novo ano (até a data efetiva), cada um com teto 12; INSS/IRRF do 13º seguem como uma só parcela. A projeção não cria período de férias vencido. **Revisa a Q7a a pedido do responsável em 2026-10-06** (antes: +1 mês por 30 dias) | O aviso indenizado conta como tempo de serviço (CLT art. 487 §1º; OJ 82 SDI-1 e Súmula 371 TST). ⚖️ leitura em avos por data, virada de ano e acordo mútuo sem validação profissional |
 | C3 | **Férias proporcionais pelo período aquisitivo** (aniversário da admissão), não pelo ano-calendário (Q8a) | Erro sempre que a admissão não é em janeiro. O 13º segue por ano-calendário |
 | C4 | **Férias indenizadas sem IRRF e sem INSS** (Q9a) | Hoje entram na base do IRRF |
 | C5 | **INSS do 13º calculado separado do salário**, cada um com tabela e teto próprios (Q9a) | Hoje é calculado sobre a soma |
