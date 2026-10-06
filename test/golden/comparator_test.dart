@@ -6,10 +6,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'loader_test.dart' show fixtureJson, parseFixture;
 import 'support/golden_comparator.dart';
 
-BreakdownItem item(BreakdownCode code, double value) =>
-    BreakdownItem(code: code, description: 'qualquer rótulo', value: value, type: BreakdownType.addition);
+BreakdownItem item(BreakdownCode code, double value) => BreakdownItem(
+  code: code,
+  description: 'qualquer rótulo',
+  value: value,
+  type: BreakdownType.addition,
+);
 
-TerminationResult resultWith(List<BreakdownItem> additions, {List<BreakdownItem> fgts = const []}) {
+TerminationResult resultWith(
+  List<BreakdownItem> additions, {
+  List<BreakdownItem> fgts = const [],
+}) {
   final total = additions.fold(0.0, (a, b) => a + b.value);
   return TerminationResult(
     additions: additions,
@@ -25,25 +32,34 @@ void main() {
   group('compareGolden', () {
     final golden = parseFixture(fixtureJson());
 
-    test('deve aceitar 100,01 contra 100,00 e rejeitar 100,02', () {
-      expect(withinTolerance(100.01, 100.00), isTrue);
-      expect(withinTolerance(100.02, 100.00), isFalse);
+    test('deve aceitar 100,00 contra 100,00 e rejeitar 100,01', () {
+      expect(withinTolerance(100.00, 100.00), isTrue);
+      expect(withinTolerance(100.01, 100.00), isFalse);
     });
 
     test('deve passar quando a verba bate', () {
-      final o = compareGolden(golden, resultWith([item(BreakdownCode.salaryBalance, 2000.00)]));
+      final o = compareGolden(
+        golden,
+        resultWith([item(BreakdownCode.salaryBalance, 2000.00)]),
+      );
       expect(o.failures, isEmpty);
     });
 
     test('deve identificar a verba pelo code, não pelo texto', () {
-      final o = compareGolden(golden, resultWith([item(BreakdownCode.thirteenth, 2000.00)]));
+      final o = compareGolden(
+        golden,
+        resultWith([item(BreakdownCode.thirteenth, 2000.00)]),
+      );
       expect(o.passed, isFalse);
     });
 
     test('deve falhar apontando verba extra não zero em fgtsDeposit', () {
       final o = compareGolden(
         golden,
-        resultWith([item(BreakdownCode.salaryBalance, 2000.00)], fgts: [item(BreakdownCode.fgtsFine, 50.00)]),
+        resultWith(
+          [item(BreakdownCode.salaryBalance, 2000.00)],
+          fgts: [item(BreakdownCode.fgtsFine, 50.00)],
+        ),
       );
       expect(o.passed, isFalse);
       expect(o.failures.any((f) => f.contains('fgtsFine')), isTrue);
@@ -51,10 +67,25 @@ void main() {
 
     test('deve comparar os totais paidAtTermination e fgtsDeposit', () {
       final json = fixtureJson();
-      (json['esperado'] as Map)['totais'] = <String, dynamic>{'paidAtTermination': 2000.00, 'fgtsDeposit': 0.0};
+      (json['esperado'] as Map)['totais'] = <String, dynamic>{
+        'paidAtTermination': 2000.00,
+        'fgtsDeposit': 0.0,
+      };
       final c = parseFixture(json);
-      expect(compareGolden(c, resultWith([item(BreakdownCode.salaryBalance, 2000.00)])).failures, isEmpty);
-      expect(compareGolden(c, resultWith([item(BreakdownCode.salaryBalance, 1500.00)])).passed, isFalse);
+      expect(
+        compareGolden(
+          c,
+          resultWith([item(BreakdownCode.salaryBalance, 2000.00)]),
+        ).failures,
+        isEmpty,
+      );
+      expect(
+        compareGolden(
+          c,
+          resultWith([item(BreakdownCode.salaryBalance, 1500.00)]),
+        ).passed,
+        isFalse,
+      );
     });
   });
 }

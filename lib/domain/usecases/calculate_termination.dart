@@ -1,3 +1,5 @@
+import 'package:decimal/decimal.dart';
+
 import '../entities/assumption.dart';
 import '../entities/breakdown_code.dart';
 import '../entities/breakdown_item.dart';
@@ -20,15 +22,26 @@ import '../../core/utils/formatters.dart';
 class CalculateTerminationUseCase {
   const CalculateTerminationUseCase();
 
-  /// Arredonda valores monetários para o número de casas decimais configurado.
-  double _roundCurrency(double value) {
-    try {
-      return double.parse(value.toStringAsFixed(AppConstants.decimalPlaces));
-    } catch (e) {
-      AppLogger.error('Erro ao arredondar valor monetário', e);
-      return value;
-    }
-  }
+  static final Decimal _zero = Decimal.zero;
+
+  /// Fronteira de entrada (B2-14): `double` vira [Decimal] pelo texto, sem herdar
+  /// a imprecisão binária.
+  Decimal _dec(double value) => Decimal.parse(value.toString());
+
+  /// Arredonda valores monetários (half-up; valores nunca negativos) para o número
+  /// de casas decimais configurado, nos mesmos pontos de sempre (B2-13).
+  Decimal _roundCurrency(Decimal value) =>
+      value.round(scale: AppConstants.decimalPlaces);
+
+  /// Divisão com escala explícita (20 casas, bem além dos centavos). Os chamadores
+  /// multiplicam antes e dividem uma única vez, então não há erro acumulado.
+  Decimal _divide(Decimal numerator, int denominator) =>
+      (numerator / Decimal.fromInt(denominator)).toDecimal(
+        scaleOnInfinitePrecision: 20,
+      );
+
+  Decimal _sum(Iterable<BreakdownItem> items) =>
+      items.fold(_zero, (sum, item) => sum + _dec(item.value));
 
   /// Calcula a rescisão trabalhista baseada nos dados fornecidos.
   ///
@@ -49,7 +62,8 @@ class CalculateTerminationUseCase {
       ];
 
       final noticeDays = _noticeDays(input);
-      final monthlyBase = input.baseSalary + input.averageAdditions;
+      final baseSalary = _dec(input.baseSalary);
+      final monthlyBase = baseSalary + _dec(input.averageAdditions);
       final noticeIndemnified = rules.noticePercent > 0 && !input.noticeWorked;
       final paidNoticeDays = noticeIndemnified
           ? noticeDays * rules.noticePercent ~/ 100
@@ -61,14 +75,17 @@ class CalculateTerminationUseCase {
       final daysWorked = input.workedDaysInMonth > 0
           ? input.workedDaysInMonth
           : input.terminationDate.day;
+      final salaryBalance = _roundCurrency(
+        _divide(baseSalary * Decimal.fromInt(daysWorked), 30),
+      );
       additions.add(
         BreakdownItem(
           code: BreakdownCode.salaryBalance,
           description: 'Saldo de Salário',
-          value: _roundCurrency((input.baseSalary / 30) * daysWorked),
+          value: salaryBalance.toDouble(),
           type: BreakdownType.addition,
           details:
-              '$daysWorked dias × R\$ ${(input.baseSalary / 30).toStringAsFixed(2)}',
+              '$daysWorked dias × R\$ ${_roundCurrency(_divide(baseSalary, 30)).toStringAsFixed(2)}',
         ),
       );
 
@@ -82,8 +99,11 @@ class CalculateTerminationUseCase {
                 ? 'Aviso Prévio Indenizado'
                 : 'Aviso Prévio Indenizado (${rules.noticePercent}%)',
             value: _roundCurrency(
-              (monthlyBase / 30) * noticeDays * rules.noticePercent / 100,
-            ),
+              _divide(
+                monthlyBase * Decimal.fromInt(noticeDays * rules.noticePercent),
+                3000,
+              ),
+            ).toDouble(),
             type: BreakdownType.addition,
             details: isFull
                 ? '30 dias + adicional por tempo de serviço'
@@ -98,7 +118,9 @@ class CalculateTerminationUseCase {
           BreakdownItem(
             code: BreakdownCode.noticeDiscount,
             description: 'Desconto Aviso Prévio',
-            value: _roundCurrency((monthlyBase / 30) * noticeDays),
+            value: _roundCurrency(
+              _divide(monthlyBase * Decimal.fromInt(noticeDays), 30),
+            ).toDouble(),
             type: BreakdownType.deduction,
             details: 'Aviso prévio não cumprido pelo empregado',
           ),
@@ -123,7 +145,7 @@ class CalculateTerminationUseCase {
       }
 
       // 3. 13º salário proporcional (Lei 4.090/62)
-      var thirteenthSalary = 0.0;
+      var thirteenthSalary = _zero;
       if (rules.paysThirteenth) {
         final avos = thirteenthMonths(
           input.admissionDate,
@@ -137,13 +159,15 @@ class CalculateTerminationUseCase {
             avos,
           ),
         );
-        thirteenthSalary = _roundCurrency(monthlyBase * avos / 12);
-        if (thirteenthSalary > 0) {
+        thirteenthSalary = _roundCurrency(
+          _divide(monthlyBase * Decimal.fromInt(avos), 12),
+        );
+        if (thirteenthSalary > _zero) {
           additions.add(
             BreakdownItem(
               code: BreakdownCode.thirteenth,
               description: '13º Salário Proporcional',
-              value: thirteenthSalary,
+              value: thirteenthSalary.toDouble(),
               type: BreakdownType.addition,
               details: '$avos/12 do ano da rescisão',
             ),
@@ -191,16 +215,16 @@ class CalculateTerminationUseCase {
             avos,
           ),
         );
-        final proportionalSalary = (monthlyBase * avos) / 12;
+        // base × avos/12 × 4/3 (salário + 1/3), dividido uma única vez por 9.
         final proportionalVacation = _roundCurrency(
-          proportionalSalary + (proportionalSalary / 3),
+          _divide(monthlyBase * Decimal.fromInt(avos), 9),
         );
-        if (proportionalVacation > 0) {
+        if (proportionalVacation > _zero) {
           additions.add(
             BreakdownItem(
               code: BreakdownCode.proportionalVacation,
               description: 'Férias Proporcionais + 1/3',
-              value: proportionalVacation,
+              value: proportionalVacation.toDouble(),
               type: BreakdownType.addition,
               details: '$avos/12 do período aquisitivo',
             ),
@@ -223,11 +247,14 @@ class CalculateTerminationUseCase {
         final fgtsInformed =
             input.hasExistingFgts && input.existingFgtsAmount > 0;
         final fgtsBalance = fgtsInformed
-            ? input.existingFgtsAmount
+            ? _dec(input.existingFgtsAmount)
             : _estimateFgts(input);
         final fineRate =
-            taxService.getFgtsPenaltyAliquota() * rules.fgtsFineShare;
-        final percent = (fineRate * 100).round();
+            taxService.getFgtsPenaltyAliquota() * _dec(rules.fgtsFineShare);
+        final percent = (fineRate * Decimal.fromInt(100))
+            .round()
+            .toBigInt()
+            .toInt();
         assumptions.add(
           Assumption(
             code: AssumptionCode.fgtsBalance,
@@ -237,14 +264,14 @@ class CalculateTerminationUseCase {
             origin: fgtsInformed
                 ? AssumptionOrigin.informed
                 : AssumptionOrigin.estimated,
-            value: _roundCurrency(fgtsBalance),
+            value: _roundCurrency(fgtsBalance).toDouble(),
           ),
         );
         fgtsItems.add(
           BreakdownItem(
             code: BreakdownCode.fgtsFine,
             description: 'Multa FGTS ($percent%)',
-            value: _roundCurrency(fgtsBalance * fineRate),
+            value: _roundCurrency(fgtsBalance * fineRate).toDouble(),
             type: BreakdownType.addition,
             details: '$percent% sobre FGTS do vínculo',
           ),
@@ -253,30 +280,29 @@ class CalculateTerminationUseCase {
 
       // 7. Descontos. C4: férias fora das bases de INSS e IRRF; C5: INSS separado.
       if (input.calculateTaxes) {
-        final salaryBalance = additions.first.value;
         final taxes = TaxTablesService.instance.calculateTerminationTaxes(
           salaryBalance: salaryBalance,
           thirteenthSalary: thirteenthSalary,
           terminationDate: input.terminationDate,
           dependents: input.dependents,
         );
-        if (taxes.inss > 0) {
+        if (taxes.inss > _zero) {
           deductions.add(
             BreakdownItem(
               code: BreakdownCode.inss,
               description: 'INSS',
-              value: _roundCurrency(taxes.inss),
+              value: _roundCurrency(taxes.inss).toDouble(),
               type: BreakdownType.deduction,
               details: 'Sobre saldo de salário e 13º proporcional',
             ),
           );
         }
-        if (taxes.irrf > 0) {
+        if (taxes.irrf > _zero) {
           deductions.add(
             BreakdownItem(
               code: BreakdownCode.irrf,
               description: 'IRRF',
-              value: _roundCurrency(taxes.irrf),
+              value: _roundCurrency(taxes.irrf).toDouble(),
               type: BreakdownType.deduction,
               details:
                   'Sobre saldo de salário e 13º (férias não entram na base)',
@@ -291,19 +317,15 @@ class CalculateTerminationUseCase {
           BreakdownItem(
             code: BreakdownCode.otherDiscounts,
             description: 'Outros Descontos',
-            value: _roundCurrency(input.otherDiscounts),
+            value: _roundCurrency(_dec(input.otherDiscounts)).toDouble(),
             type: BreakdownType.deduction,
             details: 'Descontos diversos',
           ),
         );
       }
 
-      final totalAdditions = _roundCurrency(
-        additions.fold(0.0, (sum, item) => sum + item.value),
-      );
-      final totalDeductions = _roundCurrency(
-        deductions.fold(0.0, (sum, item) => sum + item.value),
-      );
+      final totalAdditions = _roundCurrency(_sum(additions));
+      final totalDeductions = _roundCurrency(_sum(deductions));
       final fgtsDeposit = FgtsDeposit(items: fgtsItems);
       final paidAtTermination = _roundCurrency(
         totalAdditions - totalDeductions,
@@ -312,9 +334,9 @@ class CalculateTerminationUseCase {
       final result = TerminationResult(
         additions: additions,
         deductions: deductions,
-        totalDeductions: totalDeductions,
+        totalDeductions: totalDeductions.toDouble(),
         calculationDate: DateTime.now(),
-        paidAtTermination: paidAtTermination,
+        paidAtTermination: paidAtTermination.toDouble(),
         fgtsDeposit: fgtsDeposit,
         assumptions: assumptions,
       );
@@ -363,7 +385,7 @@ class CalculateTerminationUseCase {
   /// Um item por código: simples = base × 4/3 por período; dobro = 2 × base × 4/3
   /// (1/3 sobre o total dobrado, Súmula 328 TST). Fora de INSS/IRRF (C4).
   List<BreakdownItem> _accruedVacationItems(
-    double base,
+    Decimal base,
     List<VacationPeriod> periods,
   ) {
     final simple = periods
@@ -377,7 +399,9 @@ class CalculateTerminationUseCase {
         BreakdownItem(
           code: BreakdownCode.accruedVacationSimple,
           description: 'Férias Vencidas + 1/3',
-          value: _roundCurrency(simple * base * 4 / 3),
+          value: _roundCurrency(
+            _divide(base * Decimal.fromInt(simple * 4), 3),
+          ).toDouble(),
           type: BreakdownType.addition,
           details:
               '$simple ${simple == 1 ? 'período' : 'períodos'} (salário + 1/3 constitucional)',
@@ -386,7 +410,9 @@ class CalculateTerminationUseCase {
         BreakdownItem(
           code: BreakdownCode.accruedVacationDouble,
           description: 'Férias em Dobro + 1/3 (indenização)',
-          value: _roundCurrency(doubled * 2 * base * 4 / 3),
+          value: _roundCurrency(
+            _divide(base * Decimal.fromInt(doubled * 8), 3),
+          ).toDouble(),
           type: BreakdownType.addition,
           details:
               '$doubled ${doubled == 1 ? 'período' : 'períodos'} com prazo de concessão vencido',
@@ -435,21 +461,22 @@ class CalculateTerminationUseCase {
   }
 
   /// Estima o saldo do FGTS pelo tempo de serviço quando o usuário não informa.
-  double _estimateFgts(TerminationInput input) {
-    final averageMonthlySalary = input.baseSalary + input.averageAdditions;
+  Decimal _estimateFgts(TerminationInput input) {
+    final averageMonthlySalary =
+        _dec(input.baseSalary) + _dec(input.averageAdditions);
     return (averageMonthlySalary *
             TaxTablesService.instance.getFgtsAliquota()) *
-        _calculateMonthsWorked(input);
+        Decimal.fromInt(_calculateMonthsWorked(input));
   }
 
   /// Meses entre admissão e rescisão (conta o mês se o dia da rescisão >= dia da admissão).
-  double _calculateMonthsWorked(TerminationInput input) {
+  int _calculateMonthsWorked(TerminationInput input) {
     final years = input.terminationDate.year - input.admissionDate.year;
     final months = input.terminationDate.month - input.admissionDate.month;
     final totalMonths = (years * 12) + months;
     if (input.terminationDate.day >= input.admissionDate.day) {
-      return totalMonths.toDouble();
+      return totalMonths;
     }
-    return (totalMonths - 1).toDouble();
+    return totalMonths - 1;
   }
 }

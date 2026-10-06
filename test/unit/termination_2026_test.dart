@@ -1,3 +1,4 @@
+import 'package:decimal/decimal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:calc_recisao/domain/entities/breakdown_code.dart';
 import 'package:calc_recisao/core/services/tax_tables_service.dart';
@@ -33,10 +34,18 @@ void main() {
 
       final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-      final salaryBalance = result.additions.firstWhere((item) => item.code == BreakdownCode.salaryBalance);
-      final notice = result.additions.firstWhere((item) => item.code == BreakdownCode.notice);
-      final thirteenth = result.additions.firstWhere((item) => item.code == BreakdownCode.thirteenth);
-      final vacation = result.additions.firstWhere((item) => item.code == BreakdownCode.proportionalVacation);
+      final salaryBalance = result.additions.firstWhere(
+        (item) => item.code == BreakdownCode.salaryBalance,
+      );
+      final notice = result.additions.firstWhere(
+        (item) => item.code == BreakdownCode.notice,
+      );
+      final thirteenth = result.additions.firstWhere(
+        (item) => item.code == BreakdownCode.thirteenth,
+      );
+      final vacation = result.additions.firstWhere(
+        (item) => item.code == BreakdownCode.proportionalVacation,
+      );
 
       expect(salaryBalance.value, 2000.0);
       expect(notice.value, closeTo(4800.0, 0.01));
@@ -58,24 +67,45 @@ void main() {
       );
 
       final result = useCase.execute(input, TerminationType.withoutJustCause);
-      final inss = result.deductions.where((item) => item.code == BreakdownCode.inss);
+      final inss = result.deductions.where(
+        (item) => item.code == BreakdownCode.inss,
+      );
 
       expect(inss.length, 1);
       // C5: INSS do saldo (2000,00) e do 13º (2333,33) apurados em separado.
       expect(
         inss.first.value,
-        closeTo(taxService.calculateInss(2000.0, terminationDate) + taxService.calculateInss(2333.33, terminationDate), 0.01),
+        closeTo(
+          (taxService.calculateInss(Decimal.parse('2000.0'), terminationDate) +
+                  taxService.calculateInss(
+                    Decimal.parse('2333.33'),
+                    terminationDate,
+                  ))
+              .toDouble(),
+          0.01,
+        ),
       );
       expect(
-        taxService.calculateTerminationTaxes(
-          salaryBalance: 2000.0,
-          thirteenthSalary: 2000.0,
-          terminationDate: terminationDate,
-        ).irrf,
+        taxService
+            .calculateTerminationTaxes(
+              salaryBalance: Decimal.parse('2000.0'),
+              thirteenthSalary: Decimal.parse('2000.0'),
+              terminationDate: terminationDate,
+            )
+            .irrf
+            .toDouble(),
         greaterThanOrEqualTo(0),
       );
-      expect(result.additions.any((item) => item.code == BreakdownCode.notice), isTrue);
-      expect(result.fgtsDeposit.items.any((item) => item.code == BreakdownCode.fgtsFine), isTrue);
+      expect(
+        result.additions.any((item) => item.code == BreakdownCode.notice),
+        isTrue,
+      );
+      expect(
+        result.fgtsDeposit.items.any(
+          (item) => item.code == BreakdownCode.fgtsFine,
+        ),
+        isTrue,
+      );
     });
 
     test('pedido de demissão deve descontar aviso prévio não cumprido', () {
@@ -90,9 +120,22 @@ void main() {
 
       final result = useCase.execute(input, TerminationType.resignation);
 
-      expect(result.additions.any((item) => item.code == BreakdownCode.notice), isFalse);
-      expect(result.deductions.any((item) => item.code == BreakdownCode.noticeDiscount), isTrue);
-      expect(result.fgtsDeposit.items.any((item) => item.code == BreakdownCode.fgtsFine), isFalse);
+      expect(
+        result.additions.any((item) => item.code == BreakdownCode.notice),
+        isFalse,
+      );
+      expect(
+        result.deductions.any(
+          (item) => item.code == BreakdownCode.noticeDiscount,
+        ),
+        isTrue,
+      );
+      expect(
+        result.fgtsDeposit.items.any(
+          (item) => item.code == BreakdownCode.fgtsFine,
+        ),
+        isFalse,
+      );
     });
 
     test('deve permitir férias vencidas e proporcionais simultaneamente', () {
@@ -106,8 +149,18 @@ void main() {
 
       final result = useCase.execute(input, TerminationType.withoutJustCause);
 
-      expect(result.additions.any((item) => item.code == BreakdownCode.accruedVacationSimple), isTrue);
-      expect(result.additions.any((item) => item.code == BreakdownCode.proportionalVacation), isTrue);
+      expect(
+        result.additions.any(
+          (item) => item.code == BreakdownCode.accruedVacationSimple,
+        ),
+        isTrue,
+      );
+      expect(
+        result.additions.any(
+          (item) => item.code == BreakdownCode.proportionalVacation,
+        ),
+        isTrue,
+      );
     });
   });
 }
