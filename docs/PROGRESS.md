@@ -7,13 +7,13 @@
 
 ## Resumo
 
-**69/77 requisitos entregues (90%)**
+**70/77 requisitos entregues (91%)**
 
 | Estado | Requisitos |
 |---|--:|
-| 🚀 Entregue | 69 |
+| 🚀 Entregue | 70 |
 | ✔ Implementado | 0 |
-| 🔨 Em andamento | 1 |
+| 🔨 Em andamento | 0 |
 | 📋 Planejado | 0 |
 | 🎯 Sem plano | 7 |
 
@@ -28,7 +28,7 @@
 | B4 | Contratos a prazo e rescisão indireta | 9 | 9 | 0 | 0 | 0 | 0 | 100% |
 | B5 | Resultado, compartilhamento e PDF | 6 | 6 | 0 | 0 | 0 | 0 | 100% |
 | B6 | Validação e infraestrutura de testes golden | 6 | 6 | 0 | 0 | 0 | 0 | 100% |
-| B7 | Conformidade, privacidade e operação | 8 | 0 | 0 | 1 | 0 | 7 | 0% |
+| B7 | Conformidade, privacidade e operação | 8 | 1 | 0 | 0 | 0 | 7 | 12% |
 
 ## Detalhe
 
@@ -147,7 +147,7 @@
 | B7-05 | 🎯 Sem plano | Confirmar e unificar o e-mail de contato (política × app). | — |
 | B7-06 | 🎯 Sem plano | Manutenção anual das tabelas (checklist do PRD §13): JSON, teste do ano, list... | — |
 | B7-07 | 🎯 Sem plano | Specs de compliance Android (android-target-sdk, 16 KB) preservadas; prazo da... | — |
-| B7-08 | 🔨 Em andamento | Release Android automatizado: tag v* valida a versão do pubspec.yaml, roda an... | `add-play-cd-pipeline` |
+| B7-08 | 🚀 Entregue | Release Android automatizado: tag v* valida a versão do pubspec.yaml, roda an... | `2026-10-06-add-play-cd-pipeline` |
 
 ## Alertas
 
